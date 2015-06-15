@@ -1,5 +1,7 @@
 #include "p_factory.h"
 
+using namespace oi;
+
 int    gDebugLevel=0;
 TReal  gConvergence=1e-9;
 

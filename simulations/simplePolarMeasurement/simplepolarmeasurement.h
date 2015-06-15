@@ -8,6 +8,8 @@
 #include <QDebug>
 #include <QtAlgorithms>
 
+using namespace oi;
+
 /*!
  * \brief The SimplePolarMeasurement class
  *

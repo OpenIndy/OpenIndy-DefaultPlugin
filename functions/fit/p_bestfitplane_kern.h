@@ -10,6 +10,8 @@
 #include "oimat.h"
 #include "cfitting_plane.h"
 
+using namespace oi;
+
 /*!
  * \brief The BestFitPlane_kern class
  */

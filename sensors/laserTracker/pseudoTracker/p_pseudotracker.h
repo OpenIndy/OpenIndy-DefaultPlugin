@@ -14,6 +14,8 @@
 #include "lasertracker.h"
 #include "oimat.h"
 
+using namespace oi;
+
 /*!
  * \brief The PseudoTracker class
  */

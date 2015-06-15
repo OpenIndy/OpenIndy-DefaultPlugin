@@ -15,6 +15,7 @@
 #include "oimat.h"
 #include "pluginmetadata.h"
 
+using namespace oi;
 using namespace std;
 
 class Helmert7Param : public SystemTransformation

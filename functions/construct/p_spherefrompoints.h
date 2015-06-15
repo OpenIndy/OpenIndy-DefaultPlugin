@@ -10,6 +10,8 @@
 #include "oimat.h"
 #include "cfitting_sphere.h"
 
+using namespace oi;
+
 /*!
  * \brief The SphereFromPoints class
  */

@@ -9,6 +9,7 @@
 #include "oivec.h"
 #include "oimat.h"
 
+using namespace oi;
 using namespace std;
 
 /*!

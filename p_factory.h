@@ -59,6 +59,8 @@
 
 #include "p_oiexchangeascii.h"
 
+using namespace oi;
+
 class OiTemplatePlugin : public QObject, Plugin
 {
     Q_OBJECT

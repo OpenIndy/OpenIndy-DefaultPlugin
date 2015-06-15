@@ -12,6 +12,8 @@
 #include <QVariantMap>
 #include "totalstation.h"
 
+using namespace oi;
+
 /*!
  * \brief The LeicaTachymeter class
  */

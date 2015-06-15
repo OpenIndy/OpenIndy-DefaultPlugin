@@ -8,6 +8,7 @@
 #include "exchangesimpleascii.h"
 
 using namespace std;
+using namespace oi;
 
 class OiExchangeAscii : public ExchangeSimpleAscii
 { 

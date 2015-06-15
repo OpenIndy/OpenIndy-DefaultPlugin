@@ -8,6 +8,8 @@
 #include "oivec.h"
 #include "oimat.h"
 
+using namespace oi;
+
 class Shift : public ObjectTransformation
 {
     Q_OBJECT

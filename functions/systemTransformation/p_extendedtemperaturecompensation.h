@@ -6,6 +6,7 @@
 #include <QtCore/qmath.h>
 #include "materials.h"
 
+using namespace oi;
 using namespace std;
 
 /*!

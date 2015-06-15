@@ -7,6 +7,8 @@
 #include "cfitting_plane.h"
 #include "cfitting_sphere.h"
 
+using namespace oi;
+
 /*!
  * \brief The BestFitCircle class
  */
