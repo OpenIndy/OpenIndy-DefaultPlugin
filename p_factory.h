@@ -64,7 +64,7 @@ using namespace oi;
 class OiTemplatePlugin : public QObject, Plugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "de.openIndy.plugin.v001" FILE "metaInfo.json")
+    Q_PLUGIN_METADATA(IID Plugin_iidd FILE "metaInfo.json")
     Q_INTERFACES(Plugin)
     
 public:
