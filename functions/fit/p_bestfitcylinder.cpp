@@ -12,7 +12,7 @@ void BestFitCylinder::init(){
     this->metaData.description = QString("%1 %2")
             .arg("This function calculates an adjusted cylinder.")
             .arg("You can input as many observations as you want which are then used to find the best fit cylinder.");
-    this->metaData.iid = "de.openIndy.plugin.function.fitFunction.v001";
+    this->metaData.iid = FitFunction_iidd;
 
     //set needed elements
     this->neededElements.clear();

@@ -12,7 +12,7 @@ void PointBetweenTwoPoints::init(){
     this->metaData.description = QString("%1 %2")
             .arg("This function calculates the point between two points.")
             .arg("Therefore you have to input those two points.");
-    this->metaData.iid = "de.openIndy.plugin.function.constructFunction.v001";
+    this->metaData.iid = ConstructFunction_iidd;
 
     //set needed elements
     NeededElement param1;

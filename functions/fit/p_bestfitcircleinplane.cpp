@@ -13,7 +13,7 @@ void BestFitCircleInPlane::init(){
             .arg("This function calculates an adjusted circle.")
             .arg("The observations are registered into a best fit plane first and afterward a 2D circle is approximated inside the plane.")
             .arg("You can input as many observations as you want which are then used to find the best fit circle.");
-    this->metaData.iid = "de.openIndy.plugin.function.fitFunction.v001";
+    this->metaData.iid = FitFunction_iidd;
 
     //set needed elements
     this->neededElements.clear();

@@ -12,7 +12,7 @@ void SimpleTemperatureCompensation::init(){
     this->metaData.description = QString("%1 %2")
             .arg("This functions calculates an equal temperature compensation value for x,y and z component.")
             .arg("Type in the actual and reference temperature and chose a material and get the three scales.");
-    this->metaData.iid = "de.openIndy.plugin.function.systemTransformation.v001";
+    this->metaData.iid = SystemTransformation_iidd;
 
     //set spplicable for
     this->applicableFor.append(eTrafoParamFeature);

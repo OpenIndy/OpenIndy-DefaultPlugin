@@ -11,7 +11,7 @@ void IntersectPlanePlane::init(){
     this->metaData.author = "bra";
     this->metaData.description = QString("%1")
             .arg("This function calculates the line of intersection of a plane with another plane.");
-    this->metaData.iid = "de.openIndy.plugin.function.constructFunction.v001";
+    this->metaData.iid = ConstructFunction_iidd;
 
     //set needed elements
     NeededElement param1;

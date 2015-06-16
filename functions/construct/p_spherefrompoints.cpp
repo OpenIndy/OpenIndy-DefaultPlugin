@@ -12,7 +12,7 @@ void SphereFromPoints::init(){
     this->metaData.description = QString("%1 %2")
             .arg("This function caclulates an adjusted sphere.")
             .arg("You can input as many points as you want which are then used to find the best fit sphere.");
-    this->metaData.iid = "de.openIndy.plugin.function.constructFunction.v001";
+    this->metaData.iid = ConstructFunction_iidd;
 
     //set needed elements
     NeededElement param1;

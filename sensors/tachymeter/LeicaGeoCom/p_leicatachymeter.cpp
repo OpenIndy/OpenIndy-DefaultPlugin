@@ -10,7 +10,7 @@ void LeicaTachymeter::init(){
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "oi";
     this->metaData.description = "Control Leica Tachymeter";
-    this->metaData.iid = "de.openIndy.plugin.sensor.totalStation.v001";
+    this->metaData.iid = TotalStation_iidd;
 
     //set supported reading types
     this->supportedReadingTypes.append(ePolarReading);

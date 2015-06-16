@@ -15,7 +15,7 @@ void Helmert6Param::init(){
             .arg("If you measure a expanded part object then create the movement first.")
             .arg("If the movement is valid the nominals get expanded with the scale to get a correct translation.")
             .arg("If no movement is set, the translation can be wrong.");
-    this->metaData.iid = "de.openIndy.plugin.function.systemTransformation.v001";
+    this->metaData.iid = SystemTransformation_iidd;
 
     //set needed elements
     NeededElement param1; //start system

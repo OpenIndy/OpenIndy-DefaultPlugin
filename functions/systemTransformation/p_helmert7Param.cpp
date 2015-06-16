@@ -9,7 +9,7 @@ void Helmert7Param::init(){
     this->metaData.description = QString("%1 %2")
             .arg("This function calculates a 7 parameter helmert transformation.")
             .arg("That transformation is based on identical points in start and target system.");
-    this->metaData.iid = "de.openIndy.plugin.function.systemTransformation.v001";
+    this->metaData.iid = SystemTransformation_iidd;
 
     //set needed elements
     NeededElement param1;

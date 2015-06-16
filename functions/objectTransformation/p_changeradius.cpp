@@ -11,7 +11,7 @@ void ChangeRadius::init(){
     this->metaData.author = "bra";
     this->metaData.description = QString("%1")
             .arg("This functions adds the specified offset to the radius of the target geometry");
-    this->metaData.iid = "de.openIndy.plugin.function.objectTransformation.v001";
+    this->metaData.iid = ObjectTransformation_iidd;
 
     //set spplicable for
     this->applicableFor.append(eSphereFeature);

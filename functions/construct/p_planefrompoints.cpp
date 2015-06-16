@@ -12,7 +12,7 @@ void PlaneFromPoints::init(){
     this->metaData.description = QString("%1 %2")
             .arg("This function calculates an adjusted plane.")
             .arg("You can input as many points as you want which are then used to find the best fit plane.");
-    this->metaData.iid = "de.openIndy.plugin.function.constructFunction.v001";
+    this->metaData.iid = ConstructFunction_iidd;
 
     //set needed elements
     NeededElement param1;

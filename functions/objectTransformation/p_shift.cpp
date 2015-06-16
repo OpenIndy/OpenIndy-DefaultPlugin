@@ -11,7 +11,7 @@ void Shift::init(){
     this->metaData.author = "bra";
     this->metaData.description = QString("%1")
             .arg("This function shifts the target geometry along its one vector.");
-    this->metaData.iid = "de.openIndy.plugin.function.objectTransformation.v001";
+    this->metaData.iid = ObjectTransformation_iidd;
 
     //set spplicable for
     this->applicableFor.append(ePlaneFeature);

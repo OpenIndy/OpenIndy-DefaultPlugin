@@ -10,7 +10,7 @@ void PseudoTracker::init(){
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "mlux";
     this->metaData.description = "Simulates a laser tracker.";
-    this->metaData.iid = "de.openIndy.plugin.sensor.laserTracker.v001";
+    this->metaData.iid = LaserTracker_iidd;
 
     //set supported reading types
     this->supportedReadingTypes.append(eCartesianReading);

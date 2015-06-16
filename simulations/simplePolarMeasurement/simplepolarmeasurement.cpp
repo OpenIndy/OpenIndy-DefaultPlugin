@@ -10,7 +10,7 @@ void SimplePolarMeasurement::init(){
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "mlux";
     this->metaData.description = "simulation of a simple polar measurement system";
-    this->metaData.iid = "de.openIndy.plugin.simulation.v001";
+    this->metaData.iid = Simulation_iidd;
 
     //simulation specific inits
     this->distributions.append("normal");

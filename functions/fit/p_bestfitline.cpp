@@ -9,7 +9,7 @@ void BestFitLine::init(){
     this->metaData.description = QString("%1 %2")
             .arg("This function calculates an adjusted line.")
             .arg("You can input as many observations as you want which are then used to find the best fit 3D line.");
-    this->metaData.iid = "de.openIndy.plugin.function.fitFunction.v001";
+    this->metaData.iid = FitFunction_iidd;
 
     //set needed elements
     this->neededElements.clear();

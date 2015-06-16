@@ -13,7 +13,7 @@ void BestFitCircle::init(){
             .arg("This function estimates a spatial circle usnig a general least squares algorithm.")
             .arg("Insert at least three non-collinear observed points, to get the best fit circle.")
             .arg("The algorithm was taken from the OpenSource FormFittingToolbox (c) M.Loesler (GNU-GPL).");
-    this->metaData.iid = "de.openIndy.plugin.function.fitFunction.v001";
+    this->metaData.iid = FitFunction_iidd;
 
     //set needed elements
     this->neededElements.clear();

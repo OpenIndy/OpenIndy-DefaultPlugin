@@ -10,7 +10,7 @@ void OiExchangeAscii::init(){
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "bra";
     this->metaData.description = "Read simple Ascii files.";
-    this->metaData.iid = "de.openIndy.plugin.exchange.exchangeSimpleAscii.v001";
+    this->metaData.iid = ExchangeSimpleAscii_iidd;
 
     //set supported delimiters
     this->supportedDelimiters.append("whitespace [ ]");

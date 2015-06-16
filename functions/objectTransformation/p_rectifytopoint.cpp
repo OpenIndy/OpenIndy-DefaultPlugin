@@ -11,7 +11,7 @@ void RectifyToPoint::init(){
     this->metaData.author = "bra";
     this->metaData.description = QString("%1")
             .arg("This function changes the orientation of a geometry according to the specified position.");
-    this->metaData.iid = "de.openIndy.plugin.function.objectTransformation.v001";
+    this->metaData.iid = ObjectTransformation_iidd;
 
     //set needed elements
     NeededElement param1;

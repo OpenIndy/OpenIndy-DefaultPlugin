@@ -11,7 +11,7 @@ void ExtendedTemperatureCompensation::init(){
     this->metaData.author = "jwa";
     this->metaData.description = QString("%1 %2").arg("This is a 9 parameter helmert transformation. You can calculate the")
             .arg("parameters by the given points (at least 3).");
-    this->metaData.iid = "de.openIndy.plugin.function.systemTransformation.v001";
+    this->metaData.iid = SystemTransformation_iidd;
 
     //set needed elements
     NeededElement param1;

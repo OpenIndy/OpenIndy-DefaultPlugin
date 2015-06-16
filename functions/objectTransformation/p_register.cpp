@@ -11,7 +11,7 @@ void Register::init(){
     this->metaData.author = "bra";
     this->metaData.description = QString("%1")
             .arg("This function projects the target geometry in the specified plane.");
-    this->metaData.iid = "de.openIndy.plugin.function.objectTransformation.v001";
+    this->metaData.iid = ObjectTransformation_iidd;
 
     //set needed elements
     NeededElement param1;
