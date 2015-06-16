@@ -54,7 +54,7 @@ OpenIndyCore_VERSION = $$system(git --git-dir $$PWD/lib/OpenIndy-Core/.git --wor
 OpenIndyCore_VERSION = $$replace(OpenIndyCore_VERSION, "-g"{1}\w*, ) # remove commit hash after tag name
 OpenIndyCore_VERSION = $$replace(OpenIndyCore_VERSION, "-", ".") # remove remaining hyphen
 PluginVersion = $$replace(OpenIndyCore_VERSION, "[/.]", )
-DEFINES += PLUGIN_INTERFACE_VERSION=\\\"$$PluginVersion\\\"
+DEFINES += PLUGIN_INTERFACE_VERSION=$$PluginVersion
 OpenIndyCore_VERSION = $$replace(OpenIndyCore_VERSION, "\b[0-9a-f]{5,40}\b", ) # remove commit hash (only if no tag has been set yet)
 
 isEmpty(OpenIndyCore_VERSION){
@@ -67,7 +67,6 @@ isEmpty(OpenIndyCore_VERSION){
 #-----------------------------------
 # get OpenIndy-DefaultPlugin version
 #-----------------------------------
-
 
 OpenIndyDefaultPlugin_VERSION = $$system(git --git-dir $$PWD/.git --work-tree $$PWD describe --always --tags) # get git version
 OpenIndyDefaultPlugin_VERSION = $$replace(OpenIndyDefaultPlugin_VERSION, "-g"{1}\w*, ) # remove commit hash after tag name
