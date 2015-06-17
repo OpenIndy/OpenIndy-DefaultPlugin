@@ -2,7 +2,7 @@
     "isOiPlugin": true,
 
     "name"  : "OpenIndy Default Plugin",
-    "pluginVersion" : "0.0.1",
+    "pluginVersion" : "1.0.0",
     "author"  : "OpenIndyOrg",
 
     "compiler" : "MVSC 64bit",

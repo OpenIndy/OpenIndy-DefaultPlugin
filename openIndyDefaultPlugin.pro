@@ -78,7 +78,7 @@ isEmpty(OpenIndyDefaultPlugin_VERSION){
 }else{
     message(OpenIndy-DefaultPlugin version:)
     message($$OpenIndyDefaultPlugin_VERSION)
-    VERSION = OpenIndyDefaultPlugin_VERSION
+    VERSION = $$OpenIndyDefaultPlugin_VERSION
 }
 
 #--------------
