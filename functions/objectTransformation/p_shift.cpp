@@ -37,7 +37,7 @@ bool Shift::exec(Plane &plane){
  * \return
  */
 bool Shift::exec(Circle &circle){
-    this->setUpResult(circle);
+    return this->setUpResult(circle);
 }
 
 /*!

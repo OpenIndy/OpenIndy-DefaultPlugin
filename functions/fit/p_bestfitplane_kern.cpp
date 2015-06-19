@@ -85,6 +85,22 @@ bool BestFitPlane_kern::exec(Plane &plane){
     planeNormal.setVector(n[0], n[1], n[2]);
     plane.setPlane(planeNormal, d);
 
+    //calculate standard deviation
+    double stdev = 0.0;
+    foreach(const QPointer<Observation> &obs, inputObservations){
+        if(obs.isNull()){
+            continue;
+        }
+        stdev += (n[0]*obs->getXYZ().getAt(0) + n[1]*obs->getXYZ().getAt(1) + n[2]*obs->getXYZ().getAt(2) - d)
+                * (n[0]*obs->getXYZ().getAt(0) + n[1]*obs->getXYZ().getAt(1) + n[2]*obs->getXYZ().getAt(2) - d);
+    }
+    stdev = qSqrt(stdev / (inputObservations.size() - 3));
+
+    //set statistic
+    this->statistic.setIsValid(true);
+    this->statistic.setStdev(stdev);
+    plane.setStatistic(this->statistic);
+
     return true;
 
 }
