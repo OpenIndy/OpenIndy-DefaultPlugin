@@ -33,6 +33,7 @@ protected:
 
     bool exec(Point &point);
     bool exec(Sphere &sphere);
+    bool exec(Circle &circle);
 
 private:
 
@@ -42,6 +43,7 @@ private:
 
     bool setUpResult(Point &point);
     bool setUpResult(Sphere &sphere);
+    bool setUpResult(Circle &circle);
 
 };
 

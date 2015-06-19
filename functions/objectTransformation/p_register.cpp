@@ -23,6 +23,7 @@ void Register::init(){
     //set spplicable for
     this->applicableFor.append(ePointFeature);
     this->applicableFor.append(eSphereFeature);
+    this->applicableFor.append(eCircleFeature);
 
 }
 
@@ -42,6 +43,15 @@ bool Register::exec(Point &point){
  */
 bool Register::exec(Sphere &sphere){
     return this->setUpResult(sphere);
+}
+
+/*!
+ * \brief Register::exec
+ * \param circle
+ * \return
+ */
+bool Register::exec(Circle &circle){
+    return this->setUpResult(circle);
 }
 
 /*!
@@ -134,6 +144,53 @@ bool Register::setUpResult(Sphere &sphere){
     position.setVector(x_sphere);
     Radius radius = sphere.getRadius();
     sphere.setSphere(position, radius);
+
+    return true;
+
+}
+
+/*!
+ * \brief Register::setUpResult
+ * \param circle
+ * \return
+ */
+bool Register::setUpResult(Circle &circle){
+
+    //get and check plane
+    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
+        return false;
+    }
+    QPointer<Plane> plane = this->inputElements[0].at(0).plane;
+    if(plane.isNull() || !plane->getIsSolved()){
+        return false;
+    }
+
+    //get the position of the sphere and the plane and the normal vector
+    OiVec n_plane = plane->getDirection().getVector();
+    n_plane.normalize();
+    OiVec x_plane = plane->getPosition().getVector();
+    OiVec x_circle = circle.getPosition().getVector();
+
+    //calculate the distance of the plane from the origin
+    double d;
+    OiVec::dot(d, x_plane, n_plane);
+    if(d < 0.0){
+        n_plane = -1.0 * n_plane;
+        d = -d;
+    }
+
+    //calculate the distance of the sphere position from the plane
+    double s;
+    OiVec::dot(s, x_circle, n_plane);
+    s = s - d;
+
+    //project the sphere position into the plane
+    x_circle = x_circle - s * n_plane;
+
+    //set result
+    Position position = circle.getPosition();
+    position.setVector(x_circle);
+    circle.setCircle(position, circle.getDirection(), circle.getRadius());
 
     return true;
 
