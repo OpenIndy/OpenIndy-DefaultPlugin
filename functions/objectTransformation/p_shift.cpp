@@ -15,6 +15,7 @@ void Shift::init(){
 
     //set spplicable for
     this->applicableFor.append(ePlaneFeature);
+    this->applicableFor.append(eCircleFeature);
 
     //set double parameter
     this->doubleParameters.insert("offset", 0.0);
@@ -28,6 +29,15 @@ void Shift::init(){
  */
 bool Shift::exec(Plane &plane){
     return this->setUpResult(plane);
+}
+
+/*!
+ * \brief Shift::exec
+ * \param circle
+ * \return
+ */
+bool Shift::exec(Circle &circle){
+    this->setUpResult(circle);
 }
 
 /*!
@@ -57,6 +67,38 @@ bool Shift::setUpResult(Plane &plane){
     Position position;
     position.setVector(x_plane);
     plane.setPlane(position, plane.getDirection());
+
+    return true;
+
+}
+
+/*!
+ * \brief Shift::setUpResult
+ * \param circle
+ * \return
+ */
+bool Shift::setUpResult(Circle &circle){
+
+    //get and check offset
+    double offset = 0.0;
+    if(this->scalarInputParams.doubleParameter.contains("offset")){
+        offset = this->scalarInputParams.doubleParameter.value("offset");
+    }else{
+        offset = this->doubleParameters.value("offset");
+    }
+
+    //get normalized vector
+    OiVec vec = circle.getDirection().getVector();
+    vec.normalize();
+
+    //shift circle position
+    OiVec x_circle = circle.getPosition().getVector();
+    x_circle = x_circle + offset * vec;
+
+    //set result
+    Position position;
+    position.setVector(x_circle);
+    circle.setCircle(position, circle.getDirection(), circle.getRadius());
 
     return true;
 

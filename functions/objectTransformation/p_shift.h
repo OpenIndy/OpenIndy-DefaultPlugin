@@ -29,6 +29,7 @@ protected:
     //############
 
     bool exec(Plane &plane);
+    bool exec(Circle &circle);
 
 private:
 
@@ -37,6 +38,7 @@ private:
     //##############
 
     bool setUpResult(Plane &plane);
+    bool setUpResult(Circle &circle);
 
 };
 
