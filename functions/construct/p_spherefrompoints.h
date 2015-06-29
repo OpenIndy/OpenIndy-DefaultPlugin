@@ -8,7 +8,6 @@
 #include "constructfunction.h"
 #include "oivec.h"
 #include "oimat.h"
-#include "cfitting_sphere.h"
 
 using namespace oi;
 

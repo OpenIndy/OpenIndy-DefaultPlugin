@@ -125,8 +125,8 @@ INCLUDEPATH += $$PWD/functions/generateFeature/pointcloud_segmentation
 INCLUDEPATH += $$PWD/simulations/simplePolarMeasurement
 INCLUDEPATH += $$PWD/exchange
 
-INCLUDEPATH += $$PWD/lib/fitting
-INCLUDEPATH += $$PWD/lib/fitting/util
+#INCLUDEPATH += $$PWD/lib/fitting
+#INCLUDEPATH += $$PWD/lib/fitting/util
 
 INCLUDEPATH += $$PWD/lib/OpenIndy-Core/include
 INCLUDEPATH += $$PWD/lib/OpenIndy-Core/include/geometry
@@ -148,7 +148,7 @@ SOURCES += \
     functions/construct/p_pointbetweentwopoints.cpp \
     functions/construct/p_pointfrompoints.cpp \
     functions/construct/p_spherefrompoints.cpp \
-    functions/fit/p_bestfitcircle.cpp \
+    #functions/fit/p_bestfitcircle.cpp \
     functions/fit/p_bestfitline.cpp \
     functions/fit/p_bestfitplane.cpp \
     functions/fit/p_bestfitpoint.cpp \
@@ -164,19 +164,19 @@ SOURCES += \
     simulations/simplePolarMeasurement/simplepolarmeasurement.cpp \
     functions/objectTransformation/p_register.cpp \
     functions/objectTransformation/p_translatebyvalue.cpp \
-    lib/fitting/cfitting_approxfunc.cpp \
-    lib/fitting/cfitting_circle.cpp \
-    lib/fitting/cfitting_ellipse.cpp \
-    lib/fitting/cfitting_it.cpp \
-    lib/fitting/cfitting_matrix.cpp \
-    lib/fitting/cfitting_plane.cpp \
-    lib/fitting/cfitting_sphere.cpp \
-    lib/fitting/cfitting_util.cpp \
-    lib/fitting/util/Getopt.cpp \
-    lib/fitting/util/iskeyword.cpp \
-    lib/fitting/util/microtim.cpp \
-    lib/fitting/util/mystring.cpp \
-    lib/fitting/util/rho.cpp \
+    #lib/fitting/cfitting_approxfunc.cpp \
+    #lib/fitting/cfitting_circle.cpp \
+    #lib/fitting/cfitting_ellipse.cpp \
+    #lib/fitting/cfitting_it.cpp \
+    #lib/fitting/cfitting_matrix.cpp \
+    #lib/fitting/cfitting_plane.cpp \
+    #lib/fitting/cfitting_sphere.cpp \
+    #lib/fitting/cfitting_util.cpp \
+    #lib/fitting/util/Getopt.cpp \
+    #lib/fitting/util/iskeyword.cpp \
+    #lib/fitting/util/microtim.cpp \
+    #lib/fitting/util/mystring.cpp \
+    #lib/fitting/util/rho.cpp \
     p_factory.cpp \
     main.cpp \
     functions/objectTransformation/p_rectifytopoint.cpp \
@@ -184,8 +184,8 @@ SOURCES += \
     functions/objectTransformation/p_rectifytovector.cpp \
     functions/fit/p_bestfitcylinder.cpp \
     functions/fit/p_bestfitcircleinplane.cpp \
-    functions/fit/p_bestfitplane_kern.cpp \
-    functions/fit/p_bestfitsphere_kern.cpp \
+    #functions/fit/p_bestfitplane_kern.cpp \
+    #functions/fit/p_bestfitsphere_kern.cpp \
     functions/fit/p_bestfitsphere.cpp
 
 HEADERS += \
@@ -196,7 +196,7 @@ HEADERS += \
     functions/construct/p_pointbetweentwopoints.h \
     functions/construct/p_pointfrompoints.h \
     functions/construct/p_spherefrompoints.h \
-    functions/fit/p_bestfitcircle.h \
+    #functions/fit/p_bestfitcircle.h \
     functions/fit/p_bestfitline.h \
     functions/fit/p_bestfitplane.h \
     functions/fit/p_bestfitpoint.h \
@@ -212,27 +212,27 @@ HEADERS += \
     simulations/simplePolarMeasurement/simplepolarmeasurement.h \
     functions/objectTransformation/p_translatebyvalue.h \
     functions/objectTransformation/p_register.h \
-    lib/fitting/cfitting_approxfunc.h \
-    lib/fitting/cfitting_circle.h \
-    lib/fitting/cfitting_ellipse.h \
-    lib/fitting/cfitting_it.h \
-    lib/fitting/cfitting_matrix.h \
-    lib/fitting/cfitting_plane.h \
-    lib/fitting/cfitting_sphere.h \
-    lib/fitting/cfitting_util.h \
-    lib/fitting/util/getopt.h \
-    lib/fitting/util/iskeyword.h \
-    lib/fitting/util/microtim.h \
-    lib/fitting/util/mystring.h \
-    lib/fitting/util/rho.h \
+    #lib/fitting/cfitting_approxfunc.h \
+    #lib/fitting/cfitting_circle.h \
+    #lib/fitting/cfitting_ellipse.h \
+    #lib/fitting/cfitting_it.h \
+    #lib/fitting/cfitting_matrix.h \
+    #lib/fitting/cfitting_plane.h \
+    #lib/fitting/cfitting_sphere.h \
+    #lib/fitting/cfitting_util.h \
+    #lib/fitting/util/getopt.h \
+    #lib/fitting/util/iskeyword.h \
+    #lib/fitting/util/microtim.h \
+    #lib/fitting/util/mystring.h \
+    #lib/fitting/util/rho.h \
     p_factory.h \
     functions/objectTransformation/p_rectifytopoint.h \
     functions/objectTransformation/p_shift.h \
     functions/objectTransformation/p_rectifytovector.h \
     functions/fit/p_bestfitcylinder.h \
     functions/fit/p_bestfitcircleinplane.h \
-    functions/fit/p_bestfitplane_kern.h \
-    functions/fit/p_bestfitsphere_kern.h \
+    #functions/fit/p_bestfitplane_kern.h \
+    #functions/fit/p_bestfitsphere_kern.h \
     functions/fit/p_bestfitsphere.h \
     lib/OpenIndy-Core/lib/OpenIndy-Math/include/chooselalib.h \
     lib/OpenIndy-Core/lib/OpenIndy-Math/include/global.h \

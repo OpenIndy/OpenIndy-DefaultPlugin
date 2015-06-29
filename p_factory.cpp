@@ -2,8 +2,8 @@
 
 using namespace oi;
 
-int    gDebugLevel=0;
-TReal  gConvergence=1e-9;
+//int    gDebugLevel=0;
+//TReal  gConvergence=1e-9;
 
 OiTemplatePlugin::OiTemplatePlugin(QObject *parent) : QObject(parent){
 
@@ -34,8 +34,8 @@ QList<QPointer<Function> > OiTemplatePlugin::createFunctions(){
     resultSet.append(new BestFitPoint());
     resultSet.append(new BestFitLine());
     resultSet.append(new BestFitPlane());
-    resultSet.append(new BestFitPlane_kern());
-    resultSet.append(new BestFitSphere_kern());
+    //resultSet.append(new BestFitPlane_kern());
+    //resultSet.append(new BestFitSphere_kern());
     resultSet.append(new PointFromPoints());
     resultSet.append(new LineFromPoints());
     resultSet.append(new PlaneFromPoints());
@@ -46,7 +46,7 @@ QList<QPointer<Function> > OiTemplatePlugin::createFunctions(){
     resultSet.append(new TranslateByValue());
     resultSet.append(new Register());
     resultSet.append(new Helmert7Param());
-    resultSet.append(new BestFitCircle());
+    //resultSet.append(new BestFitCircle());
     resultSet.append(new SimpleTemperatureCompensation());
     resultSet.append(new ExtendedTemperatureCompensation());
     resultSet.append(new Helmert6Param());
@@ -139,11 +139,11 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
         result = new BestFitLine();
     }else if(name.compare("BestFitPlane") == 0){
         result = new BestFitPlane();
-    }else if(name.compare("BestFitPlane_kern") == 0){
+    }/*else if(name.compare("BestFitPlane_kern") == 0){
         result = new BestFitPlane_kern();
     }else if(name.compare("BestFitSphere_kern") == 0){
         result = new BestFitSphere_kern();
-    }else if(name.compare("PointFromPoints") == 0){
+    }*/else if(name.compare("PointFromPoints") == 0){
         result = new PointFromPoints();
     }else if(name.compare("LineFromPoints") == 0){
         result = new LineFromPoints();
@@ -163,9 +163,9 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
         result = new Register();
     }else if(name.compare("HelmertTransformation") == 0){
         result = new Helmert7Param();
-    }else if(name.compare("BestFitCircle") == 0){
+    }/*else if(name.compare("BestFitCircle") == 0){
         result = new BestFitCircle();
-    }else if(name.compare("BestFitCircleInPlane") == 0){
+    }*/else if(name.compare("BestFitCircleInPlane") == 0){
         result = new BestFitCircleInPlane();
     }else if(name.compare("StandardTempComp") == 0){
         result = new SimpleTemperatureCompensation();
