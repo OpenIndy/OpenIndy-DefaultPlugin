@@ -10,6 +10,7 @@
 #include <QThread>
 #include <QStringList>
 #include <QVariantMap>
+
 #include "totalstation.h"
 
 using namespace oi;
@@ -35,63 +36,43 @@ public:
 
     bool doSelfDefinedAction(const QString &action);
 
-    //! abort a running action
     bool abortAction();
 
-    //! connect to sensor
     bool connectSensor();
-
-    //! disconnect to sensor
     bool disconnectSensor();
 
-    //! measure
     QList<QPointer<Reading> > measure(const MeasurementConfig &mConfig);
-
-    //! stream
     QVariantMap readingStream(const ReadingTypes &streamFormat);
 
-    //! getConnectionState
     bool getConnectionState();
-
-    //! return ready state of the sensor
     bool getIsReadyForMeasurement();
-
-    //!sensor stats
     QMap<QString, QString> getSensorStatus();
-
-    //!checks if sensor is busy
     bool getIsBusy();
 
 protected:
 
-    //! move totalstation to specified position
-    bool move(const double &azimuth, const double &zenith, const double &distance, const bool &isRelative);
+    //############################
+    //special totalstation methods
+    //############################
 
-    //! move total station to specified xyz position
+    bool move(const double &azimuth, const double &zenith, const double &distance, const bool &isRelative);
     bool move(const double &x, const double &y, const double &z);
 
-    //! toggle between frontside and backside
     bool toggleSightOrientation();
 
-    //! check LOCK state
-    bool getLOCKState();
+    //#########################
+    //Leica tachymeter specific
+    //#########################
 
-    //! deactivate lock state
-    void deactiveLockState();
-
-    //! sets the LOCK state
-    bool setLOCKState(QString currentState);
-
-    //! starts target tracking
-    bool startTargetTracking();
-
-    //! starts the fine adjustment for ATR on prism
-    bool fineAdjust();
-
+    //bool getLOCKState();
+    //void deactiveLockState();
+    //bool setLOCKState(QString currentState);
+    //bool startTargetTracking();
+    //bool fineAdjust();
 
 private:
 
-    QSerialPort *serial;
+    QPointer<QSerialPort> serial;
 
     QList<QPointer<Reading> > measurePolar(const MeasurementConfig &mConfig);
     QList<QPointer<Reading> > measureDistance(const MeasurementConfig &mConfig);
@@ -105,7 +86,7 @@ private:
     QSerialPort::FlowControl myFlowControl;
 
     QString receive();
-    void getError(QSerialPort::SerialPortError);
+    //void getError(QSerialPort::SerialPortError);
     bool executeEDM();
     bool executeCommand(QString);
 
@@ -115,26 +96,26 @@ private:
 
     bool setTargetTypeMeasure();
     bool setTargetTypeStream();
-    bool setAdjustMode();
+    //bool setAdjustMode();
 
-    void stopTrackingAfterMeasure();
+    //void stopTrackingAfterMeasure();
 
-    bool laserOn;
-    bool fineAdjusted;
+    //bool laserOn;
+    //bool fineAdjusted;
 
-    bool measureWatchWindow;
-    bool watchWindowOpen;
-    ReadingTypes currentStreamFormat;
-    void stopWatchWindowForMeasurement();
-    void restartWatchWindowAfterMeasurement();
+    //bool measureWatchWindow;
+    //bool watchWindowOpen;
+    //ReadingTypes currentStreamFormat;
+    //void stopWatchWindowForMeasurement();
+    //void restartWatchWindowAfterMeasurement();
 
 
-    QPointer<Reading> getQuickMeasReading(QString receive);
+    //QPointer<Reading> getQuickMeasReading(QString receive);
 
-    void activateLaserPointer();
-    void deactivateLaserPointer();
+    //void activateLaserPointer();
+    //void deactivateLaserPointer();
 
-    void stopTrackingMode();
+    //void stopTrackingMode();
 
     QPointer<Reading> getStreamValues();
 
