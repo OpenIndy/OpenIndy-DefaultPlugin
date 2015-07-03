@@ -45,7 +45,7 @@ bool BestFitPoint::setUpResult(Point &point){
 
     //get and check input observations
     if(!this->inputElements.contains(0) || this->inputElements[0].size() < 1){
-        emit this->sendMessage(QString("Not enough valid observations to fit the point %1").arg(point.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid observations to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
         return false;
     }
     QList<QPointer<Observation> > inputObservations;
@@ -58,7 +58,7 @@ bool BestFitPoint::setUpResult(Point &point){
         this->setUseState(0, element.id, false);
     }
     if(inputObservations.size() < 1){
-        emit this->sendMessage(QString("Not enough valid observations to fit the point %1").arg(point.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid observations to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
         return false;
     }
 
@@ -92,10 +92,10 @@ bool BestFitPoint::setUpResult(Point &point){
         x = qxx * c;
         v = a * x - l;
     }catch(const logic_error &e){
-        emit this->sendMessage(e.what());
+        emit this->sendMessage(e.what(), eErrorMessage);
         return false;
     }catch(const runtime_error &e){
-        emit this->sendMessage(e.what());
+        emit this->sendMessage(e.what(), eErrorMessage);
         return false;
     }
 

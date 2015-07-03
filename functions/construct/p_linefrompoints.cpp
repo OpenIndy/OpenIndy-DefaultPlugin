@@ -44,7 +44,7 @@ bool LineFromPoints::setUpResult(Line &line){
 
     //get and check input points
     if(!this->inputElements.contains(0) || this->inputElements[0].size() < 2){
-        emit this->sendMessage(QString("Not enough valid points to fit the line %1").arg(line.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid points to fit the line %1").arg(line.getFeatureName()), eWarningMessage);
         return false;
     }
     QList<QPointer<Point> > inputPoints;
@@ -56,7 +56,7 @@ bool LineFromPoints::setUpResult(Line &line){
         this->setUseState(0, element.id, false);
     }
     if(inputPoints.size() < 2){
-        emit this->sendMessage(QString("Not enough valid points to fit the line %1").arg(line.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid points to fit the line %1").arg(line.getFeatureName()), eWarningMessage);
         return false;
     }
 

@@ -45,7 +45,7 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
 
     //get and check input observations
     if(!this->inputElements.contains(0) || this->inputElements[0].size() < 5){
-        emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
         return false;
     }
     QList<QPointer<Observation> > inputObservations;
@@ -58,19 +58,19 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
         this->setUseState(0, element.id, false);
     }
     if(inputObservations.size() < 5){
-        emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
         return false;
     }
 
     //approximate cylinder by 2D circle fit
     if(!this->approximateCylinder(cylinder, inputObservations)){
-        emit this->sendMessage(QString("Error while generating approximations for cylinder parameters of cylinder %1").arg(cylinder.getFeatureName()));
+        emit this->sendMessage(QString("Error while generating approximations for cylinder parameters of cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
         return false;
     }
 
     //fit the cylinder using the previously generated approximations
     if(!this->fitCylinder(cylinder, inputObservations)){
-        emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()));
+        emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
         return false;
     }
 
@@ -144,7 +144,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
     try{
         H.svd(U, d, V);
     }catch(const exception &e){
-        emit this->sendMessage(QString("SVD error cylinder minimum solution: %1").arg(e.what()));
+        emit this->sendMessage(QString("SVD error cylinder minimum solution: %1").arg(e.what()), eErrorMessage);
         return false;
     }
 
@@ -305,7 +305,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
                 return false;
             }
         }catch(const exception &e){
-            emit this->sendMessage(QString("inv error cylinder minimum solution: %1").arg(e.what()));
+            emit this->sendMessage(QString("inv error cylinder minimum solution: %1").arg(e.what()), eErrorMessage);
             return false;
         }
 
@@ -471,7 +471,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
                 return false;
             }
         }catch(const exception &e){
-            emit this->sendMessage(QString("solve error cylinder fit: %1").arg(e.what()));
+            emit this->sendMessage(QString("solve error cylinder fit: %1").arg(e.what()), eErrorMessage);
             return false;
         }
 

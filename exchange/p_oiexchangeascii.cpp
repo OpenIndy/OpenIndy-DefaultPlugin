@@ -106,7 +106,7 @@ QList<ExchangeSimpleAscii::ColumnType> OiExchangeAscii::getDefaultColumnOrder(co
         }
 
     }catch(const exception &e){
-        emit this->sendMessage(e.what());
+        emit this->sendMessage(e.what(), eErrorMessage);
     }
 
     return defaultColumnOrder;
@@ -176,7 +176,7 @@ QMap<ExchangeSimpleAscii::ColumnType, QVariantList> OiExchangeAscii::getFilePrev
         this->device->close();
 
     }catch(const exception &e){
-        emit this->sendMessage(e.what());
+        emit this->sendMessage(e.what(), eErrorMessage);
     }
 
     return filePreview;
@@ -408,7 +408,7 @@ void OiExchangeAscii::importOiData(){
         }
 
     }catch(const exception &e){
-        emit this->sendMessage(e.what());
+        emit this->sendMessage(e.what(), eErrorMessage, eMessageBoxMessage);
     }
 
 }
@@ -421,7 +421,7 @@ void OiExchangeAscii::exportOiData(){
     try{
 
     }catch(const exception &e){
-        emit this->sendMessage(e.what());
+        emit this->sendMessage(e.what(), eErrorMessage, eMessageBoxMessage);
     }
 
 }

@@ -1251,7 +1251,7 @@ QPointer<Reading> LeicaTachymeter::getStreamValues(){
  */
 bool LeicaTachymeter::executeEDM(){
 
-    emit this->sensorMessage("start edm measurement");
+    emit this->sensorMessage("start edm measurement", eInformationMessage);
 
     //QString edmCommand = "%R1Q,2008:1,1\r\n";  //maybe wrong. 1 = reflector tape? try with the other values
 

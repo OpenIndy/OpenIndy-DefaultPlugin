@@ -57,7 +57,7 @@ bool ExtendedTemperatureCompensation::exec(TrafoParam &trafoParam){
         }
 
     }else{
-        emit this->sendMessage("Not enough points to calculate transformation parameters");
+        emit this->sendMessage("Not enough points to calculate transformation parameters", eWarningMessage);
         return false;
     }
 

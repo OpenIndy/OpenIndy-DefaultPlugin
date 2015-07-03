@@ -41,7 +41,7 @@ bool Helmert7Param::exec(TrafoParam &trafoParam){
             }
         }
     }else{
-        emit this->sendMessage("Not enough common points!");
+        emit this->sendMessage("Not enough common points!", eWarningMessage);
     }
 
     return false;

@@ -44,7 +44,7 @@ bool PlaneFromPoints::setUpResult(Plane &plane){
 
     //get and check input points
     if(!this->inputElements.contains(0) || this->inputElements[0].size() < 3){
-        emit this->sendMessage(QString("Not enough valid points to fit the plane %1").arg(plane.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid points to fit the plane %1").arg(plane.getFeatureName()), eWarningMessage);
         return false;
     }
     QList<QPointer<Point> > inputPoints;
@@ -56,7 +56,7 @@ bool PlaneFromPoints::setUpResult(Plane &plane){
         this->setUseState(0, element.id, false);
     }
     if(inputPoints.size() < 3){
-        emit this->sendMessage(QString("Not enough valid points to fit the plane %1").arg(plane.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid points to fit the plane %1").arg(plane.getFeatureName()), eWarningMessage);
         return false;
     }
 

@@ -89,7 +89,7 @@ void PseudoTracker::init(){
  */
 bool PseudoTracker::doSelfDefinedAction(const QString &action){
     if(action == "echo"){
-        emit this->sensorMessage(action);
+        emit this->sensorMessage(action, eInformationMessage, eMessageBoxMessage);
     }
     return true;
 }

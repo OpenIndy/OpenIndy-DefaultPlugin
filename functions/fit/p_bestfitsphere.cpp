@@ -36,7 +36,7 @@ bool BestFitSphere::exec(Sphere &sphere){
 
     //get and check input observations
     if(!this->inputElements.contains(0) || this->inputElements[0].size() < 4){
-        emit this->sendMessage(QString("Not enough valid observations to fit the sphere %1").arg(sphere.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid observations to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);
         return false;
     }
     QList<QPointer<Observation> > inputObservations;
@@ -49,7 +49,7 @@ bool BestFitSphere::exec(Sphere &sphere){
         this->setUseState(0, element.id, false);
     }
     if(inputObservations.size() < 4){
-        emit this->sendMessage(QString("Not enough valid observations to fit the sphere %1").arg(sphere.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid observations to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);
         return false;
     }
 
@@ -124,7 +124,7 @@ bool BestFitSphere::approximate(Sphere &sphere, const QList<QPointer<Observation
     try{
         Q = N.inv();
     }catch(exception &e){
-        emit this->sendMessage(e.what());
+        emit this->sendMessage(e.what(), eErrorMessage);
         return false;
     }
 
@@ -225,7 +225,7 @@ bool BestFitSphere::fit(Sphere &sphere, const QList<QPointer<Observation> > &inp
         try{
             Q = N.inv();
         }catch(exception &e){
-            emit this->sendMessage(e.what());
+            emit this->sendMessage(e.what(), eErrorMessage);
             return false;
         }
 
@@ -255,7 +255,7 @@ bool BestFitSphere::fit(Sphere &sphere, const QList<QPointer<Observation> > &inp
     }while( (xdxd > 0.000001) && (numIterations < 101) );
 
     if(numIterations >= 101){
-        emit this->sendMessage("No solution found during 100 iterations");
+        emit this->sendMessage("No solution found during 100 iterations", eWarningMessage);
         return false;
     }
 

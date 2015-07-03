@@ -44,7 +44,7 @@ bool SphereFromPoints::setUpResult(Sphere &sphere){
 
     //get and check input points
     if(!this->inputElements.contains(0) || this->inputElements[0].size() < 4){
-        emit this->sendMessage(QString("Not enough valid points to fit the sphere %1").arg(sphere.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid points to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);
         return false;
     }
     QList<QPointer<Point> > inputPoints;
@@ -56,7 +56,7 @@ bool SphereFromPoints::setUpResult(Sphere &sphere){
         this->setUseState(0, element.id, false);
     }
     if(inputPoints.size() < 4){
-        emit this->sendMessage(QString("Not enough valid points to fit the sphere %1").arg(sphere.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid points to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);
         return false;
     }
 
@@ -114,7 +114,7 @@ bool SphereFromPoints::setUpResult(Sphere &sphere){
     try{
         Q = N.inv();
     }catch(exception &e){
-        emit this->sendMessage(e.what());
+        emit this->sendMessage(e.what(), eErrorMessage);
         return false;
     }
 

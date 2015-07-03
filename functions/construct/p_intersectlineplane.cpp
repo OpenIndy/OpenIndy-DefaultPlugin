@@ -60,7 +60,8 @@ bool IntersectLinePlane::setUpResult(Point &point){
 
     //check if line and plane intersect
     if(!this->isIntersection(line, plane)){
-        emit this->sendMessage(QString("No intersection between line %1 and plane %2").arg(line->getFeatureName()).arg(plane->getFeatureName()));
+        emit this->sendMessage(QString("No intersection between line %1 and plane %2").arg(line->getFeatureName())
+                               .arg(plane->getFeatureName()), eWarningMessage);
         return false;
     }
 

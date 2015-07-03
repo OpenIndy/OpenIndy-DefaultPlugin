@@ -46,7 +46,7 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
 
     //get and check input observations
     if(!this->inputElements.contains(0) || this->inputElements[0].size() < 3){
-        emit this->sendMessage(QString("Not enough valid observations to fit the circle %1").arg(circle.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid observations to fit the circle %1").arg(circle.getFeatureName()), eWarningMessage);
         return false;
     }
     QList<QPointer<Observation> > inputObservations;
@@ -59,7 +59,7 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         this->setUseState(0, element.id, false);
     }
     if(inputObservations.size() < 3){
-        emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(circle.getFeatureName()));
+        emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(circle.getFeatureName()), eWarningMessage);
         return false;
     }
 
@@ -164,7 +164,7 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
             return false;
         }
     }catch(const exception &e){
-        qDebug() << "inv error cylinder minimum solution: " << e.what();
+        emit this->sendMessage(e.what(), eErrorMessage);
         return false;
     }
 

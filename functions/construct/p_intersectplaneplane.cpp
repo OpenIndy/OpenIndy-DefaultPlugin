@@ -59,7 +59,8 @@ bool IntersectPlanePlane::setUpResult(Line &line){
 
     //check if the two planes intersect
     if(!this->isIntersection(plane1, plane2)){
-        emit this->sendMessage(QString("No intersection between plane %1 and plane %2").arg(plane1->getFeatureName()).arg(plane2->getFeatureName()));
+        emit this->sendMessage(QString("No intersection between plane %1 and plane %2").arg(plane1->getFeatureName())
+                               .arg(plane2->getFeatureName()), eWarningMessage);
         return false;
     }
 
