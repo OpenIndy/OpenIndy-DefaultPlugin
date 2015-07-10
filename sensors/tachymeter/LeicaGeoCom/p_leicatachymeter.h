@@ -130,6 +130,7 @@ private:
 
     bool checkATRStae();
 
+    bool checkSerialPort();
 };
 
 #endif // P_LEICATACHYMETER_H

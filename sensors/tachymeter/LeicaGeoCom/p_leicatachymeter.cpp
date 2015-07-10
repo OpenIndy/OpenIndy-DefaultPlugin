@@ -32,8 +32,8 @@ void LeicaTachymeter::init(){
     this->stringParameters.insert("sense of rotation", "mathematical");
     this->stringParameters.insert("measure mode", "fast");
     this->stringParameters.insert("measure mode", "precise");
-    this->stringParameters.insert("ATR", "on");
-    this->stringParameters.insert("ATR", "off");
+    this->stringParameters.insert("track prism", "on");
+    this->stringParameters.insert("track prism", "off");
     this->stringParameters.insert("stop tracking after measurement", "no");
     this->stringParameters.insert("stop tracking after measurement", "yes");
     this->stringParameters.insert("ATR accuracy", "point tolerance");
@@ -51,8 +51,6 @@ void LeicaTachymeter::init(){
     this->defaultAccuracy.insert("sigmaDistance",0.001);
 
     //general tachy inits
-    this->serial = new QSerialPort();
-
     this->laserOn = false;
     this->fineAdjusted = false;
     this->watchWindowOpen = false;
@@ -66,6 +64,8 @@ void LeicaTachymeter::init(){
  */
 bool LeicaTachymeter::doSelfDefinedAction(const QString &action)
 {
+    if(!this->checkSerialPort()){return false;}
+
     if(action == "laserPointer"){
 
         if(laserOn){
@@ -114,6 +114,11 @@ bool LeicaTachymeter::abortAction(){
  */
 bool LeicaTachymeter::connectSensor(){
 
+    if(!this->serial.isNull()){
+        delete this->serial;
+    }
+    this->serial = new QSerialPort();
+
     //set port
     this->serial->setPortName(this->sensorConfiguration.getConnectionConfig().comPort);
 
@@ -146,6 +151,8 @@ bool LeicaTachymeter::disconnectSensor(){
  * \return
  */
 bool LeicaTachymeter::toggleSightOrientation(){
+    if(!this->checkSerialPort()){return false;}
+
     if(this->serial->isOpen()){
         QString command = "%R1Q,9028:0,0,0\r\n";
         if(executeCommand(command)){
@@ -165,6 +172,8 @@ bool LeicaTachymeter::toggleSightOrientation(){
  * \return
  */
 bool LeicaTachymeter::move(const double &azimuth, const double &zenith, const double &distance, const bool &isRelative){
+
+    if(!this->checkSerialPort()){return false;}
 
     if(isRelative){
 
@@ -210,6 +219,8 @@ bool LeicaTachymeter::move(const double &azimuth, const double &zenith, const do
  */
 bool LeicaTachymeter::move(const double &x, const double &y, const double &z){
 
+    if(!this->checkSerialPort()){return false;}
+
     //convert xyz to azimuth, zenith and distance for total station
     OiVec p = Reading::toPolar(x, y, z);
     ReadingPolar rPolar;
@@ -251,6 +262,8 @@ bool LeicaTachymeter::move(const double &x, const double &y, const double &z){
 QList<QPointer<Reading> > LeicaTachymeter::measure(const MeasurementConfig &mConfig){
 
     QList<QPointer<Reading> > readings;
+
+    if(!this->checkSerialPort()){return readings;}
 
     //stop watchwindow if it is open
     this->stopWatchWindowForMeasurement();
@@ -303,11 +316,13 @@ QList<QPointer<Reading> > LeicaTachymeter::measure(const MeasurementConfig &mCon
  */
 QVariantMap LeicaTachymeter::readingStream(const ReadingTypes &streamFormat){
 
+    QVariantMap m;
+
+    if(!this->checkSerialPort()){return m;}
+
     this->currentStreamFormat = streamFormat;
 
     this->watchWindowOpen = true;
-
-    QVariantMap m;
 
     QPointer<Reading> reading(NULL);
 
@@ -365,6 +380,8 @@ QVariantMap LeicaTachymeter::readingStream(const ReadingTypes &streamFormat){
  */
 bool LeicaTachymeter::getConnectionState()
 {
+    if(!this->checkSerialPort()){return false;}
+
     return this->serial->isOpen();
 }
 
@@ -374,6 +391,8 @@ bool LeicaTachymeter::getConnectionState()
  */
 bool LeicaTachymeter::getIsReadyForMeasurement()
 {
+    if(!this->checkSerialPort()){return false;}
+
     return this->getConnectionState();
 }
 
@@ -384,6 +403,8 @@ bool LeicaTachymeter::getIsReadyForMeasurement()
 QMap<QString, QString> LeicaTachymeter::getSensorStatus()
 {
     QMap<QString, QString> stats;
+
+    if(!this->checkSerialPort()){return stats;}
 
     stats.insert("connected", QString::number(this->serial->isOpen()));
 
@@ -831,6 +852,8 @@ void LeicaTachymeter::restartWatchWindowAfterMeasurement()
  */
 QPointer<Reading> LeicaTachymeter::getQuickMeasReading(QString receive)
 {
+    if(!this->checkSerialPort()){return false;}
+
     QStringList rc = receive.split(":"); //split at ":" to get RC
     QStringList elements = rc.at(1).split(","); // split at "," to get values
 
@@ -943,9 +966,7 @@ QPointer<Reading> LeicaTachymeter::getStreamValues(){
             }
         }
     }
-
     return reading;
-
 }
 
 /*!
@@ -955,14 +976,26 @@ QPointer<Reading> LeicaTachymeter::getStreamValues(){
 bool LeicaTachymeter::checkATRStae()
 {
     //check user defined ATR value
-    if(!this->sensorConfiguration.getStringParameter().contains("ATR")){ //only if atr is on
-        QString atr = this->sensorConfiguration.getStringParameter().value("ATR");
+    if(!this->sensorConfiguration.getStringParameter().contains("track prism")){ //only if atr is on
+        QString atr = this->sensorConfiguration.getStringParameter().value("track prism");
         if(atr.compare("on") != 0){
             return false;
         }
         return true;
     }
     return false;
+}
+
+/*!
+ * \brief LeicaTachymeter::checkSerialPort returns true if serialport is valid
+ * \return
+ */
+bool LeicaTachymeter::checkSerialPort()
+{
+    if(this->serial.isNull()){
+        return false;
+    }
+    return true;
 }
 
 /*!
@@ -1033,7 +1066,7 @@ bool LeicaTachymeter::getLOCKState()
  */
 void LeicaTachymeter::deactiveLockState()
 {
-    QString atrOn = this->sensorConfiguration.getStringParameter().value("ATR");
+    QString atrOn = this->sensorConfiguration.getStringParameter().value("track prism");
 
     if(atrOn.compare("on") == 0){
         //if ATR is on, then deactivate lock mode
@@ -1046,7 +1079,7 @@ bool LeicaTachymeter::setLOCKState(QString currentState)
 {
     QString command = QString("%R1Q,18007:" + QString::number(currentState.toInt()) + "\r\n");
 
-    QString value = this->sensorConfiguration.getStringParameter().value("ATR");
+    QString value = this->sensorConfiguration.getStringParameter().value("track prism");
 
     if(value.compare("on") == 0){
         value = "1";
@@ -1165,7 +1198,7 @@ void LeicaTachymeter::stopTrackingAfterMeasure()
     if(this->sensorConfiguration.getStringParameter().contains("stop tracking after measurement") &&
             this->sensorConfiguration.getStringParameter().contains("ATR")){
 
-        QString atrValue = this->sensorConfiguration.getStringParameter().value("ATR");
+        QString atrValue = this->sensorConfiguration.getStringParameter().value("track prism");
         QString trackValue = this->sensorConfiguration.getStringParameter().value("stop tracking after measurement");
 
         if(atrValue.compare("on") == 0 && trackValue.compare("yes") == 0){
