@@ -13,10 +13,10 @@ void LeicaTachymeter::init(){
     this->metaData.iid = TotalStation_iidd;
 
     //set supported reading types
+    this->supportedReadingTypes.append(eCartesianReading);
     this->supportedReadingTypes.append(ePolarReading);
     this->supportedReadingTypes.append(eDirectionReading);
     this->supportedReadingTypes.append(eDistanceReading);
-    this->supportedReadingTypes.append(eCartesianReading);
 
     //set supported sensor actions
     this->supportedSensorActions.append(eMoveAngle);
@@ -28,24 +28,22 @@ void LeicaTachymeter::init(){
     //set string parameter
     this->stringParameters.insert("reflector", "reflectorless");
     this->stringParameters.insert("reflector", "reflector");
-    this->stringParameters.insert("ATR", "atr off");
-    this->stringParameters.insert("ATR", "atr on");
-    this->stringParameters.insert("stop tracking after measurement", "yes");
-    this->stringParameters.insert("stop tracking after measurement", "no");
-    this->stringParameters.insert("ATR accuracy", "angle tolerance");
-    this->stringParameters.insert("ATR accuracy", "point tolerance");
     this->stringParameters.insert("sense of rotation", "geodetic");
     this->stringParameters.insert("sense of rotation", "mathematical");
     this->stringParameters.insert("measure mode", "fast");
     this->stringParameters.insert("measure mode", "precise");
-    this->stringParameters.insert("laser beam after aim", "no");
-    this->stringParameters.insert("laser beam after aim", "yes");
+    this->stringParameters.insert("ATR", "on");
+    this->stringParameters.insert("ATR", "off");
+    this->stringParameters.insert("stop tracking after measurement", "no");
+    this->stringParameters.insert("stop tracking after measurement", "yes");
+    this->stringParameters.insert("ATR accuracy", "point tolerance");
+    this->stringParameters.insert("ATR accuracy", "angle tolerance");
 
     //set self defined actions
+    this->selfDefinedActions.append("laserPointer"); //turn on/off laser pointer
     this->selfDefinedActions.append("lock to prism"); //start tracking
     this->selfDefinedActions.append("stop prism lock"); //stop tracking
-    this->selfDefinedActions.append("stop measurement"); // call this to stop tracking mode
-    this->selfDefinedActions.append("laserPointer"); //turn on/off laser pointer
+    this->selfDefinedActions.append("stop measurement"); //call this to stop tracking mode
 
     //set default accuracy
     this->defaultAccuracy.insert("sigmaAzimuth",0.000001570);
@@ -54,11 +52,11 @@ void LeicaTachymeter::init(){
 
     //general tachy inits
     this->serial = new QSerialPort();
-    //this->laserOn = false;
-    //this->fineAdjusted = false;
-    //this->watchWindowOpen = false;
-    //this->measureWatchWindow = false;
 
+    this->laserOn = false;
+    this->fineAdjusted = false;
+    this->watchWindowOpen = false;
+    this->measureWatchWindow = false;
 }
 
 /*!
@@ -68,21 +66,13 @@ void LeicaTachymeter::init(){
  */
 bool LeicaTachymeter::doSelfDefinedAction(const QString &action)
 {
-/*
-    qDebug() << "you pressed: " << action;
+    if(action == "laserPointer"){
 
-    if(action.compare("l") == 0){
-
-        qDebug() << "leica tachy l pressed";
-
-        //TODO laser ausschalten bzw. einschalten
-        //first turn laser off
         if(laserOn){
             this->deactivateLaserPointer();
+        }else{
+            this->activateLaserPointer();
         }
-        //activate lock mode for prism tracking
-        this->getLOCKState();
-
     }
 
     if(action == "lock to prism"){
@@ -91,29 +81,22 @@ bool LeicaTachymeter::doSelfDefinedAction(const QString &action)
         if(laserOn){
             this->deactivateLaserPointer();
         }
+
         //activate lock mode for prism tracking
         this->getLOCKState();
+    }
 
-    }else if(action == "stop prism lock"){
+    if(action == "stop prism lock"){
 
         //stop lock mode for prism tracking
         this->deactiveLockState();
+    }
 
-    }else if(action == "stop measurement"){
+    if(action == "stop measurement"){
 
         this->stopTrackingMode();
         this->watchWindowOpen = false;
-
-    }else if(action == "laserPointer"){
-
-        if(laserOn){
-            this->deactivateLaserPointer();
-        }else{
-            //first stop tracking
-            this->deactiveLockState();
-            this->activateLaserPointer();
-        }
-    }*/
+    }
     return true;
 }
 
@@ -131,9 +114,6 @@ bool LeicaTachymeter::abortAction(){
  */
 bool LeicaTachymeter::connectSensor(){
 
-    //set fineAdjusted to false
-    //this->fineAdjusted = false;
-
     //set port
     this->serial->setPortName(this->sensorConfiguration.getConnectionConfig().comPort);
 
@@ -147,9 +127,7 @@ bool LeicaTachymeter::connectSensor(){
             return true;
         }
     }
-
     return false;
-
 }
 
 /*!
@@ -179,151 +157,6 @@ bool LeicaTachymeter::toggleSightOrientation(){
 }
 
 /*!
- * \brief getLOCKState
- * Returns the current lock state. Means, if the total station should lock and follow a prism or not.
- * This function also activates total stations ATR mode
- * \return
- */
-/*bool LeicaTachymeter::getLOCKState(){
-    if(this->serial->isOpen()){
-
-        //check user defined ATR value
-        if(!this->sensorConfiguration.getStringParameter().contains("ATR")){ //only if atr is on
-            return false;
-        }
-
-        QString command = "%R1Q,18008:\r\n";
-
-        if(executeCommand(command)){
-            QString measureData = this->receive();
-            QStringList responseElements = measureData.split(":");
-            QStringList elements = responseElements.at(1).split(",");
-
-            //if LOCK is supported
-            if(elements.at(0).compare("0") == 0){
-                //get current state and set to specified state
-                if(this->setLOCKState(elements.at(1))){
-                    return true;
-                }
-            }else{
-                return false;
-            }
-        }
-        return false;
-    }else{
-        emit this->sensorMessage("not connected");
-        return false;
-    }
-}*/
-
-/*!
- * \brief deactiveLockState deactivates lock and atr mode of the total station.
- */
-/*void LeicaTachymeter::deactiveLockState()
-{
-    QString atrOn = this->sensorConfiguration.getStringParameter().value("ATR");
-
-    if(atrOn.compare("atr on") == 0){
-        //if ATR is on, then deactivate lock mode
-        QString command = "%R1Q,18007:0\r\n";
-        this->executeCommand(command);
-    }
-}*/
-
-/*!
- * \brief setLOCKState sets current lock state to specified lock state.
- * \param currentState
- * \return
- */
-/*bool LeicaTachymeter::setLOCKState(QString currentState)
-{
-    QString command = QString("%R1Q,18007:" + QString::number(currentState.toInt()) + "\r\n");
-
-    QString value = this->sensorConfiguration.getStringParameter().value("ATR");
-
-    if(value.compare("atr on") == 0){
-        value = "1";
-    }else{
-        value = "0";
-    }
-
-    if(QString::number(currentState.toInt()).compare(value) != 0){
-
-        //if current state is not the same as specified
-        command = "%R1Q,18007:" + value + "\r\n";
-
-        bool result = this->checkCommandRC(command);
-        if(result){
-            emit this->sensorMessage("atr and lock state changed");
-        }else{
-            return false;
-        }
-    }
-
-    //if ATR is on, then start target/prism tracking
-    if(value.compare("1") == 0){
-        return this->startTargetTracking();
-    }
-    return true;
-}*/
-
-/*!
- * \brief startTargetTracking locks onto the prism and tracks it.
- * \return
- */
-/*bool LeicaTachymeter::startTargetTracking()
-{
-    //first set fine adjust mode
-    if(!this->setAdjustMode()){
-        return false;
-    }
-    //then do fine adjust
-    if(this->fineAdjust()){
-
-        QString command = "%R1Q,9013:\r\n";
-
-        bool result = this->checkCommandRC(command);
-        if(result){
-            emit this->sensorMessage("target tracking active.");
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return false;
-    }
-}*/
-
-/*!
- * \brief fineAdjust needs to be called before tracking can be activated.
- * \return
- */
-/*bool LeicaTachymeter::fineAdjust()
-{
-    //don´t need to call every measurement
-    //check if fineadjust was called before
-    if(this->fineAdjusted){
-        return true;
-    }
-    //call fine adjust with dH and dVZ for prism search criterias. if does not find one, turns back to initial position
-    QString command = "%R1Q,9037:0.08,0.08,0\r\n";
-
-    //execute fine adjust command
-    bool result = this->checkCommandRC(command);
-    if(result){
-        emit this->sensorMessage("fine adjust successful.");
-        //if successful then run target tracking.
-
-        //set bool, that fine adjust was callled
-        this->fineAdjusted = true;
-
-        return true;
-    }else{
-        return false;
-    }
-}*/
-
-/*!
  * \brief move to specified angles
  * \param azimuth
  * \param zenith
@@ -338,18 +171,6 @@ bool LeicaTachymeter::move(const double &azimuth, const double &zenith, const do
     }else{
 
         if( this->serial->isOpen()){
-/*
-            //check if prism lock should be aborted before move/aim
-            if(this->sensorConfiguration.getStringParameter().contains("laser beam after aim")){
-                QString laserAim = this->sensorConfiguration.getStringParameter().value("laser beam after aim");
-                if(laserAim.compare("yes") == 0){
-                    //stop prism lock
-                    this->deactiveLockState();
-                }else{
-                    //do not stop tracking and prism lock
-                }
-            }
-*/
 
             double az = azimuth;
             double ze = zenith;
@@ -375,16 +196,6 @@ bool LeicaTachymeter::move(const double &azimuth, const double &zenith, const do
             if(executeCommand(command)){
                 this->receive();
             }
-/*
-            if(this->sensorConfiguration.getStringParameter().contains("laser beam after aim")){
-                QString laserAim = this->myConfiguration.stringParameter.value("laser beam after aim");
-                if(laserAim.compare("yes") == 0){
-                    //start laser to find the position
-                    this->activateLaserPointer();
-                }else{
-                    //do not start laser
-                }
-            }*/
         }
     }
     return true;
@@ -410,17 +221,6 @@ bool LeicaTachymeter::move(const double &x, const double &y, const double &z){
     rPolar.distance = p.getAt(2);
 
     if(this->serial->isOpen()){
-/*
-        //check if prism lock should be aborted before move/aim
-        if(this->sensorConfiguration.getStringParameter().contains("laser beam after aim")){
-            QString laserAim = this->sensorConfiguration.getStringParameter().value("laser beam after aim");
-            if(laserAim.compare("yes") == 0){
-                //stop prism lock
-                this->deactiveLockState();
-            }else{
-                //do not stop tracking and prism lock
-            }
-        }*/
 
         //correct the values depending on specified sense of rotation
         if(this->sensorConfiguration.getStringParameter().contains("sense of rotation")){
@@ -439,16 +239,6 @@ bool LeicaTachymeter::move(const double &x, const double &y, const double &z){
         if(executeCommand(command)){
             this->receive();
         }
-/*
-        if(this->sensorConfiguration.getStringParameter().contains("laser beam after aim")){
-            QString laserAim = this->sensorConfiguration.getStringParameter().value("laser beam after aim");
-            if(laserAim.compare("yes") == 0){
-                //start laser to find the position
-                this->activateLaserPointer();
-            }else{
-                //do not start laser
-            }
-        }*/
     }
     return true;
 }
@@ -462,14 +252,12 @@ QList<QPointer<Reading> > LeicaTachymeter::measure(const MeasurementConfig &mCon
 
     QList<QPointer<Reading> > readings;
 
-    //if tracking measurements are active, stop them
-    //this->stopTrackingMode();
-
     //stop watchwindow if it is open
-    //this->stopWatchWindowForMeasurement();
+    this->stopWatchWindowForMeasurement();
 
     //set target to specified value
     //measurements work with standard mode for precise measurements
+
     if(this->setTargetTypeMeasure()){
 
         switch (mConfig.getTypeOfReading()){
@@ -491,7 +279,7 @@ QList<QPointer<Reading> > LeicaTachymeter::measure(const MeasurementConfig &mCon
     }
 
     //restart watchwindow if it was open before measurement
-    //this->restartWatchWindowAfterMeasurement();
+    this->restartWatchWindowAfterMeasurement();
 
     if(readings.size() > 0){
 
@@ -505,9 +293,7 @@ QList<QPointer<Reading> > LeicaTachymeter::measure(const MeasurementConfig &mCon
         this->lastReading.second = r;
 
     }
-
     return readings;
-
 }
 
 /*!
@@ -517,9 +303,9 @@ QList<QPointer<Reading> > LeicaTachymeter::measure(const MeasurementConfig &mCon
  */
 QVariantMap LeicaTachymeter::readingStream(const ReadingTypes &streamFormat){
 
-    //this->currentStreamFormat = streamFormat;
+    this->currentStreamFormat = streamFormat;
 
-    //this->watchWindowOpen = true;
+    this->watchWindowOpen = true;
 
     QVariantMap m;
 
@@ -571,7 +357,6 @@ QVariantMap LeicaTachymeter::readingStream(const ReadingTypes &streamFormat){
     this->lastReading.second = reading;
 
     return m;
-
 }
 
 /*!
@@ -674,9 +459,9 @@ QList<QPointer<Reading> > LeicaTachymeter::measurePolar(const MeasurementConfig 
             }
         }
     }
-    //this->stopTrackingAfterMeasure();
+    this->stopTrackingAfterMeasure();
     //restart watchwindow if it was open before measurement
-    //this->restartWatchWindowAfterMeasurement();
+    this->restartWatchWindowAfterMeasurement();
     return readings;
 }
 
@@ -731,9 +516,9 @@ QList<QPointer<Reading> > LeicaTachymeter::measureDistance(const MeasurementConf
             }
         }
     }
-    //this->stopTrackingAfterMeasure();
+    this->stopTrackingAfterMeasure();
     //restart watchwindow if it was open before measurement
-    //this->restartWatchWindowAfterMeasurement();
+    this->restartWatchWindowAfterMeasurement();
     return readings;
 }
 
@@ -793,9 +578,9 @@ QList<QPointer<Reading> > LeicaTachymeter::measureDirection(const MeasurementCon
             }
         }
     }
-    //this->stopTrackingAfterMeasure();
+    this->stopTrackingAfterMeasure();
     //restart watchwindow if it was open before measurement
-    //this->restartWatchWindowAfterMeasurement();
+    this->restartWatchWindowAfterMeasurement();
     return readings;
 }
 
@@ -808,9 +593,10 @@ QList<QPointer<Reading> > LeicaTachymeter::measureCartesian(const MeasurementCon
 
     QList<QPointer<Reading> > readings = this->measurePolar(mConfig);
 
-    //this->stopTrackingAfterMeasure();
+    this->stopTrackingAfterMeasure();
     //restart watchwindow if it was open before measurement
-    //this->restartWatchWindowAfterMeasurement();
+    this->restartWatchWindowAfterMeasurement();
+
     return readings;
 
 }
@@ -831,15 +617,6 @@ QString LeicaTachymeter::receive(){
     return response;
 
 }
-
-/*!
- * \brief getError
- * \param e
- */
-/*void LeicaTachymeter::getError(QSerialPort::SerialPortError e){
-    qDebug() << e;
-    this->serial->close();
-}*/
 
 /*!
  * \brief executeCommand executes the geom com command
@@ -929,7 +706,7 @@ bool LeicaTachymeter::setTargetTypeMeasure()
 
 
         if(reflless){
-            if(receive.compare("%R1P,0,0:0,3\r\n") != 0){ //if not RL and standard
+            if(receive.compare("%R1P,0,0:0,3\r\n") != 0){ //if not RL and standard, switch to it. BAP_USER_MEASPRG 3 = RL standard
                 //switch to reflectorless standard
                 command = "%R1Q,17019:3\r\n";
                 if(this->executeCommand(command)){
@@ -942,34 +719,32 @@ bool LeicaTachymeter::setTargetTypeMeasure()
 
             if(measureMode.compare("precise") == 0){
 
-                //if(receive.compare("%R1P,0,0:0,0\r\n") != 0){ // if not IR and standard
                 if(receive.compare("%R1P,0,0:0,11\r\n") != 0){ // if not IR and precise
 
-                    //switch
-                    //command = "%R1Q,17019:0\r\n";  //IR standard
+                    //switch to IR precise BAP_USER_MEASPRG 11 = IR precise
                     command = "%R1Q,17019:11\r\n"; //IR precise
                     if(this->executeCommand(command)){
                         receive = this->receive();
-                        //this->fineAdjusted = false;
+                        this->fineAdjusted = false;
+                        //return true;
                     }
                 }
             }else if(measureMode.compare("fast") == 0){
 
-                //1 IR fast
                 if(receive.compare("&R1P,0,0:0,1\r\n") != 0){
 
-                    //switch
+                    //switch to IR fast. BAP_USER_MEASPRG 1 = IR fast
                     command = "%R1Q,17019:1\r\n"; //IR fast
                     if(this->executeCommand(command)){
                         receive = this->receive();
-                        //this->fineAdjust();
+                        this->fineAdjust();
+                        //return true;
                     }
                 }
             }
-
-            /*if(this->getLOCKState()){
+            if(this->getLOCKState()){
                 return true;
-            }*/
+            }
         }
     }
     return false;
@@ -1002,7 +777,7 @@ bool LeicaTachymeter::setTargetTypeStream()
         if(reflless){
             if(receive.compare("%R1P,0,0:0,6\r\n") != 0){ //if not RL and tracking
                 //switch to reflectorless tracking
-                command = "%R1Q,17019:6\r\n";
+                command = "%R1Q,17019:6\r\n";   //BAP_USER_MEASPRG 6 = RL fast tracking
                 if(this->executeCommand(command)){
                     receive = this->receive();
                     return true;
@@ -1010,108 +785,51 @@ bool LeicaTachymeter::setTargetTypeStream()
             }
             return true;
         }else{
-            //if(receive.compare("%R1P,0,0:0,4\r\n") != 0){ // if not IR and tracking
             if(receive.compare("%R1P,0,0:0,10\r\n") != 0){ // if not IR and synchrotrack
-                //switch
-                //command = "%R1Q,17019:4\r\n";
+                //switch to IR synchroTrack BAP_USER_MEASPRG 10 = IR synchroTrack
                 command = "%R1Q,17019:10\r\n";
                 if(this->executeCommand(command)){
                     receive = this->receive();
-                    //this->fineAdjusted = false;
+                    this->fineAdjusted = false;
+                    return true;
                 }
             }
-            /*if(this->getLOCKState()){
+            if(this->getLOCKState()){
                 return true;
-            }*/
+            }
         }
     }
     return false;
 }
 
 /*!
- * \brief setAdjustMode sets the adjust mode to point or angle accuracy
- * \return
- */
-/*bool LeicaTachymeter::setAdjustMode()
-{
-    if(this->sensorConfiguration.getStringParameter().contains("ATR accuracy")){
-        QString atrAcc = this->sensorConfiguration.getStringParameter().value("ATR accuracy");
-
-        QString command = "%R1Q,9030:\r\n";
-        if(this->executeCommand(command)){
-            QString receive = this->receive();
-
-
-            if(atrAcc.compare("point tolerance") == 0){//if point tolerance is selected in options
-
-                if(receive.compare("%R1P,0,0:0,0\r\n") == 0){ //if angle tolerance is active
-
-                    command = "%R1Q,9031:1\r\n";
-                    return this->executeCommand(command);
-                }
-                return true;
-
-            }else{ // if angle tolerance is selected in options
-
-                if(receive.compare("%R1P,0,0:0,1\r\n") == 0){ //if point tolerance is active
-
-                    command = "%R1Q,9031:0\r\n";
-                    return this->executeCommand(command);
-                }
-                return true;
-
-            }
-        }
-    }
-    return false;
-}*/
-
-/*!
- * \brief stopTrackingAfterMeasure stops tracking mode after measurement with ATR
- */
-/*void LeicaTachymeter::stopTrackingAfterMeasure()
-{
-    if(this->sensorConfiguration.getStringParameter().contains("stop tracking after measurement") &&
-            this->sensorConfiguration.getStringParameter().contains("ATR")){
-
-        QString atrValue = this->sensorConfiguration.getStringParameter().value("ATR");
-        QString trackValue = this->sensorConfiguration.getStringParameter().value("stop tracking after measurement");
-
-        if(atrValue.compare("atr on") == 0 && trackValue.compare("yes") == 0){
-            this->deactiveLockState();
-        }
-    }
-
-}*/
-
-/*!
  * \brief stopWatchWindowForMeasurement
  */
-/*void LeicaTachymeter::stopWatchWindowForMeasurement()
+void LeicaTachymeter::stopWatchWindowForMeasurement()
 {
     if(watchWindowOpen){
         this->stopTrackingMode();
         this->measureWatchWindow = true;
     }
-}*/
+}
 
 /*!
  * \brief restartWatchWindowAfterMeasurement
  */
-/*void LeicaTachymeter::restartWatchWindowAfterMeasurement()
+void LeicaTachymeter::restartWatchWindowAfterMeasurement()
 {
     if(measureWatchWindow){
         this->measureWatchWindow = false;
         this->readingStream(this->currentStreamFormat);
     }
-}*/
+}
 
 /*!
  * \brief getQuickMeasReading convert receive code to reading
  * \param receive
  * \return
  */
-/*QPointer<Reading> LeicaTachymeter::getQuickMeasReading(QString receive)
+QPointer<Reading> LeicaTachymeter::getQuickMeasReading(QString receive)
 {
     QStringList rc = receive.split(":"); //split at ":" to get RC
     QStringList elements = rc.at(1).split(","); // split at "," to get values
@@ -1144,40 +862,27 @@ bool LeicaTachymeter::setTargetTypeStream()
     r->setSensor(this);
 
     return r;
-}*/
+}
 
 /*!
  * \brief activateLaserPointer
  */
-/*void LeicaTachymeter::activateLaserPointer()
+void LeicaTachymeter::activateLaserPointer()
 {
     QString command = "%R1Q,1004:1\r\n";
     laserOn = true;
     this->executeCommand(command);
-}*/
+}
 
 /*!
  * \brief deactivateLaserPointer
  */
-/*void LeicaTachymeter::deactivateLaserPointer()
+void LeicaTachymeter::deactivateLaserPointer()
 {
     QString command = "%R1Q,1004:0\r\n";
     laserOn = false;
     this->executeCommand(command);
-}*/
-
-/*!
- * \brief stopTrackingMode
- */
-/*void LeicaTachymeter::stopTrackingMode()
-{
-    //stop tracking mode for fast measurements (watchwindow)
-    QString command = "%R1Q,17017:6\r\n";
-    if(executeCommand(command)){
-        QString measuredData = this->receive();
-        emit this->sensorMessage("stop tracking");
-    }
-}*/
+}
 
 /*!
  * \brief getStreamValues
@@ -1194,11 +899,9 @@ QPointer<Reading> LeicaTachymeter::getStreamValues(){
         QString command;
 
         if(value.compare("reflector") == 0){
-            //command = "%R1Q,2008:7,1\r\n";
-            command = "%R1Q,2008:1,1\r\n";
+            command = "%R1Q,2008:10,1\r\n"; // IR synchrotrack
         }else{
-            //command = "%R1Q,2008:8,1\r\n";
-            command = "%R1Q,2008:1,1\r\n";
+            command = "%R1Q,2008:6,1\r\n"; //RL fast Track
         }
 
         if(this->executeCommand(command)){
@@ -1246,6 +949,23 @@ QPointer<Reading> LeicaTachymeter::getStreamValues(){
 }
 
 /*!
+ * \brief LeicaTachymeter::checkATRStae checks if ATR is on or off
+ * \return
+ */
+bool LeicaTachymeter::checkATRStae()
+{
+    //check user defined ATR value
+    if(!this->sensorConfiguration.getStringParameter().contains("ATR")){ //only if atr is on
+        QString atr = this->sensorConfiguration.getStringParameter().value("ATR");
+        if(atr.compare("on") != 0){
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+/*!
  * \brief executeEDM for distance measurement
  * \return
  */
@@ -1264,7 +984,7 @@ bool LeicaTachymeter::executeEDM(){
             edmCommand = "%R1Q,2008:1,1\r\n";
         }else{
             //edmCommand = "%R1Q,2008:5,1\r\n";
-            edmCommand = "%R1Q,2008:1,1\r\n";
+            edmCommand = "%R1Q,2008:6,1\r\n";
         }
 
         if(this->executeCommand(edmCommand)){
@@ -1275,4 +995,194 @@ bool LeicaTachymeter::executeEDM(){
         }
     }
     return false;
+}
+
+/*!
+ * \brief getLOCKState returns the current lock state. Means, if the total station should lock and follow a prism or not. This function also activates total stations ATR mode
+ * \return
+ */
+bool LeicaTachymeter::getLOCKState()
+{
+    if(this->serial->isOpen()){
+
+        //getUserLockState
+        QString command = "%R1Q,18008:\r\n";
+
+        if(executeCommand(command)){
+            QString measureData = this->receive();
+            QStringList responseElements = measureData.split(":");
+            QStringList elements = responseElements.at(1).split(",");
+
+            //if LOCK is supported
+            if(elements.at(0).compare("0") == 0){
+                //get current state and set to specified state
+                if(this->setLOCKState(elements.at(1))){
+                    return true;
+                }
+            }else{
+                return false;
+            }
+        }
+        return false;
+    }
+    return false;
+}
+
+/*!
+ * \brief deactiveLockState deactivates lock and atr mode of the total station.
+ */
+void LeicaTachymeter::deactiveLockState()
+{
+    QString atrOn = this->sensorConfiguration.getStringParameter().value("ATR");
+
+    if(atrOn.compare("on") == 0){
+        //if ATR is on, then deactivate lock mode
+        QString command = "%R1Q,18007:0\r\n";
+        this->executeCommand(command);
+    }
+}
+
+bool LeicaTachymeter::setLOCKState(QString currentState)
+{
+    QString command = QString("%R1Q,18007:" + QString::number(currentState.toInt()) + "\r\n");
+
+    QString value = this->sensorConfiguration.getStringParameter().value("ATR");
+
+    if(value.compare("on") == 0){
+        value = "1";
+    }else{
+        value = "0";
+    }
+
+    if(QString::number(currentState.toInt()).compare(value) != 0){
+
+        //if current state is not the same as specified
+        command = "%R1Q,18007:" + value + "\r\n";
+
+        bool result = this->checkCommandRC(command);
+        if(!result){
+            return false;
+        }
+    }
+
+    //if ATR is on, then start target/prism tracking
+    if(value.compare("1") == 0){
+        return this->startTargetTracking();
+    }
+    return true;
+}
+
+bool LeicaTachymeter::startTargetTracking()
+{
+    //first set fine adjust mode
+    if(!this->setAdjustMode()){
+        return false;
+    }
+    //then do fine adjust
+    if(this->fineAdjust()){
+
+        QString command = "%R1Q,9013:\r\n";
+
+        bool result = this->checkCommandRC(command);
+        if(result){
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
+
+/*!
+ * \brief fineAdjust needs to be called before tracking can be activated.
+ * \return
+ */
+bool LeicaTachymeter::fineAdjust()
+{
+    //don´t need to call every measurement
+    //check if fineadjust was called before
+    if(this->fineAdjusted){
+        return true;
+    }
+    //call fine adjust with dH and dVZ for prism search criterias. if does not find one, turns back to initial position
+    QString command = "%R1Q,9037:0.08,0.08,0\r\n";
+
+    //execute fine adjust command
+    bool result = this->checkCommandRC(command);
+    if(result){
+        //if successful then run target tracking.
+
+        //set bool, that fine adjust was callled
+        this->fineAdjusted = true;
+
+        return true;
+    }else{
+        return false;
+   }
+}
+
+bool LeicaTachymeter::setAdjustMode()
+{
+    if(this->sensorConfiguration.getStringParameter().contains("ATR accuracy")){
+        QString atrAcc = this->sensorConfiguration.getStringParameter().value("ATR accuracy");
+
+        QString command = "%R1Q,9030:\r\n";
+        if(this->executeCommand(command)){
+            QString receive = this->receive();
+
+
+            if(atrAcc.compare("point tolerance") == 0){//if point tolerance is selected in options
+
+                if(receive.compare("%R1P,0,0:0,0\r\n") == 0){ //if angle tolerance is active
+
+                    command = "%R1Q,9031:1\r\n";
+                    return this->executeCommand(command);
+                }
+                return true;
+
+            }else{ // if angle tolerance is selected in options
+
+                if(receive.compare("%R1P,0,0:0,1\r\n") == 0){ //if point tolerance is active
+
+                    command = "%R1Q,9031:0\r\n";
+                    return this->executeCommand(command);
+                }
+                return true;
+
+            }
+        }
+    }
+    return false;
+}
+
+
+/*!
+ * \brief stopTrackingAfterMeasure stops tracking mode after measurement with ATR
+ */
+void LeicaTachymeter::stopTrackingAfterMeasure()
+{
+    if(this->sensorConfiguration.getStringParameter().contains("stop tracking after measurement") &&
+            this->sensorConfiguration.getStringParameter().contains("ATR")){
+
+        QString atrValue = this->sensorConfiguration.getStringParameter().value("ATR");
+        QString trackValue = this->sensorConfiguration.getStringParameter().value("stop tracking after measurement");
+
+        if(atrValue.compare("on") == 0 && trackValue.compare("yes") == 0){
+            this->deactiveLockState();
+        }
+    }
+
+}
+
+/*!
+ * \brief stopTrackingMode
+ */
+void LeicaTachymeter::stopTrackingMode()
+{
+    //stop tracking mode for fast measurements (watchwindow)
+    QString command = "%R1Q,17017:6\r\n";
+    if(executeCommand(command)){
+        QString measuredData = this->receive();
+    }
 }

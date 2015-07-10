@@ -60,15 +60,22 @@ protected:
 
     bool toggleSightOrientation();
 
-    //#########################
-    //Leica tachymeter specific
-    //#########################
 
-    //bool getLOCKState();
-    //void deactiveLockState();
-    //bool setLOCKState(QString currentState);
-    //bool startTargetTracking();
-    //bool fineAdjust();
+    //! check LOCK state
+    bool getLOCKState();
+
+    //! deactivate lock state
+    void deactiveLockState();
+
+    //! sets the LOCK state
+    bool setLOCKState(QString currentState);
+
+    //! starts target tracking
+    bool startTargetTracking();
+
+    //! starts the fine adjustment for ATR on prism
+    bool fineAdjust();
+
 
 private:
 
@@ -86,7 +93,6 @@ private:
     QSerialPort::FlowControl myFlowControl;
 
     QString receive();
-    //void getError(QSerialPort::SerialPortError);
     bool executeEDM();
     bool executeCommand(QString);
 
@@ -96,28 +102,33 @@ private:
 
     bool setTargetTypeMeasure();
     bool setTargetTypeStream();
-    //bool setAdjustMode();
-
-    //void stopTrackingAfterMeasure();
-
-    //bool laserOn;
-    //bool fineAdjusted;
-
-    //bool measureWatchWindow;
-    //bool watchWindowOpen;
-    //ReadingTypes currentStreamFormat;
-    //void stopWatchWindowForMeasurement();
-    //void restartWatchWindowAfterMeasurement();
 
 
-    //QPointer<Reading> getQuickMeasReading(QString receive);
+    bool setAdjustMode();
 
-    //void activateLaserPointer();
-    //void deactivateLaserPointer();
+    void stopTrackingAfterMeasure();
 
-    //void stopTrackingMode();
+    bool laserOn;
+
+    bool fineAdjusted;
+
+    bool measureWatchWindow;
+    bool watchWindowOpen;
+
+    ReadingTypes currentStreamFormat;
+    void stopWatchWindowForMeasurement();
+    void restartWatchWindowAfterMeasurement();
+
+    QPointer<Reading> getQuickMeasReading(QString receive);
+
+    void activateLaserPointer();
+    void deactivateLaserPointer();
+
+    void stopTrackingMode();
 
     QPointer<Reading> getStreamValues();
+
+    bool checkATRStae();
 
 };
 
