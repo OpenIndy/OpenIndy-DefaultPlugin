@@ -572,6 +572,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
 
     //calculate sum vv
     double sumVV = 0.0;
+    OiVec v_obs(3);
     for(int i = 0; i < numPoints; i++){
 
         QPointer<Observation> obs = inputObservations.at(i);
@@ -597,6 +598,22 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         float distance = 0.0f;
 
         distance = radiusActual - _r; //distance error
+
+        //calculate residual vector
+        v_obs.setAt(0, b[0]);
+        v_obs.setAt(1, b[1]);
+        v_obs.setAt(2, b[2]);
+        v_obs.normalize();
+        v_obs = distance * v_obs;
+
+        //set up display residuals
+        Residual residual;
+        residual.elementId = obs->getId();
+        residual.dimension = eMetric;
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_obs.getAt(3*i));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_obs.getAt(3*i+1));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_obs.getAt(3*i+2));
+        this->statistic.addDisplayResidual(residual);
 
         sumVV += distance * distance;
 

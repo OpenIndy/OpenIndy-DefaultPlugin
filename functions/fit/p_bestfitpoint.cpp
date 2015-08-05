@@ -105,6 +105,13 @@ bool BestFitPoint::setUpResult(Point &point){
         corr.add(qSqrt(v.getAt(3*i)*v.getAt(3*i)
                        + v.getAt(3*i+1)*v.getAt(3*i+1)
                        + v.getAt(3*i+2)*v.getAt(3*i+2)));
+        Residual residual;
+        residual.elementId = inputObservations[i]->getId();
+        residual.dimension = eMetric;
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v.getAt(3*i));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v.getAt(3*i+1));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v.getAt(3*i+2));
+        this->statistic.addDisplayResidual(residual);
     }
 
     //calculate standard deviation

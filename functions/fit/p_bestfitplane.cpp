@@ -96,6 +96,30 @@ bool BestFitPlane::setUpResult(Plane &plane){
     u.getCol(n, eigenIndex);
     n.normalize();
 
+    //calculate smallest distance of the plane from the origin
+    double dOrigin = n.getAt(0) * centroid.getAt(0) + n.getAt(1) * centroid.getAt(1) + n.getAt(2) * centroid.getAt(2);
+
+    //calculate display residuals for each observation
+    double distance = 0.0;
+    OiVec v_plane(3);
+    for(int i = 0; i < inputObservations.size(); i++){
+
+        //calculate residual vector
+        distance = n.getAt(0) * inputObservations[i]->getXYZ().getAt(0) + n.getAt(1) * inputObservations[i]->getXYZ().getAt(1)
+                + n.getAt(2) * inputObservations[i]->getXYZ().getAt(2) - dOrigin;
+        v_plane = distance * n;
+
+        //set up display residual
+        Residual residual;
+        residual.elementId = inputObservations[i]->getId();
+        residual.dimension = eMetric;
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_plane.getAt(0));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_plane.getAt(1));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_plane.getAt(2));
+        this->statistic.addDisplayResidual(residual);
+
+    }
+
     //check that the normal vector of the plane is defined by the first three points A, B and C (cross product)
     OiVec ab = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
     ab.removeLast();
