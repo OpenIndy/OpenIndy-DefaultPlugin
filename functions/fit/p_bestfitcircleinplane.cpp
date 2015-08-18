@@ -34,6 +34,7 @@ void BestFitCircleInPlane::init(){
  * \return
  */
 bool BestFitCircleInPlane::exec(Circle &circle){
+    this->statistic.reset();
     return this->setUpResult(circle);
 }
 
@@ -51,12 +52,13 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
     }
     QList<QPointer<Observation> > inputObservations;
     foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()){
+        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
+                && element.shouldBeUsed){
             inputObservations.append(element.observation);
-            this->setUseState(0, element.id, true);
+            this->setIsUsed(0, element.id, true);
             continue;
         }
-        this->setUseState(0, element.id, false);
+        this->setIsUsed(0, element.id, false);
     }
     if(inputObservations.size() < 3){
         emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(circle.getFeatureName()), eWarningMessage);
@@ -226,6 +228,9 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_all.getAt(0));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_all.getAt(1));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_all.getAt(2));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_all.getAt(0) * v_all.getAt(0)
+                                                                                                     + v_all.getAt(1) * v_all.getAt(1)
+                                                                                                     + v_all.getAt(2) * v_all.getAt(2)));
         this->statistic.addDisplayResidual(residual);
 
     }

@@ -33,6 +33,7 @@ void BestFitCylinder::init(){
  * \return
  */
 bool BestFitCylinder::exec(Cylinder &cylinder){
+    this->statistic.reset();
     return this->setUpResult(cylinder);
 }
 
@@ -50,12 +51,13 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     }
     QList<QPointer<Observation> > inputObservations;
     foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()){
+        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
+                && element.shouldBeUsed){
             inputObservations.append(element.observation);
-            this->setUseState(0, element.id, true);
+            this->setIsUsed(0, element.id, true);
             continue;
         }
-        this->setUseState(0, element.id, false);
+        this->setIsUsed(0, element.id, false);
     }
     if(inputObservations.size() < 5){
         emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
@@ -613,6 +615,9 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_obs.getAt(3*i));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_obs.getAt(3*i+1));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_obs.getAt(3*i+2));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
+                                                                                                     + v_obs.getAt(1) * v_obs.getAt(1)
+                                                                                                     + v_obs.getAt(2) * v_obs.getAt(2)));
         this->statistic.addDisplayResidual(residual);
 
         sumVV += distance * distance;

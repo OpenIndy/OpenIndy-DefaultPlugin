@@ -417,6 +417,9 @@ QList<QPointer<Reading> > PseudoTracker::measurePolar(const MeasurementConfig &m
     rPolar.azimuth = myAzimuth;
     rPolar.zenith = myZenith;
     rPolar.distance = myDistance;
+    rPolar.sigmaAzimuth = this->sensorConfiguration.getAccuracy().sigmaAzimuth;
+    rPolar.sigmaZenith= this->sensorConfiguration.getAccuracy().sigmaZenith;
+    rPolar.sigmaDistance = this->sensorConfiguration.getAccuracy().sigmaDistance;
     rPolar.isValid = true;
 
     this->noisyPolarReading(rPolar);

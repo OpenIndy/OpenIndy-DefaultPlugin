@@ -33,6 +33,7 @@ void BestFitPoint::init(){
  * \return
  */
 bool BestFitPoint::exec(Point &point){
+    this->statistic.reset();
     return this->setUpResult(point);
 }
 
@@ -50,12 +51,13 @@ bool BestFitPoint::setUpResult(Point &point){
     }
     QList<QPointer<Observation> > inputObservations;
     foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()){
+        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
+                && element.shouldBeUsed){
             inputObservations.append(element.observation);
-            this->setUseState(0, element.id, true);
+            this->setIsUsed(0, element.id, true);
             continue;
         }
-        this->setUseState(0, element.id, false);
+        this->setIsUsed(0, element.id, false);
     }
     if(inputObservations.size() < 1){
         emit this->sendMessage(QString("Not enough valid observations to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
@@ -111,6 +113,7 @@ bool BestFitPoint::setUpResult(Point &point){
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v.getAt(3*i));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v.getAt(3*i+1));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v.getAt(3*i+2));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), corr.getAt(i));
         this->statistic.addDisplayResidual(residual);
     }
 

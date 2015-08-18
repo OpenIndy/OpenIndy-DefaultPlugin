@@ -34,6 +34,8 @@ void BestFitSphere::init(){
  */
 bool BestFitSphere::exec(Sphere &sphere){
 
+    this->statistic.reset();
+
     //get and check input observations
     if(!this->inputElements.contains(0) || this->inputElements[0].size() < 4){
         emit this->sendMessage(QString("Not enough valid observations to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);
@@ -41,12 +43,13 @@ bool BestFitSphere::exec(Sphere &sphere){
     }
     QList<QPointer<Observation> > inputObservations;
     foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()){
+        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
+                && element.shouldBeUsed){
             inputObservations.append(element.observation);
-            this->setUseState(0, element.id, true);
+            this->setIsUsed(0, element.id, true);
             continue;
         }
-        this->setUseState(0, element.id, false);
+        this->setIsUsed(0, element.id, false);
     }
     if(inputObservations.size() < 4){
         emit this->sendMessage(QString("Not enough valid observations to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);
@@ -282,6 +285,9 @@ bool BestFitSphere::fit(Sphere &sphere, const QList<QPointer<Observation> > &inp
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_sphere.getAt(0));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_sphere.getAt(1));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_sphere.getAt(2));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_sphere.getAt(0) * v_sphere.getAt(0)
+                                                                                                     + v_sphere.getAt(1) * v_sphere.getAt(1)
+                                                                                                     + v_sphere.getAt(2) * v_sphere.getAt(2)));
         this->statistic.addDisplayResidual(residual);
 
     }
