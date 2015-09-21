@@ -612,9 +612,9 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         Residual residual;
         residual.elementId = obs->getId();
         residual.dimension = eMetric;
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_obs.getAt(3*i));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_obs.getAt(3*i+1));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_obs.getAt(3*i+2));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_obs.getAt(0));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_obs.getAt(1));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_obs.getAt(2));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
                                                                                                      + v_obs.getAt(1) * v_obs.getAt(1)
                                                                                                      + v_obs.getAt(2) * v_obs.getAt(2)));
