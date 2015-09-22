@@ -571,11 +571,13 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         x = sigma * x;
         v = sigma * v;
 
+        sigma = 2.0;
+
         numIterations++;
 
-    }while( (stopXX > 0.000000001) && (stopVV > 0.000000001) && numIterations < 100 );
+    }while( (stopXX > 0.000000001) && (stopVV > 0.000000001) && numIterations < 1000 );
 
-    if(numIterations >= 100){
+    if(numIterations >= 1000){
         return false;
     }
 
@@ -656,8 +658,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_obs.getAt(1));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_obs.getAt(2));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
-                                                                                                     + v_obs.getAt(1) * v_obs.getAt(1)
-                                                                                                     + v_obs.getAt(2) * v_obs.getAt(2)));
+                                                                                                + v_obs.getAt(2) * v_obs.getAt(2)));
         this->statistic.addDisplayResidual(residual);
 
         sumVV += distance * distance;
