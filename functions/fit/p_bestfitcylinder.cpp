@@ -366,9 +366,12 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
     OiVec res(numPoints+5); //adjustment result
     double _r = 0.0, _X0 = 0.0, _Y0 = 0.0, _alpha = 0.0, _beta = 0.0;
     double _r_armijo = 0.0, _X0_armijo = 0.0, _Y0_armijo = 0.0, _alpha_armijo = 0.0, _beta_armijo = 0.0;
-    OiVec a(5);
-    OiVec b(5);
+    //OiVec a(5);
+    //OiVec b(5);
+    OiVec a(numPoints);
+    OiVec b(numPoints);
     double _x = 0.0, _y = 0.0, _z = 0.0;
+    double _x_armijo = 0.0, _y_armijo = 0.0, _z_armijo = 0.0;
     double a1 = 0.0, a2 = 0.0;
     double diff = 0.0, _xr = 0.0, _yr = 0.0;
     double sigma = 2.0;
@@ -401,7 +404,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
 
     int numIterations = 0;
 
-    double stopAA = 0.0, stopBB = 0.0, stopXX = 0.0;
+    double stopAA = 0.0, stopBB = 0.0, stopXX = 0.0, stopVV = 0.0;
     do{
 
         //improve unknowns
@@ -501,7 +504,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         }
 
         //apply Armijo rule which is useful in case of bad approximations
-        do{
+        /*do{
 
             sigma = sigma / 2.0;
 
@@ -528,12 +531,49 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
 
         }while( stopAA > ( stopBB - 2.0 * 0.001 * sigma * stopBB ) );
 
+        x = sigma * x;*/
+
+
+        do{
+
+            sigma = sigma / 2.0;
+
+            _r_armijo = _r + sigma * x.getAt(0);
+            _X0_armijo = _X0 + sigma * x.getAt(1);
+            _Y0_armijo = _Y0 + sigma * x.getAt(2);
+            _alpha_armijo = _alpha + sigma * x.getAt(3);
+            _beta_armijo = _beta + sigma * x.getAt(4);
+
+            for(int i = 0; i < numPoints; i++){
+                _x = L0.getAt(i*3);
+                _y = L0.getAt(i*3+1);
+                _z = L0.getAt(i*3+2);
+
+                _x_armijo = L0.getAt(i*3) + sigma * v.getAt(i*3);
+                _y_armijo = L0.getAt(i*3+1) + sigma * v.getAt(i*3+1);
+                _z_armijo = L0.getAt(i*3+2) + sigma * v.getAt(i*3+2);
+
+                a.setAt(i, _r_armijo - qSqrt( (_X0_armijo + _x_armijo*qCos(_beta_armijo) + _y_armijo*qSin(_alpha_armijo)*qSin(_beta_armijo) + _z_armijo*qCos(_alpha_armijo)*qSin(_beta_armijo))*(_X0_armijo + _x_armijo*qCos(_beta_armijo) + _y_armijo*qSin(_alpha_armijo)*qSin(_beta_armijo) + _z_armijo*qCos(_alpha_armijo)*qSin(_beta_armijo))
+                                       + (_Y0_armijo + _y_armijo*qCos(_alpha_armijo) - _z_armijo*qSin(_alpha_armijo))*(_Y0_armijo + _y_armijo*qCos(_alpha_armijo) - _z_armijo*qSin(_alpha_armijo)) ));
+
+                b.setAt(i, _r - qSqrt( (_X0 + _x*qCos(_beta) + _y*qSin(_alpha)*qSin(_beta) + _z*qCos(_alpha)*qSin(_beta))*(_X0 + _x*qCos(_beta) + _y*qSin(_alpha)*qSin(_beta) + _z*qCos(_alpha)*qSin(_beta))
+                                               + (_Y0 + _y*qCos(_alpha) - _z*qSin(_alpha))*(_Y0 + _y*qCos(_alpha) - _z*qSin(_alpha)) ));
+            }
+
+            OiVec::dot(stopAA, a, a);
+            OiVec::dot(stopBB, b, b);
+
+        }while( stopAA > stopBB );
+
+        OiVec::dot(stopXX, x, x);
+        OiVec::dot(stopVV, v, v);
+
         x = sigma * x;
+        v = sigma * v;
 
         numIterations++;
-        OiVec::dot(stopXX, x, x);
 
-    }while( (stopXX > 0.000000001) && numIterations < 100 );
+    }while( (stopXX > 0.000000001) && (stopVV > 0.000000001) && numIterations < 100 );
 
     if(numIterations >= 100){
         return false;
