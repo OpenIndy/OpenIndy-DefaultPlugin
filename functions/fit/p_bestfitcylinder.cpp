@@ -33,6 +33,7 @@ void BestFitCylinder::init(){
  * \return
  */
 bool BestFitCylinder::exec(Cylinder &cylinder){
+    this->statistic.reset();
     return this->setUpResult(cylinder);
 }
 
@@ -50,12 +51,13 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     }
     QList<QPointer<Observation> > inputObservations;
     foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()){
+        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
+                && element.shouldBeUsed){
             inputObservations.append(element.observation);
-            this->setUseState(0, element.id, true);
+            this->setIsUsed(0, element.id, true);
             continue;
         }
-        this->setUseState(0, element.id, false);
+        this->setIsUsed(0, element.id, false);
     }
     if(inputObservations.size() < 5){
         emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
@@ -364,9 +366,12 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
     OiVec res(numPoints+5); //adjustment result
     double _r = 0.0, _X0 = 0.0, _Y0 = 0.0, _alpha = 0.0, _beta = 0.0;
     double _r_armijo = 0.0, _X0_armijo = 0.0, _Y0_armijo = 0.0, _alpha_armijo = 0.0, _beta_armijo = 0.0;
-    OiVec a(5);
-    OiVec b(5);
+    //OiVec a(5);
+    //OiVec b(5);
+    OiVec a(numPoints);
+    OiVec b(numPoints);
     double _x = 0.0, _y = 0.0, _z = 0.0;
+    double _x_armijo = 0.0, _y_armijo = 0.0, _z_armijo = 0.0;
     double a1 = 0.0, a2 = 0.0;
     double diff = 0.0, _xr = 0.0, _yr = 0.0;
     double sigma = 2.0;
@@ -399,7 +404,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
 
     int numIterations = 0;
 
-    double stopAA = 0.0, stopBB = 0.0, stopXX = 0.0;
+    double stopAA = 0.0, stopBB = 0.0, stopXX = 0.0, stopVV = 0.0;
     do{
 
         //improve unknowns
@@ -499,7 +504,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         }
 
         //apply Armijo rule which is useful in case of bad approximations
-        do{
+        /*do{
 
             sigma = sigma / 2.0;
 
@@ -526,14 +531,53 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
 
         }while( stopAA > ( stopBB - 2.0 * 0.001 * sigma * stopBB ) );
 
+        x = sigma * x;*/
+
+
+        do{
+
+            sigma = sigma / 2.0;
+
+            _r_armijo = _r + sigma * x.getAt(0);
+            _X0_armijo = _X0 + sigma * x.getAt(1);
+            _Y0_armijo = _Y0 + sigma * x.getAt(2);
+            _alpha_armijo = _alpha + sigma * x.getAt(3);
+            _beta_armijo = _beta + sigma * x.getAt(4);
+
+            for(int i = 0; i < numPoints; i++){
+                _x = L0.getAt(i*3);
+                _y = L0.getAt(i*3+1);
+                _z = L0.getAt(i*3+2);
+
+                _x_armijo = L0.getAt(i*3) + sigma * v.getAt(i*3);
+                _y_armijo = L0.getAt(i*3+1) + sigma * v.getAt(i*3+1);
+                _z_armijo = L0.getAt(i*3+2) + sigma * v.getAt(i*3+2);
+
+                a.setAt(i, _r_armijo - qSqrt( (_X0_armijo + _x_armijo*qCos(_beta_armijo) + _y_armijo*qSin(_alpha_armijo)*qSin(_beta_armijo) + _z_armijo*qCos(_alpha_armijo)*qSin(_beta_armijo))*(_X0_armijo + _x_armijo*qCos(_beta_armijo) + _y_armijo*qSin(_alpha_armijo)*qSin(_beta_armijo) + _z_armijo*qCos(_alpha_armijo)*qSin(_beta_armijo))
+                                       + (_Y0_armijo + _y_armijo*qCos(_alpha_armijo) - _z_armijo*qSin(_alpha_armijo))*(_Y0_armijo + _y_armijo*qCos(_alpha_armijo) - _z_armijo*qSin(_alpha_armijo)) ));
+
+                b.setAt(i, _r - qSqrt( (_X0 + _x*qCos(_beta) + _y*qSin(_alpha)*qSin(_beta) + _z*qCos(_alpha)*qSin(_beta))*(_X0 + _x*qCos(_beta) + _y*qSin(_alpha)*qSin(_beta) + _z*qCos(_alpha)*qSin(_beta))
+                                               + (_Y0 + _y*qCos(_alpha) - _z*qSin(_alpha))*(_Y0 + _y*qCos(_alpha) - _z*qSin(_alpha)) ));
+            }
+
+            OiVec::dot(stopAA, a, a);
+            OiVec::dot(stopBB, b, b);
+
+        }while( stopAA > stopBB );
+
+        OiVec::dot(stopXX, x, x);
+        OiVec::dot(stopVV, v, v);
+
         x = sigma * x;
+        v = sigma * v;
+
+        sigma = 2.0;
 
         numIterations++;
-        OiVec::dot(stopXX, x, x);
 
-    }while( (stopXX > 0.000000001) && numIterations < 100 );
+    }while( (stopXX > 0.000000001) && (stopVV > 0.000000001) && numIterations < 1000 );
 
-    if(numIterations >= 100){
+    if(numIterations >= 1000){
         return false;
     }
 
@@ -572,6 +616,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
 
     //calculate sum vv
     double sumVV = 0.0;
+    OiVec v_obs(3);
     for(int i = 0; i < numPoints; i++){
 
         QPointer<Observation> obs = inputObservations.at(i);
@@ -597,6 +642,24 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         float distance = 0.0f;
 
         distance = radiusActual - _r; //distance error
+
+        //calculate residual vector
+        v_obs.setAt(0, b[0]);
+        v_obs.setAt(1, b[1]);
+        v_obs.setAt(2, b[2]);
+        v_obs.normalize();
+        v_obs = distance * v_obs;
+
+        //set up display residuals
+        Residual residual;
+        residual.elementId = obs->getId();
+        residual.dimension = eMetric;
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_obs.getAt(0));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_obs.getAt(1));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_obs.getAt(2));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
+                                                                                                + v_obs.getAt(2) * v_obs.getAt(2)));
+        this->statistic.addDisplayResidual(residual);
 
         sumVV += distance * distance;
 

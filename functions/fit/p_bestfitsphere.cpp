@@ -34,6 +34,8 @@ void BestFitSphere::init(){
  */
 bool BestFitSphere::exec(Sphere &sphere){
 
+    this->statistic.reset();
+
     //get and check input observations
     if(!this->inputElements.contains(0) || this->inputElements[0].size() < 4){
         emit this->sendMessage(QString("Not enough valid observations to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);
@@ -41,12 +43,13 @@ bool BestFitSphere::exec(Sphere &sphere){
     }
     QList<QPointer<Observation> > inputObservations;
     foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()){
+        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
+                && element.shouldBeUsed){
             inputObservations.append(element.observation);
-            this->setUseState(0, element.id, true);
+            this->setIsUsed(0, element.id, true);
             continue;
         }
-        this->setUseState(0, element.id, false);
+        this->setIsUsed(0, element.id, false);
     }
     if(inputObservations.size() < 4){
         emit this->sendMessage(QString("Not enough valid observations to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);
@@ -266,6 +269,29 @@ bool BestFitSphere::fit(Sphere &sphere, const QList<QPointer<Observation> > &inp
     radius.setRadius(r);
     sphere.setSphere(position, radius);
 
+    //calculate display residuals for each observation
+    OiVec v_sphere(3);
+    for(int i = 0; i < inputObservations.size(); i++){
+
+        //calculate residual vector
+        v_sphere.setAt(0, verb.getAt(3*i));
+        v_sphere.setAt(1, verb.getAt(3*i+1));
+        v_sphere.setAt(2, verb.getAt(3*i+2));
+
+        //set up display residual
+        Residual residual;
+        residual.elementId = inputObservations[i]->getId();
+        residual.dimension = eMetric;
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_sphere.getAt(0));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_sphere.getAt(1));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_sphere.getAt(2));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_sphere.getAt(0) * v_sphere.getAt(0)
+                                                                                                  + v_sphere.getAt(2) * v_sphere.getAt(2)));
+        this->statistic.addDisplayResidual(residual);
+
+    }
+
+    //calculate standard deviation
     double stdv = 0.0;
     if(verb.getSize() > 12){
         double sum_vv = 0.0;
@@ -276,14 +302,11 @@ bool BestFitSphere::fit(Sphere &sphere, const QList<QPointer<Observation> > &inp
     }else{
         stdv = 0.0;
     }
-    Statistic myStats;
-    myStats.setS0APriori(1.0);
-    myStats.setS0APosteriori(stdv);
-    myStats.setStdev(stdv);
-    myStats.setIsValid(true);
 
-    sphere.setStatistic(myStats);
-    this->statistic = myStats;
+    //set statistic
+    this->statistic.setIsValid(true);
+    this->statistic.setStdev(stdv);
+    sphere.setStatistic(this->statistic);
 
     return true;
 

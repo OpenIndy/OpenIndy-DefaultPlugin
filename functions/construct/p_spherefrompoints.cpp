@@ -51,9 +51,9 @@ bool SphereFromPoints::setUpResult(Sphere &sphere){
     foreach(const InputElement &element, this->inputElements[0]){
         if(!element.point.isNull() && element.point->getIsSolved()){
             inputPoints.append(element.point);
-            this->setUseState(0, element.id, true);
+            this->setIsUsed(0, element.id, true);
         }
-        this->setUseState(0, element.id, false);
+        this->setIsUsed(0, element.id, false);
     }
     if(inputPoints.size() < 4){
         emit this->sendMessage(QString("Not enough valid points to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);

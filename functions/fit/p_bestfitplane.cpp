@@ -33,6 +33,7 @@ void BestFitPlane::init(){
  * \return
  */
 bool BestFitPlane::exec(Plane &plane){
+    this->statistic.reset();
     return this->setUpResult(plane);
 }
 
@@ -50,12 +51,13 @@ bool BestFitPlane::setUpResult(Plane &plane){
     }
     QList<QPointer<Observation> > inputObservations;
     foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()){
+        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
+                && element.shouldBeUsed){
             inputObservations.append(element.observation);
-            this->setUseState(0, element.id, true);
+            this->setIsUsed(0, element.id, true);
             continue;
         }
-        this->setUseState(0, element.id, false);
+        this->setIsUsed(0, element.id, false);
     }
     if(inputObservations.size() < 3){
         emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(plane.getFeatureName()), eWarningMessage);
@@ -95,6 +97,31 @@ bool BestFitPlane::setUpResult(Plane &plane){
     OiVec n(3);
     u.getCol(n, eigenIndex);
     n.normalize();
+
+    //calculate smallest distance of the plane from the origin
+    double dOrigin = n.getAt(0) * centroid.getAt(0) + n.getAt(1) * centroid.getAt(1) + n.getAt(2) * centroid.getAt(2);
+
+    //calculate display residuals for each observation
+    double distance = 0.0;
+    OiVec v_plane(3);
+    for(int i = 0; i < inputObservations.size(); i++){
+
+        //calculate residual vector
+        distance = n.getAt(0) * inputObservations[i]->getXYZ().getAt(0) + n.getAt(1) * inputObservations[i]->getXYZ().getAt(1)
+                + n.getAt(2) * inputObservations[i]->getXYZ().getAt(2) - dOrigin;
+        v_plane = distance * n;
+
+        //set up display residual
+        Residual residual;
+        residual.elementId = inputObservations[i]->getId();
+        residual.dimension = eMetric;
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_plane.getAt(0));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_plane.getAt(1));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_plane.getAt(2));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), distance);
+        this->statistic.addDisplayResidual(residual);
+
+    }
 
     //check that the normal vector of the plane is defined by the first three points A, B and C (cross product)
     OiVec ab = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();

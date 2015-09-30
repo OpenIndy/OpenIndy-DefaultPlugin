@@ -30,6 +30,7 @@ void BestFitLine::init(){
  * \return
  */
 bool BestFitLine::exec(Line &line){
+    this->statistic.reset();
     return this->setUpResult(line);
 }
 
@@ -47,12 +48,13 @@ bool BestFitLine::setUpResult(Line &line){
     }
     QList<QPointer<Observation> > inputObservations;
     foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()){
+        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
+                && element.shouldBeUsed){
             inputObservations.append(element.observation);
-            this->setUseState(0, element.id, true);
+            this->setIsUsed(0, element.id, true);
             continue;
         }
-        this->setUseState(0, element.id, false);
+        this->setIsUsed(0, element.id, false);
     }
     if(inputObservations.size() < 2){
         emit this->sendMessage(QString("Not enough valid observations to fit the line %1").arg(line.getFeatureName()), eWarningMessage);
@@ -108,6 +110,37 @@ bool BestFitLine::setUpResult(Line &line){
     angle = qAbs(qAcos(angle));
     if(angle > (PI/2.0)){
         r = r * -1.0;
+    }
+
+    //calculate display residuals for each observation
+    double distance = 0.0;
+    OiVec v_line(3);
+    for(int i = 0; i < inputObservations.size(); i++){
+
+        //calculate perpendicular
+        v_line.setAt(0, inputObservations[i]->getXYZ().getAt(0) - centroid.getAt(0));
+        v_line.setAt(1, inputObservations[i]->getXYZ().getAt(1) - centroid.getAt(1));
+        v_line.setAt(2, inputObservations[i]->getXYZ().getAt(2) - centroid.getAt(2));
+        OiVec::dot(distance, r, v_line);
+        v_line = centroid + distance * r;
+
+        //calculate residual vector
+        v_line.setAt(0, inputObservations[i]->getXYZ().getAt(0) - v_line.getAt(0));
+        v_line.setAt(1, inputObservations[i]->getXYZ().getAt(1) - v_line.getAt(1));
+        v_line.setAt(2, inputObservations[i]->getXYZ().getAt(2) - v_line.getAt(2));
+
+        //set up display residual
+        Residual residual;
+        residual.elementId = inputObservations[i]->getId();
+        residual.dimension = eMetric;
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_line.getAt(0));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_line.getAt(1));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_line.getAt(2));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_line.getAt(0) * v_line.getAt(0)
+                                                                                                     + v_line.getAt(1) * v_line.getAt(1)
+                                                                                                     + v_line.getAt(2) * v_line.getAt(2)));
+        this->statistic.addDisplayResidual(residual);
+
     }
 
     //set result

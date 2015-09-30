@@ -34,6 +34,7 @@ void BestFitCircleInPlane::init(){
  * \return
  */
 bool BestFitCircleInPlane::exec(Circle &circle){
+    this->statistic.reset();
     return this->setUpResult(circle);
 }
 
@@ -51,12 +52,13 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
     }
     QList<QPointer<Observation> > inputObservations;
     foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()){
+        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
+                && element.shouldBeUsed){
             inputObservations.append(element.observation);
-            this->setUseState(0, element.id, true);
+            this->setIsUsed(0, element.id, true);
             continue;
         }
-        this->setUseState(0, element.id, false);
+        this->setIsUsed(0, element.id, false);
     }
     if(inputObservations.size() < 3){
         emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(circle.getFeatureName()), eWarningMessage);
@@ -193,7 +195,45 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
     }
 
     //transform center into 3D space
-    xm = t.inv() * xm;
+    OiMat t_inv = t.inv();
+    xm = t_inv * xm;
+
+    //calculate 3D residuals for each observation
+    OiVec v_circle(3);
+    OiVec v_plane(3);
+    OiVec v_all(3);
+    double distance = 0.0;
+    for(int i = 0; i < centroidReducedCoordinates.size(); i++){
+
+        //calculate residual vector of 2D circle fit
+        v_circle.setAt(0, centroidReducedCoordinates.at(i).getAt(0) + centroid2D.getAt(0) - xm.getAt(0));
+        v_circle.setAt(1, centroidReducedCoordinates.at(i).getAt(1) + centroid2D.getAt(1) - xm.getAt(1));
+        v_circle.setAt(2, 0.0);
+        v_circle.normalize();
+        v_circle = circleDistances.getAt(i) * v_circle;
+        v_circle = t_inv * v_circle;
+
+        //calculate residual vector of plane fit
+        distance = n.getAt(0) * inputObservations[i]->getXYZ().getAt(0) + n.getAt(1) * inputObservations[i]->getXYZ().getAt(1)
+                + n.getAt(2) * inputObservations[i]->getXYZ().getAt(2) - dOrigin;
+        v_plane = distance * n;
+
+        //calculate the at all residual vector
+        v_all = v_circle + v_plane;
+
+        //set up display residual
+        Residual residual;
+        residual.elementId = inputObservations[i]->getId();
+        residual.dimension = eMetric;
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_all.getAt(0));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_all.getAt(1));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_all.getAt(2));
+        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_all.getAt(0) * v_all.getAt(0)
+                                                                                                     + v_all.getAt(1) * v_all.getAt(1)
+                                                                                                     + v_all.getAt(2) * v_all.getAt(2)));
+        this->statistic.addDisplayResidual(residual);
+
+    }
 
     //set result
     Position circlePosition;
