@@ -130,6 +130,8 @@ private:
 
     bool checkATRStae();
 
+    bool setSearchArea(double dHZ, double dV);
+
 };
 
 #endif // P_LEICATACHYMETER_H

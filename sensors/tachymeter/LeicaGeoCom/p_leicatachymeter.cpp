@@ -124,6 +124,10 @@ bool LeicaTachymeter::connectSensor(){
                 && this->serial->setParity(this->sensorConfiguration.getConnectionConfig().parity)
                 && this->serial->setFlowControl(this->sensorConfiguration.getConnectionConfig().flowControl)
                 && this->serial->setStopBits(this->sensorConfiguration.getConnectionConfig().stopBits) ){
+
+            //set search area for totalstation
+            this->setSearchArea(0.0,0.0);
+
             return true;
         }
     }
@@ -302,7 +306,7 @@ QList<QPointer<Reading> > LeicaTachymeter::measure(const MeasurementConfig &mCon
  * \return
  */
 QVariantMap LeicaTachymeter::readingStream(const ReadingTypes &streamFormat){
-
+/*
     this->currentStreamFormat = streamFormat;
 
     this->watchWindowOpen = true;
@@ -356,6 +360,9 @@ QVariantMap LeicaTachymeter::readingStream(const ReadingTypes &streamFormat){
     this->lastReading.first = streamFormat;
     this->lastReading.second = reading;
 
+    return m;
+    */
+    QVariantMap m;
     return m;
 }
 
@@ -417,8 +424,11 @@ QList<QPointer<Reading> > LeicaTachymeter::measurePolar(const MeasurementConfig 
 
     if( this->serial->isOpen()){
 
+        //number of iterations for the measurement
         for(int i=0;i<mConfig.getIterations();i++){
+
             for(int k = 0; k<faceCount;k++){
+
                 if (this->executeEDM()){
 
                     Reading *r;
@@ -961,6 +971,28 @@ bool LeicaTachymeter::checkATRStae()
             return false;
         }
         return true;
+    }
+    return false;
+}
+
+/*!
+ * \brief LeicaTachymeter::setSearchArea
+ * \param dHZ
+ * \param dV
+ * \return
+ */
+bool LeicaTachymeter::setSearchArea(double dHZ, double dV)
+{
+    QString command = "";
+    //Set up command for search area with horizontal and vertical search area
+    command = "%R1Q,9041:" + QString::number(dHZ) + "," + QString::number(dV) + "\r\n";
+    qDebug() << "search area command: " << command;
+
+    if(this->executeCommand(command)){
+        QString receive = this->receive();
+        if(receive.compare("%R1P,0,0:0\r\n") == 0){
+            return true;
+        }
     }
     return false;
 }
