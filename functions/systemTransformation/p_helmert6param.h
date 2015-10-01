@@ -53,7 +53,7 @@ private:
     OiVec approxRotation();
     OiVec approxTranslation(OiVec rot);
 
-    void applyMovements(TrafoParam &tp);
+    bool applyMovements(TrafoParam &tp);
 
     OiMat getRotationMatrix(OiVec rot);
     OiVec getRotationAngles(OiMat r);

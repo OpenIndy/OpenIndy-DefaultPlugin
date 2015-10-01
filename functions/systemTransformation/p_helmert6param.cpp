@@ -43,37 +43,39 @@ bool Helmert6Param::exec(TrafoParam &trafoParam)
    this->svdError = false;
 
     this->initPoints(); //fills the locSystem and refSystem vectors based on the given common points.
-    if(locSystem.count() == refSystem.count() && locSystem.count() > 1){ //if enough common points available
+    if(locSystem.count() == refSystem.count() && locSystem.count() > 2){ //if enough common points available
 
         //apply movement if necessary
+        if(this->applyMovements(trafoParam)){
 
-        this->applyMovements(trafoParam);
+            //get rotation and translation
+            this->rotation = this->approxRotation();
+            this->translation =  this->approxTranslation(this->rotation);
 
-        //get rotation and translation
-        this->rotation = this->approxRotation();
-        this->translation =  this->approxTranslation(this->rotation);
+            if(locSystem.count() > 2){
 
-        if(locSystem.count() > 2){
+                //adjust rotation and translation if more than 2 points are available
+                return this->adjust(trafoParam);
 
-            //adjust rotation and translation if more than 2 points are available
-            return this->adjust(trafoParam);
+            }else if(locSystem.count() == 3){
 
-        }else if(locSystem.count() == 3){
+                //fill trafo parameter
+                OiVec scale(4);
+                scale.setAt(0,1.0);
+                scale.setAt(1,1.0);
+                scale.setAt(2,1.0);
+                scale.setAt(3,1.0);
 
-            //fill trafo parameter
-            OiVec scale(4);
-            scale.setAt(0,1.0);
-            scale.setAt(1,1.0);
-            scale.setAt(2,1.0);
-            scale.setAt(3,1.0);
+                OiMat s = this->getScaleMatrix(scale);
+                OiMat t = this->getTranslationMatrix(this->translation);
+                OiMat r = this->getRotationMatrix(this->rotation);
 
-            OiMat s = this->getScaleMatrix(scale);
-            OiMat t = this->getTranslationMatrix(this->translation);
-            OiMat r = this->getRotationMatrix(this->rotation);
-
-            trafoParam.setTransformationParameters(r, t, s);
-            return true;
+                trafoParam.setTransformationParameters(r, t, s);
+                return true;
+            }
         }
+
+        return false;
 
     }else{
         this->sendMessage("Not enough common points!", eWarningMessage);
@@ -279,6 +281,7 @@ bool Helmert6Param::adjust(TrafoParam &tp)
     double sumVV = 0.0;
 
     for (int i = 0;i<this->locSystem.size();i++) {
+
         OiVec diffVec = this->refSystem.at(i)-this->locSystem.at(i);
         sumVV += diffVec.getAt(0)*diffVec.getAt(0);
         sumVV += diffVec.getAt(1)*diffVec.getAt(1);
@@ -461,11 +464,18 @@ void Helmert6Param::preliminaryTransformation()
     OiMat rot = this->getRotationMatrix(this->rotation);
 
     QList<OiVec> tmpLoc;
+
+    QList<OiVec> tmpRef;
+
     for(int i=0; i<this->locSystem.size();i++){
         //get vector point i
         OiVec tmp = this->locSystem.at(i);
-        tmp.setAt(3,1.0);
+        tmp.add(1.0);
 
+        //also expand nominal vector
+        OiVec tmpRefPoint = this->refSystem.at(i);
+        tmpRefPoint.add(1.0);
+        tmpRef.append(tmpRefPoint);
 
         //rotate the point
         OiVec rt = rot*tmp;
@@ -476,6 +486,7 @@ void Helmert6Param::preliminaryTransformation()
         tmpLoc.append(tmptrafo);
     }
     this->locSystem = tmpLoc;
+    this->refSystem = tmpRef;
 }
 
 /*!
@@ -549,7 +560,7 @@ OiVec Helmert6Param::approxTranslation(OiVec rot)
  * yet. So you need to go the inverse way.
  * \param tp
  */
-void Helmert6Param::applyMovements(TrafoParam &tp)
+bool Helmert6Param::applyMovements(TrafoParam &tp)
 {
     QString use = "";
 
@@ -596,8 +607,16 @@ void Helmert6Param::applyMovements(TrafoParam &tp)
             }
             this->protocol.append("reference points were expanded with inverse of");
             this->protocol.append(" movement transformation to get correct translation values.");
+
+            return true;
         }
+
+        //return false, if no movement was found
+        return false;
     }
+
+    //if no apply movements return true
+    return true;
 }
 
 /*!

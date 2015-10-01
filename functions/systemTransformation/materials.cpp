@@ -19,7 +19,7 @@ QString Materials::sReinforcedConcrete = "reinforced concrete";
 /*!
  * \brief expansion coefficients in meter unit.
  */
-double Materials::dSteel = 0.000016;
+double Materials::dSteel = 0.00001139;
 double Materials::dAluminum = 0.000024;
 double Materials::dPlumb = 0.000030;
 double Materials::dIron = 0.000012;
