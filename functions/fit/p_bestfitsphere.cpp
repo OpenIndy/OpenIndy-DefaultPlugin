@@ -286,8 +286,7 @@ bool BestFitSphere::fit(Sphere &sphere, const QList<QPointer<Observation> > &inp
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_sphere.getAt(1));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_sphere.getAt(2));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_sphere.getAt(0) * v_sphere.getAt(0)
-                                                                                                     + v_sphere.getAt(1) * v_sphere.getAt(1)
-                                                                                                     + v_sphere.getAt(2) * v_sphere.getAt(2)));
+                                                                                                  + v_sphere.getAt(2) * v_sphere.getAt(2)));
         this->statistic.addDisplayResidual(residual);
 
     }

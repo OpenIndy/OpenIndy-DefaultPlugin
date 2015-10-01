@@ -14,6 +14,15 @@
 
 using namespace oi;
 
+class CylinderApproximation{
+public:
+    double approxRadius;
+    double approxXm;
+    double approxYm;
+    double approxAlpha;
+    double approxBeta;
+};
+
 /*!
  * \brief The BestFitCylinder class
  */
@@ -46,7 +55,7 @@ private:
     bool setUpResult(Cylinder &cylinder);
 
     bool approximateCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations);
-    bool fitCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations);
+    bool fitCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, const CylinderApproximation &approximation);
 
     double getCorrespondingCos(double a);
     double getCorrespondingSin(double a);
@@ -56,11 +65,7 @@ private:
     //approximated cylinder parameters
     //################################
 
-    double approxRadius;
-    double approxXm;
-    double approxYm;
-    double approxAlpha;
-    double approxBeta;
+    QList<CylinderApproximation> approximations;
 
 };
 
