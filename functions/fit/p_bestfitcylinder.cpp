@@ -71,10 +71,26 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     }
 
     //fit the cylinder using the previously generated approximations
-    if(!this->fitCylinder(cylinder, inputObservations)){
+    int bestSolution = -1;
+    double stdev = numeric_limits<double>::max();
+    for(int i = 0; i < this->approximations.size(); i++){
+        bool success = this->fitCylinder(cylinder, inputObservations, this->approximations[i]);
+        if(success && cylinder.getStatistic().getStdev() < stdev){
+            bestSolution = i;
+            stdev = cylinder.getStatistic().getStdev();
+        }
+    }
+    if(bestSolution < 0){
         emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
         return false;
     }
+    this->fitCylinder(cylinder, inputObservations, this->approximations[bestSolution]);
+
+
+    /*if(!this->fitCylinder(cylinder, inputObservations)){
+        emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
+        return false;
+    }*/
 
     //check that the direction vector is defined by the first two observations
     OiVec pos1 = inputObservations.at(0)->getXYZ();
@@ -103,6 +119,9 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
  * \return
  */
 bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations){
+
+    //clear current approximations
+    this->approximations.clear();
 
     //get the number of observations
     int numPoints = inputObservations.size();
@@ -321,24 +340,16 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
         OiVec::dot(sum_vv, v,v);
         sum_vv = qSqrt(sum_vv / (numPoints-3.0));
 
-        //if this solution is better than the best solution found before
-        if(sum_vv < vv_ref){
-            alpha_n = alpha;
-            beta_n = beta;
-            x_m_n = -1.0 * x_m;
-            y_m_n = -1.0 * y_m;
-            radius_n = radius;
-            vv_ref = sum_vv;
-        }
+        //add approximation
+        CylinderApproximation approximation;
+        approximation.approxAlpha = alpha;
+        approximation.approxBeta = beta;
+        approximation.approxXm = -1.0 * x_m;
+        approximation.approxYm = -1.0 * y_m;
+        approximation.approxRadius = radius;
+        this->approximations.append(approximation);
 
     }
-
-    //save the cylinder's parameters (approximation)
-    this->approxRadius = radius_n;
-    this->approxXm = x_m_n;
-    this->approxYm = y_m_n;
-    this->approxAlpha = alpha_n;
-    this->approxBeta = beta_n;
 
     return true;
 
@@ -348,9 +359,10 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
  * \brief BestFitCylinder::fitCylinder
  * \param cylinder
  * \param inputObservations
+ * \param approximation
  * \return
  */
-bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations){
+bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, const CylinderApproximation &approximation){
 
     //get the number of observations
     int numPoints = inputObservations.size();
@@ -380,11 +392,11 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
     OiMat Rall(3, 3);
 
     //set approximations of unknowns
-    _r = this->approxRadius;
-    _X0 = this->approxXm;
-    _Y0 = this->approxYm;
-    _alpha = this->approxAlpha;
-    _beta = this->approxBeta;
+    _r = approximation.approxRadius;
+    _X0 = approximation.approxXm;
+    _Y0 = approximation.approxYm;
+    _alpha = approximation.approxAlpha;
+    _beta = approximation.approxBeta;
     OiVec x(5); //vector of unknown corrections
 
     //fill L vector
@@ -534,6 +546,8 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         x = sigma * x;*/
 
 
+
+
         do{
 
             sigma = sigma / 2.0;
@@ -575,7 +589,10 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
 
         numIterations++;
 
-    }while( (stopXX > 0.000000001) && (stopVV > 0.000000001) && numIterations < 1000 );
+    //}while( (stopXX > 0.000000001) && (stopVV > 0.000000001) && numIterations < 1000 );
+    //}while( (stopXX > 0.00000000001) && (stopVV > 0.00000000001) && numIterations < 1000 );
+    //}while( ((stopXX > 0.00000000001) || (stopVV > 0.00000000001)) && numIterations < 1000 );
+    }while( ((stopXX > 0.0000000000001) || (stopVV > 0.00000000001)) && numIterations < 1000 );
 
     if(numIterations >= 1000){
         return false;
