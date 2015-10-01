@@ -116,13 +116,10 @@ void Helmert6Param::initPoints(){
 
         for(int i = 0; i < this->inputPointsStartSystem.size(); i++){
 
-            this->locSystem.append(this->inputPointsStartSystem.at(i).getPosition().getVector());
-            this->refSystem.append(this->inputPointsDestinationSystem.at(i).getPosition().getVector());
-
+            this->locSystem.append(this->inputPointsStartSystem.at(i).getPosition().getVectorH());
+            this->refSystem.append(this->inputPointsDestinationSystem.at(i).getPosition().getVectorH());
         }
-
     }
-
 }
 
 /*!
@@ -465,17 +462,9 @@ void Helmert6Param::preliminaryTransformation()
 
     QList<OiVec> tmpLoc;
 
-    QList<OiVec> tmpRef;
-
     for(int i=0; i<this->locSystem.size();i++){
         //get vector point i
         OiVec tmp = this->locSystem.at(i);
-        tmp.add(1.0);
-
-        //also expand nominal vector
-        OiVec tmpRefPoint = this->refSystem.at(i);
-        tmpRefPoint.add(1.0);
-        tmpRef.append(tmpRefPoint);
 
         //rotate the point
         OiVec rt = rot*tmp;
@@ -486,7 +475,6 @@ void Helmert6Param::preliminaryTransformation()
         tmpLoc.append(tmptrafo);
     }
     this->locSystem = tmpLoc;
-    this->refSystem = tmpRef;
 }
 
 /*!

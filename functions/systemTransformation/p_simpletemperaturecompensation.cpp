@@ -36,6 +36,7 @@ void SimpleTemperatureCompensation::init(){
  * \return
  */
 bool SimpleTemperatureCompensation::exec(TrafoParam &trafoParam){
+
     this->calcExpansion(trafoParam);
 
     //set protocol

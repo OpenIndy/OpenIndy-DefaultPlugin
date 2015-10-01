@@ -60,7 +60,6 @@ bool ExtendedTemperatureCompensation::exec(TrafoParam &trafoParam){
         emit this->sendMessage("Not enough points to calculate transformation parameters", eWarningMessage);
         return false;
     }
-
 }
 
 /*!
@@ -215,13 +214,10 @@ void ExtendedTemperatureCompensation::initPoints(){
 
         for(int i = 0; i < this->inputPointsStartSystem.size(); i++){
 
-            this->locSystem.append(this->inputPointsStartSystem.at(i).getPosition().getVector());
-            this->refSystem.append(this->inputPointsDestinationSystem.at(i).getPosition().getVector());
-
+            this->locSystem.append(this->inputPointsStartSystem.at(i).getPosition().getVectorH());
+            this->refSystem.append(this->inputPointsDestinationSystem.at(i).getPosition().getVectorH());
         }
-
     }
-
 }
 
 /*!
@@ -323,6 +319,7 @@ OiVec ExtendedTemperatureCompensation::approxScale(OiVec rot)
 
     //rotate the reference system to local system
     for(int i=0; i<this->refSystem.size(); i++){
+
         OiVec tmpRef = rotMat*this->refSystem.at(i);
         tmpRefList.append(tmpRef);
     }
