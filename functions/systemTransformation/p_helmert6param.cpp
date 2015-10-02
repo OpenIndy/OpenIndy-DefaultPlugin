@@ -40,7 +40,7 @@ void Helmert6Param::init(){
  */
 bool Helmert6Param::exec(TrafoParam &trafoParam)
 {
-   this->svdError = false;
+    this->svdError = false;
 
     this->initPoints(); //fills the locSystem and refSystem vectors based on the given common points.
     if(locSystem.count() == refSystem.count() && locSystem.count() > 2){ //if enough common points available
