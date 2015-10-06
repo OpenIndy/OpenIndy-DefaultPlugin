@@ -619,7 +619,7 @@ QString LeicaTachymeter::receive(){
 
     //receive response
     QByteArray responseData = this->serial->readAll();
-    while (this->serial->waitForReadyRead(100))
+    while (this->serial->waitForReadyRead(1000))
         responseData += this->serial->readAll();
 
     //parse and return response
@@ -640,9 +640,18 @@ bool LeicaTachymeter::executeCommand(QString command){
     this->serial->write(data, data.length());
 
     if(this->serial->waitForBytesWritten(10000)){
+
         if(this->serial->waitForReadyRead(10000)){
             return true;
+        }else{
+            QString test = this->receive();
+            qDebug() << test;
+            qDebug() << this->serial->errorString();
         }
+    }else{
+        QString test = this->receive();
+        qDebug() << test;
+        qDebug() << this->serial->errorString();
     }
 
     return false;
@@ -729,19 +738,20 @@ bool LeicaTachymeter::setTargetTypeMeasure()
 
             if(measureMode.compare("precise") == 0){
 
-                if(receive.compare("%R1P,0,0:0,11\r\n") != 0){ // if not IR and precise
+                if(!receive.contains("%R1P,0,0:0,11\r\n")){ // if not IR and precise
 
                     //switch to IR precise BAP_USER_MEASPRG 11 = IR precise
                     command = "%R1Q,17019:11\r\n"; //IR precise
                     if(this->executeCommand(command)){
                         receive = this->receive();
-                        this->fineAdjusted = false;
+                        this->fineAdjust();
+                        //this->fineAdjusted = false;
                         //return true;
                     }
                 }
             }else if(measureMode.compare("fast") == 0){
 
-                if(receive.compare("&R1P,0,0:0,1\r\n") != 0){
+                if(!receive.contains("%R1P,0,0:0,1\r\n")){
 
                     //switch to IR fast. BAP_USER_MEASPRG 1 = IR fast
                     command = "%R1Q,17019:1\r\n"; //IR fast
@@ -1046,13 +1056,16 @@ bool LeicaTachymeter::getLOCKState()
             QStringList elements = responseElements.at(1).split(",");
 
             //if LOCK is supported
-            if(elements.at(0).compare("0") == 0){
+            if(measureData.contains("%R1P,0,0:0,1")){
                 //get current state and set to specified state
-                if(this->setLOCKState(elements.at(1))){
+                if(this->setLOCKState(QString::number(1))){
                     return true;
                 }
-            }else{
-                return false;
+            }else if(measureData.contains("%R1P,0,0:0,0")){
+                if(this->setLOCKState(QString::number(0))){
+                    return true;
+                }
+                //return false;
             }
         }
         return false;
@@ -1076,7 +1089,7 @@ void LeicaTachymeter::deactiveLockState()
 
 bool LeicaTachymeter::setLOCKState(QString currentState)
 {
-    QString command = QString("%R1Q,18007:" + QString::number(currentState.toInt()) + "\r\n");
+    QString command = QString("%R1Q,18007:" + currentState + "\r\n");
 
     QString value = this->sensorConfiguration.getStringParameter().value("ATR");
 
@@ -1086,7 +1099,7 @@ bool LeicaTachymeter::setLOCKState(QString currentState)
         value = "0";
     }
 
-    if(QString::number(currentState.toInt()).compare(value) != 0){
+    if(currentState.compare(value) != 0){
 
         //if current state is not the same as specified
         command = "%R1Q,18007:" + value + "\r\n";
