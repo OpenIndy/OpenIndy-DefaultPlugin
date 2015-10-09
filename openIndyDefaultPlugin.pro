@@ -111,6 +111,21 @@ DEPENDPATH += -L$$PWD/lib/OpenIndy-Core/lib/OpenIndy-Math/bin/debug
 INCLUDEPATH += -L$$PWD/lib/OpenIndy-Core/lib/OpenIndy-Math/bin/release
 DEPENDPATH += -L$$PWD/lib/OpenIndy-Core/lib/OpenIndy-Math/bin/release
 
+#----------------------
+# OpenIndy-TachyControl
+#----------------------
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/lib/OpenIndy-TachyControl/bin/release/ -lTachyControl
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/lib/OpenIndy-TachyControl/bin/debug/ -lTachyControl
+else:unix:CONFIG(release, debug|release): LIBS += -L$$PWD/lib/OpenIndy-TachyControl/bin/release/ -lTachyControl
+else:unix:CONFIG(debug, debug|release): LIBS += -L$$PWD/lib/OpenIndy-TachyControl/bin/debug/ -lTachyControl
+
+INCLUDEPATH += -L$$PWD/lib/OpenIndy-TachyControl/bin/debug
+DEPENDPATH += -L$$PWD/lib/OpenIndy-TachyControl/bin/debug
+
+INCLUDEPATH += -L$$PWD/lib/OpenIndy-TachyControl/bin/release
+DEPENDPATH += -L$$PWD/lib/OpenIndy-TachyControl/bin/release
+
 INCLUDEPATH += $$PWD
 
 INCLUDEPATH += $$PWD/sensors/laserTracker/pseudoTracker
@@ -139,6 +154,7 @@ INCLUDEPATH += $$PWD/lib/OpenIndy-Core/include/plugin/sensor
 INCLUDEPATH += $$PWD/lib/OpenIndy-Core/include/plugin/simulation
 INCLUDEPATH += $$PWD/lib/OpenIndy-Core/include/plugin/tool
 INCLUDEPATH += $$PWD/lib/OpenIndy-Core/lib/OpenIndy-Math/include
+INCLUDEPATH += $$PWD/lib/OpenIndy-TachyControl/include
 
 SOURCES += \
     functions/construct/p_intersectlineplane.cpp \
