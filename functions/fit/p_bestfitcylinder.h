@@ -7,6 +7,7 @@
 #include <string>
 #include <limits>
 #include <math.h>
+#include <random>
 
 #include "fitfunction.h"
 #include "oivec.h"
@@ -66,6 +67,11 @@ private:
     //################################
 
     QList<CylinderApproximation> approximations;
+
+    //neuneuneu
+    bool test(Cylinder &cylinder);
+    bool approxTest(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations);
+    bool fitTest(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, const CylinderApproximation &approximation);
 
 };
 
