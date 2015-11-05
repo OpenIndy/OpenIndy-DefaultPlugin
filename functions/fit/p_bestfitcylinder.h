@@ -22,6 +22,7 @@ public:
     double approxYm;
     double approxAlpha;
     double approxBeta;
+    double stdev;
 };
 
 /*!
