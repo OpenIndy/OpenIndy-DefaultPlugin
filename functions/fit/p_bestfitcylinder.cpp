@@ -71,7 +71,7 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     }
     centroid = centroid / (double)inputObservations.size();
 
-    //cylculate centroid reduced observations
+    //calculate centroid reduced observations
     QList<QPointer<Observation> > reducedInputObservations;
     foreach(const QPointer<Observation> &obs, inputObservations){
         Observation *rObs = new Observation(*obs.data());
@@ -92,13 +92,14 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
 
         if(approximations[i].stdev < stdev){
             bestSolution = i;
+            stdev = stdev;
         }
 
-        /*bool success = this->fitCylinder(cylinder, reducedInputObservations, this->approximations[i]);
+        bool success = this->fitCylinder(cylinder, reducedInputObservations, this->approximations[i]);
         if(success && cylinder.getStatistic().getStdev() < stdev){
             bestSolution = i;
             stdev = cylinder.getStatistic().getStdev();
-        }*/
+        }
     }
     if(bestSolution < 0){
         emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
@@ -125,9 +126,19 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     Rall = Rbeta * Ralpha;
     Rall.setAt(3,3,1.0);
 
+    OiVec tmp;
     foreach(const QPointer<Observation> &obs, reducedInputObservations){
-        obs->setXYZ(Rall * obs->getXYZ());
+        tmp = Rall * obs->getXYZ();
+        tmp.setAt(3, 1.0);
+        obs->setXYZ(tmp);
     }
+
+/*
+    //approximate cylinder by 2D circle fit
+    if(!this->approximateCylinder(cylinder, reducedInputObservations)){
+        emit this->sendMessage(QString("Error while generating approximations for cylinder parameters of cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
+        return false;
+    }*/
 
     approximations[bestSolution].approxAlpha = 0.0;
     approximations[bestSolution].approxBeta = 0.0;
@@ -135,7 +146,9 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
 
 
 
-    this->fitCylinder(cylinder, reducedInputObservations, this->approximations[bestSolution]);
+    if(!this->fitCylinder(cylinder, reducedInputObservations, this->approximations[bestSolution])){
+        return false;
+    }
 
 
     /*if(!this->fitCylinder(cylinder, inputObservations)){
@@ -143,28 +156,37 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
         return false;
     }*/
 
-    //shift cylinder position by centroid
+    //transform cylinder position (centroid + rotation)
     Position cylinderPosition = cylinder.getPosition();
-    cylinderPosition.setVector(cylinderPosition.getVectorH() + centroid);
+    OiVec pos = (Rall.inv() * cylinderPosition.getVectorH()) + centroid;
+    pos.setAt(3, 1.0);
+    cylinderPosition.setVector(pos);
+
+    //transform cylinder axis (centroid + rotation)
+    Direction cylinderAxis = cylinder.getDirection();
+    OiVec axis = (Rall.inv() * cylinderAxis.getVectorH());
+    axis.removeLast();
+    axis.normalize();
+    cylinderAxis.setVector(axis);
 
     //check that the direction vector is defined by the first two observations
-    OiVec pos1 = reducedInputObservations.at(0)->getXYZ();
+    OiVec pos1 = inputObservations.at(0)->getXYZ();
     pos1.removeLast();
-    OiVec pos2 = reducedInputObservations.at(1)->getXYZ();
+    OiVec pos2 = inputObservations.at(1)->getXYZ();
     pos2.removeLast();
     OiVec direction = pos2 - pos1;
     direction.normalize();
     double angle = 0.0; //angle between r and direction
-    OiVec::dot(angle, cylinder.getDirection().getVector(), direction);
+    OiVec::dot(angle, axis, direction);
     angle = qAbs(qAcos(angle));
     if(angle > (PI/2.0)){
         Direction cylinderDirection = cylinder.getDirection();
-        cylinderDirection.setVector(Rall.inv() * cylinder.getDirection().getVectorH() * -1.0);
-        cylinder.setCylinder(cylinder.getPosition(), cylinderDirection, cylinder.getRadius());
+        cylinderDirection.setVector(axis * -1.0);
+        cylinder.setCylinder(cylinderPosition, cylinderDirection, cylinder.getRadius());
     }else{
         Direction cylinderDirection = cylinder.getDirection();
-        cylinderDirection.setVector(Rall.inv() * cylinder.getDirection().getVectorH());
-        cylinder.setCylinder(cylinderPosition, cylinder.getDirection(), cylinder.getRadius());
+        cylinderDirection.setVector(axis);
+        cylinder.setCylinder(cylinderPosition, cylinderDirection, cylinder.getRadius());
     }
 
     return true;
@@ -399,50 +421,6 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
         OiVec::dot(sum_vv, v,v);
         sum_vv = qSqrt(sum_vv / (numPoints-3.0));
 
-        //calculate point on cylinder axis
-        OiVec xyz(3);
-        xyz.setAt(0, -1.0 * x_m);
-        xyz.setAt(1, -1.0 * y_m);
-        xyz.setAt(2, 0.0);
-        OiMat::solve(xyz, Rall, -1.0 * xyz);
-
-        //calculate cylinder axis
-        OiVec axis(3);
-        axis.setAt(2, 1.0);
-        OiMat::solve(axis, Rall, axis);
-
-        //calculate sum vv
-        double sumVV = 0.0;
-        for(int j = 0; j < numPoints; j++){
-
-            QPointer<Observation> obs = inputObservations.at(j);
-
-            double _x = obs->getXYZ().getAt(0);
-            double _y = obs->getXYZ().getAt(1);
-            double _z = obs->getXYZ().getAt(2);
-
-            float b[3]; //vector between point on cylinder axis and point p which is probably on cylinder
-            b[0] = _x - xyz.getAt(0);
-            b[1] = _y - xyz.getAt(1);
-            b[2] = _z - xyz.getAt(2);
-
-            float n0CrossB[3]; //cross product of cylinder axis (length 1) and b
-            n0CrossB[0] = axis.getAt(1) * b[2] - axis.getAt(2) * b[1];
-            n0CrossB[1] = axis.getAt(2) * b[0] - axis.getAt(0) * b[2];
-            n0CrossB[2] = axis.getAt(0) * b[1] - axis.getAt(1) * b[0];
-
-            float radiusActual = 0.0f; //smallest distance of point p to cylinder axis
-
-            radiusActual = qSqrt( n0CrossB[0]*n0CrossB[0] + n0CrossB[1]*n0CrossB[1] + n0CrossB[2]*n0CrossB[2] );
-
-            float distance = 0.0f;
-
-            distance = radiusActual - radius; //distance error
-
-            sumVV += distance * distance;
-
-        }
-
         //add approximation
         CylinderApproximation approximation;
         approximation.approxAlpha = alpha;
@@ -450,7 +428,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
         approximation.approxXm = -1.0 * x_m;
         approximation.approxYm = -1.0 * y_m;
         approximation.approxRadius = radius;
-        approximation.stdev = sumVV;
+        approximation.stdev = sum_vv;
         this->approximations.append(approximation);
 
     }
@@ -596,50 +574,6 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
     OiVec::dot(sum_vv, v,v);
     sum_vv = qSqrt(sum_vv / (numPoints-3.0));
 
-    //calculate point on cylinder axis
-    OiVec xyz(3);
-    xyz.setAt(0, -1.0 * x_m);
-    xyz.setAt(1, -1.0 * y_m);
-    xyz.setAt(2, 0.0);
-    OiMat::solve(xyz, Rall, -1.0 * xyz);
-
-    //calculate cylinder axis
-    OiVec axis(3);
-    axis.setAt(2, 1.0);
-    OiMat::solve(axis, Rall, axis);
-
-    //calculate sum vv
-    double sumVV = 0.0;
-    for(int i = 0; i < numPoints; i++){
-
-        QPointer<Observation> obs = inputObservations.at(i);
-
-        double _x = obs->getXYZ().getAt(0);
-        double _y = obs->getXYZ().getAt(1);
-        double _z = obs->getXYZ().getAt(2);
-
-        float b[3]; //vector between point on cylinder axis and point p which is probably on cylinder
-        b[0] = _x - xyz.getAt(0);
-        b[1] = _y - xyz.getAt(1);
-        b[2] = _z - xyz.getAt(2);
-
-        float n0CrossB[3]; //cross product of cylinder axis (length 1) and b
-        n0CrossB[0] = axis.getAt(1) * b[2] - axis.getAt(2) * b[1];
-        n0CrossB[1] = axis.getAt(2) * b[0] - axis.getAt(0) * b[2];
-        n0CrossB[2] = axis.getAt(0) * b[1] - axis.getAt(1) * b[0];
-
-        float radiusActual = 0.0f; //smallest distance of point p to cylinder axis
-
-        radiusActual = qSqrt( n0CrossB[0]*n0CrossB[0] + n0CrossB[1]*n0CrossB[1] + n0CrossB[2]*n0CrossB[2] );
-
-        float distance = 0.0f;
-
-        distance = radiusActual - radius; //distance error
-
-        sumVV += distance * distance;
-
-    }
-
     //add approximation
     CylinderApproximation approximation;
     approximation.approxAlpha = alpha;
@@ -647,7 +581,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
     approximation.approxXm = -1.0 * x_m;
     approximation.approxYm = -1.0 * y_m;
     approximation.approxRadius = radius;
-    approximation.stdev = sumVV;
+    approximation.stdev = sum_vv;
     this->approximations.append(approximation);
 
     return true;
