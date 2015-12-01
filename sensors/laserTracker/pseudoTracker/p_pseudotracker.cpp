@@ -60,15 +60,16 @@ void PseudoTracker::init(){
     this->selfDefinedActions.append("echo");
 
     //set default accuracy
-    this->defaultAccuracy.insert("sigmaAzimuth",0.000001570);
-    this->defaultAccuracy.insert("sigmaZenith",0.000001570);
-    this->defaultAccuracy.insert("sigmaDistance",0.000025);
-    this->defaultAccuracy.insert("sigmaX",0.000025);
-    this->defaultAccuracy.insert("sigmaY",0.000025);
-    this->defaultAccuracy.insert("sigmaZ",0.000025);
-    this->defaultAccuracy.insert("sigmaTempDeg", 0.5);
-    this->defaultAccuracy.insert("sigmaAngleXZ", 0.000001570);
-    this->defaultAccuracy.insert("sigmaAngleYZ", 0.000001570);
+    this->defaultAccuracy.sigmaAzimuth = 0.000001570;
+    this->defaultAccuracy.sigmaZenith = 0.000001570;
+    this->defaultAccuracy.sigmaDistance = 0.000025;
+    this->defaultAccuracy.sigmaXyz.setAt(0, 0.000025);
+    this->defaultAccuracy.sigmaXyz.setAt(1, 0.000025);
+    this->defaultAccuracy.sigmaXyz.setAt(2, 0.000025);
+    this->defaultAccuracy.sigmaTemp = 0.5;
+    this->defaultAccuracy.sigmaRX = 0.000001570;
+    this->defaultAccuracy.sigmaRY = 0.000001570;
+    this->defaultAccuracy.sigmaRZ = 0.000001570;
 
     //general tracker inits
     this->myAzimuth = 0.00001;

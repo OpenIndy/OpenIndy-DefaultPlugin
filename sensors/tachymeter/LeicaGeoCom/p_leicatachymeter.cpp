@@ -48,9 +48,16 @@ void LeicaTachymeter::init(){
     this->selfDefinedActions.append("laserPointer"); //turn on/off laser pointer
 
     //set default accuracy
-    this->defaultAccuracy.insert("sigmaAzimuth",0.000001570);
-    this->defaultAccuracy.insert("sigmaZenith",0.000001570);
-    this->defaultAccuracy.insert("sigmaDistance",0.001);
+    this->defaultAccuracy.sigmaAzimuth = 0.000001570;
+    this->defaultAccuracy.sigmaZenith = 0.000001570;
+    this->defaultAccuracy.sigmaDistance = 0.001;
+    this->defaultAccuracy.sigmaXyz.setAt(0, 0.001);
+    this->defaultAccuracy.sigmaXyz.setAt(1, 0.001);
+    this->defaultAccuracy.sigmaXyz.setAt(2, 0.001);
+    this->defaultAccuracy.sigmaTemp = 0.5;
+    this->defaultAccuracy.sigmaRX = 0.00001570;
+    this->defaultAccuracy.sigmaRY = 0.00001570;
+    this->defaultAccuracy.sigmaRZ = 0.00001570;
 
     //general tachy inits
     this->serial = new QSerialPort();
