@@ -5,6 +5,8 @@
  */
 void PseudoTracker::init(){
 
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
+
     //set plugin meta data
     this->metaData.name = "PseudoTracker";
     this->metaData.pluginName = "OpenIndy Default Plugin";
@@ -89,6 +91,9 @@ void PseudoTracker::init(){
  * \return
  */
 bool PseudoTracker::doSelfDefinedAction(const QString &action){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
+
     if(action == "echo"){
         emit this->sensorMessage(action, eInformationMessage, eMessageBoxMessage);
     }
@@ -99,6 +104,8 @@ bool PseudoTracker::doSelfDefinedAction(const QString &action){
  * \brief PseudoTracker::abortAction
  */
 bool PseudoTracker::abortAction(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     //abort action
     return false;
 }
@@ -108,6 +115,8 @@ bool PseudoTracker::abortAction(){
  * \return
  */
 bool PseudoTracker::connectSensor(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     this->isConnected = true;
     QThread::msleep(1000);
     return true;
@@ -118,6 +127,8 @@ bool PseudoTracker::connectSensor(){
  * \return
  */
 bool PseudoTracker::disconnectSensor(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     this->isConnected = false;
     QThread::msleep(1000);
     return true;
@@ -128,6 +139,8 @@ bool PseudoTracker::disconnectSensor(){
  * \return
  */
 bool PseudoTracker::initialize(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     this->myInit = true;
     QThread::msleep(1000);
     return true;
@@ -142,6 +155,8 @@ bool PseudoTracker::initialize(){
  * \return
  */
 bool PseudoTracker::move(const double &azimuth, const double &zenith, const double &distance, const bool &isRelative){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     this->myAzimuth = azimuth;
     this->myZenith = zenith;
     this->myDistance = distance;
@@ -157,6 +172,8 @@ bool PseudoTracker::move(const double &azimuth, const double &zenith, const doub
  * \return
  */
 bool PseudoTracker::move(const double &x, const double &y, const double &z){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     this->myAzimuth = qAtan2(y,x);
     this->myDistance = qSqrt(x*x+y*y+z*z);
     this->myZenith = acos(z/myDistance);
@@ -169,6 +186,8 @@ bool PseudoTracker::move(const double &x, const double &y, const double &z){
  * \return
  */
 bool PseudoTracker::home(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     QThread::msleep(1000);
     return true;
 }
@@ -178,6 +197,8 @@ bool PseudoTracker::home(){
  * \return
  */
 bool PseudoTracker::changeMotorState(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     if(this->myMotor){
         this->myMotor = false;
     }else{
@@ -192,6 +213,8 @@ bool PseudoTracker::changeMotorState(){
  * \return
  */
 bool PseudoTracker::toggleSightOrientation(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     if(this->side = 1){
         this->side = 2;
     }else{
@@ -206,6 +229,8 @@ bool PseudoTracker::toggleSightOrientation(){
  * \return
  */
 bool PseudoTracker::compensation() {
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     QThread::msleep(5000);
     this->myCompIt = true;
     return true;
@@ -217,6 +242,8 @@ bool PseudoTracker::compensation() {
  * \return
  */
 QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfig){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
 
     QList<QPointer<Reading> > readings;
 
@@ -262,6 +289,8 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
  */
 QVariantMap PseudoTracker::readingStream(const ReadingTypes &streamFormat){
 
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
+
     double x = 0.0;
     double y = 0.0;
     double z = 0.0;
@@ -271,7 +300,7 @@ QVariantMap PseudoTracker::readingStream(const ReadingTypes &streamFormat){
 
     QVariantMap m;
 
-    QPointer<Reading> r;
+    QPointer<Reading> r(NULL);
 
     switch (streamFormat) {
     case ePolarReading:{
@@ -351,6 +380,11 @@ QVariantMap PseudoTracker::readingStream(const ReadingTypes &streamFormat){
         delete this->lastReading.second;
     }
 
+    //check reading
+    if(r.isNull()){
+        return m;
+    }
+
     this->lastReading.first = r->getTypeOfReading();
     this->lastReading.second = r;
 
@@ -365,6 +399,8 @@ QVariantMap PseudoTracker::readingStream(const ReadingTypes &streamFormat){
  * \return
  */
 bool PseudoTracker::getConnectionState(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     return isConnected;
 }
 
@@ -373,6 +409,8 @@ bool PseudoTracker::getConnectionState(){
  * \return
  */
 bool PseudoTracker::getIsReadyForMeasurement(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     return true;
 }
 
@@ -381,6 +419,8 @@ bool PseudoTracker::getIsReadyForMeasurement(){
  * \return
  */
 QMap<QString, QString> PseudoTracker::getSensorStatus(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     QMap<QString, QString> stats;
 
     stats.insert("connected",QString::number(isConnected));
@@ -402,6 +442,8 @@ QMap<QString, QString> PseudoTracker::getSensorStatus(){
  * \return
  */
 bool PseudoTracker::getIsBusy(){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
     return false;
 }
 
@@ -411,6 +453,8 @@ bool PseudoTracker::getIsBusy(){
  * \return
  */
 QList<QPointer<Reading> > PseudoTracker::measurePolar(const MeasurementConfig &mConfig){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
 
     QList<QPointer<Reading> > readings;
 
@@ -428,7 +472,6 @@ QList<QPointer<Reading> > PseudoTracker::measurePolar(const MeasurementConfig &m
     QPointer<Reading> p = new Reading(rPolar);
 
     p->setSensorFace(eFrontSide);
-    p->setSensor(this);
     p->setMeasuredAt(QDateTime::currentDateTime());
 
     QThread::msleep(1000);
@@ -446,6 +489,8 @@ QList<QPointer<Reading> > PseudoTracker::measurePolar(const MeasurementConfig &m
  */
 QList<QPointer<Reading> > PseudoTracker::measureDistance(const MeasurementConfig &mConfig){
 
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
+
     QList<QPointer<Reading> > readings;
 
     ReadingDistance rDistance;
@@ -457,7 +502,6 @@ QList<QPointer<Reading> > PseudoTracker::measureDistance(const MeasurementConfig
     QPointer<Reading> p = new Reading(rDistance);
 
     p->setSensorFace(eFrontSide);
-    p->setSensor(this);
     p->setMeasuredAt(QDateTime::currentDateTime());
 
     QThread::msleep(1000);
@@ -475,6 +519,8 @@ QList<QPointer<Reading> > PseudoTracker::measureDistance(const MeasurementConfig
  */
 QList<QPointer<Reading> > PseudoTracker::measureDirection(const MeasurementConfig &mConfig){
 
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
+
     QList<QPointer<Reading> > readings;
 
     ReadingDirection rDirection;
@@ -489,7 +535,6 @@ QList<QPointer<Reading> > PseudoTracker::measureDirection(const MeasurementConfi
     QPointer<Reading> p = new Reading(rDirection);
 
     p->setSensorFace(eFrontSide);
-    p->setSensor(this);
     p->setMeasuredAt(QDateTime::currentDateTime());
 
     QThread::msleep(1000);
@@ -506,6 +551,8 @@ QList<QPointer<Reading> > PseudoTracker::measureDirection(const MeasurementConfi
  * \return
  */
 QList<QPointer<Reading> > PseudoTracker::measureCartesian(const MeasurementConfig &mConfig){
+
+    qDebug() << Q_FUNC_INFO << QThread::currentThreadId();
 
     QList<QPointer<Reading> > readings;
 
@@ -524,7 +571,6 @@ QList<QPointer<Reading> > PseudoTracker::measureCartesian(const MeasurementConfi
     QPointer<Reading> p = new Reading(rCartesian);
 
     p->setSensorFace(eFrontSide);
-    p->setSensor(this);
     p->setMeasuredAt(QDateTime::currentDateTime());
 
     QThread::msleep(1000);

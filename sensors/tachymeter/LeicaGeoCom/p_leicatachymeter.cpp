@@ -60,7 +60,7 @@ void LeicaTachymeter::init(){
     this->defaultAccuracy.sigmaRZ = 0.00001570;
 
     //general tachy inits
-    this->serial = new QSerialPort();
+
     //this->laserOn = false;
     //this->fineAdjusted = false;
     //this->watchWindowOpen = false;
@@ -138,6 +138,11 @@ bool LeicaTachymeter::abortAction(){
  */
 bool LeicaTachymeter::connectSensor(){
 
+    //init serial port
+    if(this->serial.isNull()){
+        this->serial = new QSerialPort();
+    }
+
     //set fineAdjusted to false
     //this->fineAdjusted = false;
 
@@ -164,8 +169,15 @@ bool LeicaTachymeter::connectSensor(){
  * \return
  */
 bool LeicaTachymeter::disconnectSensor(){
+
+    //check serial port
+    if(this->serial.isNull()){
+        return false;
+    }
+
     if(this->serial->isOpen()){
         this->serial->close();
+        this->serial->deleteLater();
     }
     return true;
 }
@@ -669,7 +681,6 @@ QList<QPointer<Reading> > LeicaTachymeter::measurePolar(const MeasurementConfig 
 
                         r = new Reading(rPolar);
                         r->setSensorFace(this->getCurrentFace(rPolar.zenith));
-                        r->setSensor(this);
                         r->setMeasuredAt(QDateTime::currentDateTime());
                         readings.append(r);
 
@@ -725,8 +736,6 @@ QList<QPointer<Reading> > LeicaTachymeter::measureDistance(const MeasurementConf
 
                         QPointer<Reading> reading = new Reading(rDistance);
                         reading->setSensorFace(this->getCurrentFace(zenith));
-
-                        reading->setSensor(this);
                         reading->setMeasuredAt(QDateTime::currentDateTime());
                         readings.append(reading);
 
@@ -789,7 +798,6 @@ QList<QPointer<Reading> > LeicaTachymeter::measureDirection(const MeasurementCon
 
                     QPointer<Reading> r = new Reading(rDirection);
                     r->setSensorFace(this->getCurrentFace(rDirection.zenith));
-                    r->setSensor(this);
                     r->setMeasuredAt(QDateTime::currentDateTime());
                     readings.append(r);
 
@@ -1238,8 +1246,6 @@ QPointer<Reading> LeicaTachymeter::getStreamValues(){
 
                     reading = new Reading(rPolar);
                     reading->setSensorFace(this->getCurrentFace(rPolar.zenith));
-
-                    reading->setSensor(this);
                     reading->setMeasuredAt(QDateTime::currentDateTime());
 
                     return reading;
