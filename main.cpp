@@ -21,6 +21,7 @@ int main(int argc, char *argv[]){
     Sensor *s2 = new Sensor();
 
     Sensor *s3 = new PseudoTracker();
+    s3->init();
 
     qDebug() << "check";
 

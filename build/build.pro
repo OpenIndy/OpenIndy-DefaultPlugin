@@ -9,6 +9,7 @@ QT       += core gui widgets serialport xml
 TARGET = $$qtLibraryTarget(p_defaultPlugin)
 
 TEMPLATE = lib
+#TEMPLATE = app
 
 CONFIG += plugin
 CONFIG += c++11
