@@ -11,14 +11,11 @@ OpenIndy-DefaultPlugin is developed with the Qt framework (Qt libs + Qt Creator 
 Dependencies
 ------------
 
-- [OpenIndy-Core](https://github.com/OpenIndy/OpenIndy-Core)
 - [Qt](http://qt-project.org)
 
 Build
 -----
 
-The easiest way to build OpenIndy-DefaultPlugin is to use the Qt Creator. You can build OpenIndy-DefaultPlugin in `debug` or `release` mode.  
-
-First you need to compile the [OpenIndy-Core](https://github.com/OpenIndy/OpenIndy-Core) library.
-Afterwards you can compile OpenIndy-DefaultPlugin using the same compiler as for the [OpenIndy-Core](https://github.com/OpenIndy/OpenIndy-Core) project.
-
+The easiest way to build OpenIndy-DefaultPlugin is to use the [Qt Creator](http://www.qt.io/download/). You can build OpenIndy in `debug` or `release` mode.
+We recommend the msvc 2013 compiler (to get it simply install visual studio express).
+In the project settings in Qt-Creator add an additional make step -> make install.
