@@ -13,6 +13,8 @@
 
 #include "totalstation.h"
 
+#include "tachycontrol.h"
+
 using namespace oi;
 
 /*!
