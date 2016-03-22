@@ -733,17 +733,21 @@ bool SimplePolarMeasurement::distortionBySensor(Reading *r)
     e00.add(0.0);
     e00.add(0.0);
 
-    OiVec xAxis;
-    xAxis.add(1);
-    xAxis.add(0);
-    xAxis.add(0);
+    OiVec xAxis(3);
+    xAxis.setAt(0, 1.0);
+
+    OiVec yAxis(3);
+    yAxis.setAt(1, 1.0);
+
+    OiVec zAxis(3);
+    zAxis.setAt(2, 1.0);
 
 
-    OiMat Rz_Azimuth = OiMat::getRotationMatrix(az,Rotation::Z_AXIS);
-    OiMat Rx_alpha = OiMat::getRotationMatrix(alpha,Rotation::X_AXIS);
-    OiMat Ry_zenith = OiMat::getRotationMatrix(ze-(M_PI/2.0),Rotation::Y_AXIS);
-    OiMat Rx_minusAlpha = OiMat::getRotationMatrix(-1.0*alpha,Rotation::X_AXIS);
-    OiMat Rz_gamma = OiMat::getRotationMatrix(gamma,Rotation::Z_AXIS);
+    OiMat Rz_Azimuth = OiMat::getRotationMatrix(az, zAxis);
+    OiMat Rx_alpha = OiMat::getRotationMatrix(alpha, xAxis);
+    OiMat Ry_zenith = OiMat::getRotationMatrix(ze-(M_PI/2.0), yAxis);
+    OiMat Rx_minusAlpha = OiMat::getRotationMatrix(-1.0*alpha, xAxis);
+    OiMat Rz_gamma = OiMat::getRotationMatrix(gamma, zAxis);
 
 
     OiVec b(3);
