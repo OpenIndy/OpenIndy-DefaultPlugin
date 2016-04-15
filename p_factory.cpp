@@ -61,12 +61,12 @@ QList<QPointer<Function> > OiTemplatePlugin::createFunctions(){
 }
 
 /*!
- * \brief OiTemplatePlugin::createNetworkAdjustments
+ * \brief OiTemplatePlugin::createBundleAdjustments
  * Returns a list with all network adjustments
  * \return
  */
-QList<QPointer<NetworkAdjustment> > OiTemplatePlugin::createNetworkAdjustments(){
-    QList<QPointer<NetworkAdjustment> > resultSet;
+QList<QPointer<BundleAdjustment> > OiTemplatePlugin::createBundleAdjustments(){
+    QList<QPointer<BundleAdjustment> > resultSet;
     return resultSet;
 }
 
@@ -188,13 +188,13 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
 }
 
 /*!
- * \brief OiTemplatePlugin::createNetworkAdjustment
+ * \brief OiTemplatePlugin::createBundleAdjustment
  * Returns the network adjustment with the specified name
  * \param name
  * \return
  */
-QPointer<NetworkAdjustment> OiTemplatePlugin::createNetworkAdjustment(const QString &name){
-    QPointer<NetworkAdjustment> result(NULL);
+QPointer<BundleAdjustment> OiTemplatePlugin::createBundleAdjustment(const QString &name){
+    QPointer<BundleAdjustment> result(NULL);
     return result;
 }
 
