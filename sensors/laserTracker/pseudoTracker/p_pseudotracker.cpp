@@ -67,9 +67,9 @@ void PseudoTracker::init(){
     this->defaultAccuracy.sigmaXyz.setAt(1, 0.000025);
     this->defaultAccuracy.sigmaXyz.setAt(2, 0.000025);
     this->defaultAccuracy.sigmaTemp = 0.5;
-    this->defaultAccuracy.sigmaRX = 0.000001570;
-    this->defaultAccuracy.sigmaRY = 0.000001570;
-    this->defaultAccuracy.sigmaRZ = 0.000001570;
+    this->defaultAccuracy.sigmaI = 0.000001570;
+    this->defaultAccuracy.sigmaJ = 0.000001570;
+    this->defaultAccuracy.sigmaK = 0.000001570;
 
     //general tracker inits
     this->myAzimuth = 0.00001;
