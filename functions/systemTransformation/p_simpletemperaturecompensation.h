@@ -12,17 +12,15 @@ using namespace oi;
  * By giving it a reference temperature, a actual temperature and a material it will calculate the compensation values.
  * They are equal for x, y and z component.
  */
-class SimpleTemperatureCompensation : public SystemTransformation
+class SimpleTemperatureCompensation : QObject
 {
     Q_OBJECT
 
 public:
 
-    //##############################
-    //function initialization method
-    //##############################
+    SimpleTemperatureCompensation(double act, double ref, QString material);
 
-    void init();
+    double calcScaleFromTemperature();
 
 protected:
 
@@ -30,19 +28,11 @@ protected:
     //exec methods
     //############
 
-    bool exec(TrafoParam &trafoParam);
-
-    void calcExpansion(TrafoParam &tp);
-    void calcAccuracy(TrafoParam &tp, double tempAccuracy, double expansion);
-
 private:
-    QString protActTemp;
-    QString protRefTemp;
-    QString protMaterial;
-    QString protExpansionCoeff;
-    QString protExpansion;
-    QString protTempAccuracy;
-    QString protSTDDEV;
+
+    double refTemp;
+    double actTemp;
+    QString material;
 };
 
 #endif // P_SIMPLETEMPERATURECOMPENSATION_H

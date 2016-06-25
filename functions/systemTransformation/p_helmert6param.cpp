@@ -409,15 +409,15 @@ OiVec Helmert6Param::fillL0Vector(OiVec x0)
 {
     OiVec l0(this->locSystem.length() * 3);
 
-    for(int row = 0; row < this->locSystem.length() * 3; row++){
-        if( (row+1) % 3 == 1 ){ //observation of x
-            l0.setAt(row, this->locSystem.at(row/3).getAt(0) + x0.getAt(2) * this->locSystem.at(row/3).getAt(1) -  x0.getAt(1) * this->locSystem.at(row/3).getAt(2) + x0.getAt(3));
-        }else if( (row+1) % 3 == 2 ){ //observation of y
-            l0.setAt(row, this->locSystem.at(row/3).getAt(1) - x0.getAt(2) * this->locSystem.at(row/3).getAt(0) + x0.getAt(0) * this->locSystem.at(row/3).getAt(2) + x0.getAt(4));
-        }else if( (row+1) % 3 == 0 ){ //observation of z
-            l0.setAt(row, this->locSystem.at(row/3).getAt(2) + x0.getAt(1) * this->locSystem.at(row/3).getAt(0) - x0.getAt(0) * this->locSystem.at(row/3).getAt(1) + x0.getAt(5));
+        for(int row = 0; row < this->locSystem.length() * 3; row++){
+            if( (row+1) % 3 == 1 ){ //observation of x
+                l0.setAt(row, this->locSystem.at(row/3).getAt(0) + x0.getAt(2) * this->locSystem.at(row/3).getAt(1) -  x0.getAt(1) * this->locSystem.at(row/3).getAt(2) + x0.getAt(3));
+            }else if( (row+1) % 3 == 2 ){ //observation of y
+                l0.setAt(row, this->locSystem.at(row/3).getAt(1) - x0.getAt(2) * this->locSystem.at(row/3).getAt(0) + x0.getAt(0) * this->locSystem.at(row/3).getAt(2) + x0.getAt(4));
+            }else if( (row+1) % 3 == 0 ){ //observation of z
+                l0.setAt(row, this->locSystem.at(row/3).getAt(2) + x0.getAt(1) * this->locSystem.at(row/3).getAt(0) - x0.getAt(0) * this->locSystem.at(row/3).getAt(1) + x0.getAt(5));
+            }
         }
-    }
     return l0;
 }
 
