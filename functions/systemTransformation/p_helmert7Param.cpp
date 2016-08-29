@@ -1,13 +1,16 @@
 #include "p_helmert7Param.h"
 
+/*!
+ * \brief Helmert7Param::init
+ */
 void Helmert7Param::init(){
 
     //set plugin meta data
     this->metaData.name = "HelmertTransformation";
     this->metaData.pluginName = "OpenIndy Default Plugin";
-    this->metaData.author = "bra";
+    this->metaData.author = "bra, jwa";
     this->metaData.description = QString("%1 %2")
-            .arg("This function calculates a 7 parameter helmert transformation.")
+            .arg("This function calculates a helmert transformation with or without scale.")
             .arg("That transformation is based on identical points in start and target system.");
     this->metaData.iid = SystemTransformation_iidd;
 
@@ -22,11 +25,11 @@ void Helmert7Param::init(){
     this->applicableFor.append(eTrafoParamFeature);
 
     //scale type
-    this->stringParameters.insert("calculate scale", "yes");
     this->stringParameters.insert("calculate scale", "no");
+    this->stringParameters.insert("calculate scale", "yes");
 
-    this->stringParameters.insert("use temperature", "no");
     this->stringParameters.insert("use temperature", "yes");
+    this->stringParameters.insert("use temperature", "no");
 
     //temperatures
     this->doubleParameters.insert("reference", 20.0);
@@ -50,17 +53,19 @@ bool Helmert7Param::exec(TrafoParam &trafoParam){
 
     this->initPoints(); //fills the locSystem and refSystem vectors based on the given common points.
 
+    this->getScaleType();
+
     if(locSystem.count() == refSystem.count() && locSystem.count() > 2){ //if enough common points available
         if(this->scaleType == pointScale){
-            if(this->calc(trafoParam)){
+            if(this->calc_7p(trafoParam)){
                 if(locSystem.count() > 3){
-                    return this->adjust(trafoParam);
+                    return this->adjust_7p(trafoParam);
                 }else if(locSystem.count() == 3){
                     return true;
                 }
             }
         }else{
-            this->p6_adjust(trafoParam);
+            this->calc_6p(trafoParam);
         }
     }else{
         emit this->sendMessage("Not enough common points!", eWarningMessage);
@@ -78,13 +83,16 @@ void Helmert7Param::getScaleType()
         if(this->scalarInputParams.stringParameter.value("calculate scale").compare("yes") == 0){
             if(this->scalarInputParams.stringParameter.contains("use temperature")){
                 if(this->scalarInputParams.stringParameter.value("use temperature").compare("no") == 0){
-                    this->scaleType == pointScale;
+                    this->scaleType = pointScale;
+                    return;
                 }else{
                     this->scaleType = tempScale;
+                    return;
                 }
             }
         }else{
             this->scaleType = noScale;
+            return;
         }
     }
 }
@@ -125,7 +133,6 @@ void Helmert7Param::initPoints(){
             this->refSystem.append(this->inputPointsDestinationSystem.at(i).getPosition().getVector());
 
         }
-
     }
 
 }
@@ -136,7 +143,7 @@ void Helmert7Param::initPoints(){
  * \param tp
  * \return
  */
-bool Helmert7Param::calc(TrafoParam &tp){
+bool Helmert7Param::calc_7p(TrafoParam &tp){
     vector<OiVec> centroidCoords = this->calcCentroidCoord(); //centroid coordinates
     if(centroidCoords.size() == 2){
         vector<OiVec> locC = this->centroidReducedCoord(locSystem, centroidCoords.at(0)); //centroid reduced destination coordinates
@@ -373,7 +380,7 @@ void Helmert7Param::fillTrafoParam(OiMat r, vector<OiVec> locC, vector<OiVec> re
  * \param tp
  * \return
  */
-bool Helmert7Param::adjust(TrafoParam &tp){
+bool Helmert7Param::adjust_7p(TrafoParam &tp){
     bool result = false;
 
     //approximation
@@ -525,7 +532,7 @@ OiVec Helmert7Param::fillL0Vector(OiVec x0){
  * \param refC
  * \return
  */
-vector<OiMat> Helmert7Param::p6_modelMatrix(vector<OiVec> locC, vector<OiVec> refC)
+/*vector<OiMat> Helmert7Param::p6_modelMatrix(vector<OiVec> locC, vector<OiVec> refC)
 {
     vector<OiMat> result;
     if(locC.size() == refC.size()){
@@ -547,17 +554,20 @@ vector<OiMat> Helmert7Param::p6_modelMatrix(vector<OiVec> locC, vector<OiVec> re
         }
     }
     return result;
-}
+}*/
 
 /*!
  * \brief Helmert7Param::p6_adjust
  * \param tp
  * \return
  */
-bool Helmert7Param::p6_adjust(TrafoParam &tp)
+bool Helmert7Param::calc_6p(TrafoParam &tp)
 {
     //adjust trafo param if enough points are given
     bool result = false;
+
+    this->p6_rotation = this->p6_approxRotation();
+    this->p6_translation = this->p6_approxTranslation(this->p6_rotation);
 
     //transform loc (start system) to "pseudo"-loc system
     //transformation with previosly approximated translation and rotation
@@ -638,7 +648,7 @@ bool Helmert7Param::p6_adjust(TrafoParam &tp)
     scale.setAt(0,scaleValue);
     scale.setAt(1,scaleValue);
     scale.setAt(2,scaleValue);
-    scale.setAt(3,scaleValue);
+    scale.setAt(3,1.0);
 
     this->p6_translation.setAt(0,this->p6_translation.getAt(0)+x0.getAt(3));
     this->p6_translation.setAt(1,this->p6_translation.getAt(1)+x0.getAt(4));
@@ -749,12 +759,13 @@ void Helmert7Param::p6_preliminaryTransformation()
     //get rotation matrix of current rotation angles
     OiMat rot = this->p6_getRotationMatrix(this->p6_rotation);
 
+    this->locSystem = this->extendVector(this->locSystem);
+    this->refSystem = this->extendVector(this->refSystem);
+
     QList<OiVec> tmpLoc;
     for(int i=0; i<this->locSystem.size();i++){
         //get vector point i
         OiVec tmp = this->locSystem.at(i);
-        tmp.setAt(3,1.0);
-
 
         //rotate the point
         OiVec rt = rot*tmp;
@@ -765,6 +776,7 @@ void Helmert7Param::p6_preliminaryTransformation()
         tmpLoc.append(tmptrafo);
     }
     this->locSystem = tmpLoc;
+
 }
 
 /*!
@@ -953,4 +965,20 @@ double Helmert7Param::setScaleValue()
     }
 
     return scale;
+}
+
+/*!
+ * \brief Helmert7Param::extendVector
+ * \param vec
+ */
+QList<OiVec> Helmert7Param::extendVector(QList<OiVec> vec)
+{
+    QList<OiVec> result;
+
+    for(int i=0; i<vec.size();i++){
+        OiVec v = vec.at(i);
+        v.add(1.0);
+        result.append(v);
+    }
+    return result;
 }

@@ -56,7 +56,7 @@ private:
     void initPoints();
 
     //7 Paramter durch Punkte
-    bool calc(TrafoParam &tp);
+    bool calc_7p(TrafoParam &tp);
     vector<OiVec> calcCentroidCoord();
     vector<OiVec> centroidReducedCoord(QList<OiVec> input, OiVec centroid);
     vector<OiMat> modelMatrix(vector<OiVec> locC, vector<OiVec> refC);
@@ -64,7 +64,7 @@ private:
     OiVec quaternion(OiMat n);
     OiMat rotationMatrix(OiVec q);
     void fillTrafoParam(OiMat r, vector<OiVec> locC, vector<OiVec> refC, vector<OiVec> centroidCoords, TrafoParam &tp);
-    bool adjust(TrafoParam &tp);
+    bool adjust_7p(TrafoParam &tp);
     OiMat fillAMatrix(OiVec x0);
     OiVec fillLVector();
     OiVec fillL0Vector(OiVec x0);
@@ -73,8 +73,8 @@ private:
     OiVec p6_translation;
     OiVec p6_rotation;
 
-    vector<OiMat> p6_modelMatrix(vector<OiVec> locC, vector<OiVec> refC);
-    bool p6_adjust(TrafoParam &tp);
+    //vector<OiMat> p6_modelMatrix(vector<OiVec> locC, vector<OiVec> refC);
+    bool calc_6p(TrafoParam &tp);
     OiMat p6_fillAMatrix(OiVec x0);
     OiVec p6_fillLVector();
     OiVec p6_fillL0Vector(OiVec x0);
@@ -90,6 +90,8 @@ private:
     ScaleTypes scaleType;
 
     double setScaleValue();
+
+    QList<OiVec> extendVector(QList<OiVec> vec);
 
 };
 
