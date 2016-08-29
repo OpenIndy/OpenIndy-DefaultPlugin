@@ -65,12 +65,11 @@ bool Helmert7Param::exec(TrafoParam &trafoParam){
                 }
             }
         }else{
-            this->calc_6p(trafoParam);
+            return this->calc_6p(trafoParam);
         }
     }else{
         emit this->sendMessage("Not enough common points!", eWarningMessage);
     }
-
     return false;
 }
 
