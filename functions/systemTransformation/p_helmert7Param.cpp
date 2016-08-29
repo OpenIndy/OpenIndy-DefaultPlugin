@@ -75,6 +75,7 @@ bool Helmert7Param::exec(TrafoParam &trafoParam){
 
 /*!
  * \brief Helmert7Param::getScaleType
+ * set scale type depending on settings
  */
 void Helmert7Param::getScaleType()
 {
@@ -105,24 +106,6 @@ void Helmert7Param::initPoints(){
     this->locSystem.clear();
     this->refSystem.clear();
 
-    //get and check input points
-    /*if(!this->inputElements.contains(0) || this->inputElements[0].size() < 3
-            || !this->inputElements.contains(1) || this->inputElements[1].size() != this->inputElements[0].size()){
-        return;
-    }
-    for(int i = 0; i < this->inputElements[0].size(); i++){
-        if(this->inputElements[0].at(i).point.isNull() || this->inputElements[1].at(i).point.isNull()
-                || this->inputElements[0].at(i).point->getFeatureName().compare(this->inputElements[1].at(i).point->getFeatureName()) != 0){
-            this->setUseState(0, this->inputElements[0].at(i).point->getId(), false);
-            this->setUseState(1, this->inputElements[1].at(i).point->getId(), false);
-            continue;
-        }
-        this->setUseState(0, this->inputElements[0].at(i).point->getId(), true);
-        this->setUseState(1, this->inputElements[1].at(i).point->getId(), true);
-        this->locSystem.append(this->inputElements[0].at(i).point->getPosition().getVectorH());
-        this->refSystem.append(this->inputElements[1].at(i).point->getPosition().getVectorH());
-    }*/
-
     if(this->inputPointsStartSystem.size() >= 3 &&
             this->inputPointsStartSystem.size() == this->inputPointsDestinationSystem.size()){
 
@@ -130,10 +113,8 @@ void Helmert7Param::initPoints(){
 
             this->locSystem.append(this->inputPointsStartSystem.at(i).getPosition().getVector());
             this->refSystem.append(this->inputPointsDestinationSystem.at(i).getPosition().getVector());
-
         }
     }
-
 }
 
 /*!
@@ -526,36 +507,6 @@ OiVec Helmert7Param::fillL0Vector(OiVec x0){
 }
 
 /*!
- * \brief Helmert7Param::p6_modelMatrix
- * \param locC
- * \param refC
- * \return
- */
-/*vector<OiMat> Helmert7Param::p6_modelMatrix(vector<OiVec> locC, vector<OiVec> refC)
-{
-    vector<OiMat> result;
-    if(locC.size() == refC.size()){
-        for(int i = 0; i < locC.size(); i++){
-            OiMat a(4, 4);
-            a.setAt(0, 1, -( locC.at(i).getAt(0) - refC.at(i).getAt(0) ));
-            a.setAt(0, 2, -( locC.at(i).getAt(1) - refC.at(i).getAt(1) ));
-            a.setAt(0, 3, -( locC.at(i).getAt(2) - refC.at(i).getAt(2) ));
-            a.setAt(1, 0, ( locC.at(i).getAt(0) - refC.at(i).getAt(0) ));
-            a.setAt(1, 2, ( locC.at(i).getAt(2) + refC.at(i).getAt(2) ));
-            a.setAt(1, 3, -( locC.at(i).getAt(1) + refC.at(i).getAt(1) ));
-            a.setAt(2, 0, ( locC.at(i).getAt(1) - refC.at(i).getAt(1) ));
-            a.setAt(2, 1, -( locC.at(i).getAt(2) + refC.at(i).getAt(2) ));
-            a.setAt(2, 3, ( locC.at(i).getAt(0) + refC.at(i).getAt(0) ));
-            a.setAt(3, 0, ( locC.at(i).getAt(2) - refC.at(i).getAt(2) ));
-            a.setAt(3, 1, ( locC.at(i).getAt(1) + refC.at(i).getAt(1) ));
-            a.setAt(3, 2, -( locC.at(i).getAt(0) + refC.at(i).getAt(0) ));
-            result.push_back(a);
-        }
-    }
-    return result;
-}*/
-
-/*!
  * \brief Helmert7Param::p6_adjust
  * \param tp
  * \return
@@ -642,6 +593,7 @@ bool Helmert7Param::calc_6p(TrafoParam &tp)
 
     //set the trafo parameters with the previously calulated values and the additional values from adjustment
 
+    //get scale from temperature or set scale to 1.0
     double scaleValue = this->setScaleValue();
     OiVec scale(4);
     scale.setAt(0,scaleValue);
@@ -775,7 +727,6 @@ void Helmert7Param::p6_preliminaryTransformation()
         tmpLoc.append(tmptrafo);
     }
     this->locSystem = tmpLoc;
-
 }
 
 /*!
@@ -785,27 +736,28 @@ void Helmert7Param::p6_preliminaryTransformation()
 OiVec Helmert7Param::p6_approxRotation()
 {
     vector<OiVec> centroidCoords = this->calcCentroidCoord(); //centroid coordinates
-        if(centroidCoords.size() == 2){
-            vector<OiVec> locC = this->centroidReducedCoord(locSystem, centroidCoords.at(0)); //centroid reduced destination coordinates
-            vector<OiVec> refC = this->centroidReducedCoord(refSystem, centroidCoords.at(1)); //centroid reduced target coordinates
-            vector<OiMat> modelMatrices = this->modelMatrix(locC, refC); //vector of model matrices - one for each common point
-            OiMat n = this->normalEquationMatrix(modelMatrices); //calculate the normal equation matrix
-            OiVec q = this->quaternion(n);
-            if( !svdError ){
-                OiMat r = this->rotationMatrix(q); //fill rotation matrix
-                OiVec result = this->p6_getRotationAngles(r);
-                if(result.getAt(0) == -0.0){
-                    result.setAt(0,0.0);
-                }
-                if(result.getAt(1) == -0.0){
-                    result.setAt(1,0.0);
-                }
-                if(result.getAt(2) == -0.0){
-                    result.setAt(2,0.0);
-                }
-                return result;
+
+    if(centroidCoords.size() == 2){
+        vector<OiVec> locC = this->centroidReducedCoord(locSystem, centroidCoords.at(0)); //centroid reduced destination coordinates
+        vector<OiVec> refC = this->centroidReducedCoord(refSystem, centroidCoords.at(1)); //centroid reduced target coordinates
+        vector<OiMat> modelMatrices = this->modelMatrix(locC, refC); //vector of model matrices - one for each common point
+        OiMat n = this->normalEquationMatrix(modelMatrices); //calculate the normal equation matrix
+        OiVec q = this->quaternion(n);
+        if( !svdError ){
+            OiMat r = this->rotationMatrix(q); //fill rotation matrix
+            OiVec result = this->p6_getRotationAngles(r);
+            if(result.getAt(0) == -0.0){
+                result.setAt(0,0.0);
             }
+            if(result.getAt(1) == -0.0){
+                result.setAt(1,0.0);
+            }
+            if(result.getAt(2) == -0.0){
+                result.setAt(2,0.0);
+            }
+            return result;
         }
+    }
 }
 
 /*!
@@ -962,7 +914,6 @@ double Helmert7Param::setScaleValue()
         SimpleTemperatureCompensation simple(act, ref, material);
         scale = simple.calcScaleFromTemperature();
     }
-
     return scale;
 }
 

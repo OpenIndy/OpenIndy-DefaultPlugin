@@ -118,8 +118,7 @@ QStringList Materials::getMaterials()
 {
     QStringList mats;
 
-    mats.append(sSteel);
-    mats.append(sAluminum);
+    mats.append(sReinforcedConcrete);
     mats.append(sPlumb);
     mats.append(sIron);
     mats.append(sGrayCastIron);
@@ -128,7 +127,8 @@ QStringList Materials::getMaterials()
     mats.append(sZinc);
     mats.append(sPlatinum);
     mats.append(sConcrete);
-    mats.append(sReinforcedConcrete);
+    mats.append(sAluminum);
+    mats.append(sSteel);
 
     return mats;
 }

@@ -46,17 +46,28 @@ protected:
     bool exec(TrafoParam &trafoParam);
 
 private:
+
+    //attributes
     bool svdError;
+
+    ScaleTypes scaleType;
+
+    double setScaleValue();
+
+    OiVec p6_translation;
+    OiVec p6_rotation;
+
+    QList<OiVec> extendVector(QList<OiVec> vec);
     QList<OiVec> locSystem;
     QList<OiVec> refSystem;
 
-
+    //general functions
     void getScaleType();
-
     void initPoints();
 
-    //7 Paramter durch Punkte
+    //7 parameter functions
     bool calc_7p(TrafoParam &tp);
+
     vector<OiVec> calcCentroidCoord();
     vector<OiVec> centroidReducedCoord(QList<OiVec> input, OiVec centroid);
     vector<OiMat> modelMatrix(vector<OiVec> locC, vector<OiVec> refC);
@@ -70,11 +81,8 @@ private:
     OiVec fillL0Vector(OiVec x0);
 
     //6 Parameter ohne Maßstab/ mit Maßstab aus Temperatur
-    OiVec p6_translation;
-    OiVec p6_rotation;
-
-    //vector<OiMat> p6_modelMatrix(vector<OiVec> locC, vector<OiVec> refC);
     bool calc_6p(TrafoParam &tp);
+
     OiMat p6_fillAMatrix(OiVec x0);
     OiVec p6_fillLVector();
     OiVec p6_fillL0Vector(OiVec x0);
@@ -86,13 +94,6 @@ private:
     OiVec p6_getRotationAngles(OiMat r);
     OiMat p6_getTranslationMatrix(OiVec trans);
     OiMat p6_getScaleMatrix(OiVec s);
-
-    ScaleTypes scaleType;
-
-    double setScaleValue();
-
-    QList<OiVec> extendVector(QList<OiVec> vec);
-
 };
 
 #endif // P_HELMERT7PARAM_H

@@ -31,8 +31,6 @@ public:
     static double getExpansionCoefficient(Materials::supportedMaterials material);
     static QStringList getMaterials();
 
-
-
 private:
     //material names
     static QString sSteel;
