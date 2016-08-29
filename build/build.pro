@@ -55,7 +55,6 @@ SOURCES += \
     $$PWD/../functions/objectTransformation/p_changeradius.cpp \
     $$PWD/../functions/systemTransformation/materials.cpp \
     $$PWD/../functions/systemTransformation/p_extendedtemperaturecompensation.cpp \
-    $$PWD/../functions/systemTransformation/p_helmert6param.cpp \
     $$PWD/../functions/systemTransformation/p_helmert7Param.cpp \
     $$PWD/../functions/systemTransformation/p_simpletemperaturecompensation.cpp \
     $$PWD/../exchange/p_oiexchangeascii.cpp \
@@ -88,7 +87,6 @@ HEADERS += \
     $$PWD/../functions/objectTransformation/p_changeradius.h \
     $$PWD/../functions/systemTransformation/materials.h \
     $$PWD/../functions/systemTransformation/p_extendedtemperaturecompensation.h \
-    $$PWD/../functions/systemTransformation/p_helmert6param.h \
     $$PWD/../functions/systemTransformation/p_helmert7Param.h \
     $$PWD/../functions/systemTransformation/p_simpletemperaturecompensation.h \
     $$PWD/../exchange/p_oiexchangeascii.h \
