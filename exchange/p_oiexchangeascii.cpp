@@ -266,11 +266,14 @@ void OiExchangeAscii::importOiData(){
             while (!in.atEnd()){
 
                 QString line = in.readLine();
+                //convert , to .
+                line.replace(",", ".");
 
                 readSize += line.size();
 
                 //split the line at delimiter
                 QStringList columns = line.split(this->getDelimiter(this->usedDelimiter));
+
 
                 //create a point object
                 QPointer<Point> myNominal = new Point(true);
