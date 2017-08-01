@@ -18,7 +18,7 @@ void Shift::init(){
     this->applicableFor.append(eCircleFeature);
 
     //set double parameter
-    this->doubleParameters.insert("offset", 0.0);
+    this->doubleParameters.insert("offset [mm]", 0.0);
 
 }
 
@@ -49,10 +49,12 @@ bool Shift::setUpResult(Plane &plane){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
+        offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
+        offset = offset / 1000.0;
     }
 
     //get normalized vector
@@ -81,10 +83,12 @@ bool Shift::setUpResult(Circle &circle){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
+        offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
+        offset = offset / 1000.0;
     }
 
     //get normalized vector
