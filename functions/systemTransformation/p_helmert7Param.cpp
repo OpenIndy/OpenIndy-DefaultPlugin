@@ -36,7 +36,7 @@ void Helmert7Param::init(){
     this->doubleParameters.insert("actual", 20.0);
 
     //materials
-    QStringList materials = Materials::getMaterials();
+    QList<QString> materials = getMaterials();
 
     for(int i = 0; i < materials.size(); i++){
         this->stringParameters.insert("material", materials.at(i));
@@ -903,7 +903,7 @@ OiMat Helmert7Param::p6_getScaleMatrix(OiVec s)
  */
 double Helmert7Param::setScaleValue()
 {
-    double scale;
+    double scale = 1.0;
 
     if(this->scaleType == noScale){
         scale = 1.0;
@@ -911,8 +911,8 @@ double Helmert7Param::setScaleValue()
         double act = this->scalarInputParams.doubleParameter.value("actual");
         double ref = this->scalarInputParams.doubleParameter.value("reference");
         QString material = this->scalarInputParams.stringParameter.value("material");
-        SimpleTemperatureCompensation simple(act, ref, material);
-        scale = simple.calcScaleFromTemperature();
+
+        return oi::getTemperatureExpansion(material, act, ref);
     }
     return scale;
 }

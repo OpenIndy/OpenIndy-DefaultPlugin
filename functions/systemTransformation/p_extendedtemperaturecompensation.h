@@ -4,7 +4,6 @@
 #include "systemtransformation.h"
 #include "pluginmetadata.h"
 #include <QtCore/qmath.h>
-#include "materials.h"
 
 using namespace oi;
 using namespace std;

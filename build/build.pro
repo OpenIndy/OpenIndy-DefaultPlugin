@@ -53,10 +53,8 @@ SOURCES += \
     $$PWD/../functions/fit/p_bestfitplane.cpp \
     $$PWD/../functions/fit/p_bestfitpoint.cpp \
     $$PWD/../functions/objectTransformation/p_changeradius.cpp \
-    $$PWD/../functions/systemTransformation/materials.cpp \
     $$PWD/../functions/systemTransformation/p_extendedtemperaturecompensation.cpp \
     $$PWD/../functions/systemTransformation/p_helmert7Param.cpp \
-    $$PWD/../functions/systemTransformation/p_simpletemperaturecompensation.cpp \
     $$PWD/../exchange/p_oiexchangeascii.cpp \
     $$PWD/../sensors/laserTracker/pseudoTracker/p_pseudotracker.cpp \
     $$PWD/../sensors/tachymeter/LeicaGeoCom/p_leicatachymeter.cpp \
@@ -85,10 +83,8 @@ HEADERS += \
     $$PWD/../functions/fit/p_bestfitplane.h \
     $$PWD/../functions/fit/p_bestfitpoint.h \
     $$PWD/../functions/objectTransformation/p_changeradius.h \
-    $$PWD/../functions/systemTransformation/materials.h \
     $$PWD/../functions/systemTransformation/p_extendedtemperaturecompensation.h \
     $$PWD/../functions/systemTransformation/p_helmert7Param.h \
-    $$PWD/../functions/systemTransformation/p_simpletemperaturecompensation.h \
     $$PWD/../exchange/p_oiexchangeascii.h \
     $$PWD/../sensors/laserTracker/pseudoTracker/p_pseudotracker.h \
     $$PWD/../sensors/tachymeter/LeicaGeoCom/p_leicatachymeter.h \

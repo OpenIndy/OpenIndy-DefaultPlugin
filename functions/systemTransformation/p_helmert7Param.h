@@ -14,7 +14,7 @@
 #include "oivec.h"
 #include "oimat.h"
 #include "pluginmetadata.h"
-#include "p_simpletemperaturecompensation.h"
+#include "util.h"
 
 using namespace oi;
 using namespace std;
