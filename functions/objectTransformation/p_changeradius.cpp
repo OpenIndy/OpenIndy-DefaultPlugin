@@ -59,11 +59,11 @@ bool ChangeRadius::setUpResult(Sphere &sphere){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
         offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
         offset = offset / 1000.0;
     }
 
@@ -87,11 +87,11 @@ bool ChangeRadius::setUpResult(Circle &circle){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
         offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
         offset = offset / 1000.0;
     }
 
@@ -116,11 +116,11 @@ bool ChangeRadius::setUpResult(Cylinder &cylinder){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
         offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
         offset = offset / 1000.0;
     }
 
