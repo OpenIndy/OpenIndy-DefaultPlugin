@@ -49,6 +49,26 @@ bool RectifyToPoint::exec(Circle &circle){
 }
 
 /*!
+ * \brief RectifyToPoint::exec
+ * \param line
+ * \return
+ */
+bool RectifyToPoint::exec(Line &line)
+{
+    return this->setUpResult(line);
+}
+
+/*!
+ * \brief RectifyToPoint::exec
+ * \param Cylinder
+ * \return
+ */
+bool RectifyToPoint::exec(Cylinder &cylinder)
+{
+    return this->setUpResult(cylinder);
+}
+
+/*!
  * \brief RectifyToPoint::setUpResult
  * \param plane
  * \return
@@ -166,4 +186,122 @@ bool RectifyToPoint::setUpResult(Circle &circle){
 
     return true;
 
+}
+
+/*!
+ * \brief RectifyToPoint::setUpResult
+ * \param line
+ * \return
+ */
+bool RectifyToPoint::setUpResult(Line &line)
+{
+    //get and check position
+    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
+        return false;
+    }
+    QPointer<Geometry> geometry = this->inputElements[0].at(0).geometry;
+    if(geometry.isNull() || !geometry->getIsSolved() || !geometry->hasPosition()){
+        return false;
+    }
+
+    //get the sense (positive or negative)
+    double sense = 1.0;
+    if(this->scalarInputParams.stringParameter.contains("sense")){
+        if(this->scalarInputParams.stringParameter.value("sense").compare("negative") == 0){
+            sense = -1.0;
+        }
+    }
+
+    //get the position of the point and the line and the normal vector
+    OiVec n_line = line.getDirection().getVector();
+    n_line.normalize();
+    OiVec x_line = line.getPosition().getVector();
+    OiVec x_point = geometry->getPosition().getVector();
+
+    //calculate the distance of the line plane from the origin
+    double d;
+    OiVec::dot(d, x_line, n_line);
+    if(d < 0.0){
+        n_line = -1.0 * n_line;
+        d = -d;
+    }
+
+    //calculate the distance of the point position from the line plane
+    double s;
+    OiVec::dot(s, x_point, n_line);
+    s = s - d;
+
+    //invert the distance if sense is negative
+    s = s * sense;
+
+    //invert the normal vector of the line if it has the wrong orientation
+    if(s < 0.0){
+        n_line = -1.0 * n_line;
+    }
+
+    //set result
+    Direction direction = line.getDirection();
+    direction.setVector(n_line);
+    line.setLine(line.getPosition(), direction);
+
+    return true;
+}
+
+/*!
+ * \brief RectifyToPoint::setUpResult
+ * \param cylinder
+ * \return
+ */
+bool RectifyToPoint::setUpResult(Cylinder &cylinder)
+{
+    //get and check position
+    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
+        return false;
+    }
+    QPointer<Geometry> geometry = this->inputElements[0].at(0).geometry;
+    if(geometry.isNull() || !geometry->getIsSolved() || !geometry->hasPosition()){
+        return false;
+    }
+
+    //get the sense (positive or negative)
+    double sense = 1.0;
+    if(this->scalarInputParams.stringParameter.contains("sense")){
+        if(this->scalarInputParams.stringParameter.value("sense").compare("negative") == 0){
+            sense = -1.0;
+        }
+    }
+
+    //get the position of the point and the cylinder and the normal vector
+    OiVec n_cylinder = cylinder.getDirection().getVector();
+    n_cylinder.normalize();
+    OiVec x_cylinder = cylinder.getPosition().getVector();
+    OiVec x_point = geometry->getPosition().getVector();
+
+    //calculate the distance of the cylinder plane from the origin
+    double d;
+    OiVec::dot(d, x_cylinder, n_cylinder);
+    if(d < 0.0){
+        n_cylinder = -1.0 * n_cylinder;
+        d = -d;
+    }
+
+    //calculate the distance of the point position from the cylinder plane
+    double s;
+    OiVec::dot(s, x_point, n_cylinder);
+    s = s - d;
+
+    //invert the distance if sense is negative
+    s = s * sense;
+
+    //invert the normal vector of the cylinder if it has the wrong orientation
+    if(s < 0.0){
+        n_cylinder = -1.0 * n_cylinder;
+    }
+
+    //set result
+    Direction direction = cylinder.getDirection();
+    direction.setVector(n_cylinder);
+    cylinder.setCylinder(cylinder.getPosition(), direction, cylinder.getRadius());
+
+    return true;
 }
