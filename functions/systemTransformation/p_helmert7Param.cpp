@@ -25,8 +25,8 @@ void Helmert7Param::init(){
     this->applicableFor.append(eTrafoParamFeature);
 
     //scale type
-    this->stringParameters.insert("calculate scale", "no");
     this->stringParameters.insert("calculate scale", "yes");
+    this->stringParameters.insert("calculate scale", "no");
 
     this->stringParameters.insert("use temperature", "yes");
     this->stringParameters.insert("use temperature", "no");
