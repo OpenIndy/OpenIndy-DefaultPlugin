@@ -23,6 +23,8 @@ void RectifyToPoint::init(){
     //set spplicable for
     this->applicableFor.append(ePlaneFeature);
     this->applicableFor.append(eCircleFeature);
+    this->applicableFor.append(eLineFeature);
+    this->applicableFor.append(eCylinderFeature);
 
     //set string parameter
     this->stringParameters.insert("sense", "negative");
