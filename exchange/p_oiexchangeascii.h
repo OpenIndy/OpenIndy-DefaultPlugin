@@ -6,6 +6,7 @@
 #include <QVariantList>
 
 #include "exchangesimpleascii.h"
+#include "oijob.h"
 
 using namespace std;
 using namespace oi;

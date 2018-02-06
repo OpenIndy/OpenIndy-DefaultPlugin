@@ -422,6 +422,87 @@ void OiExchangeAscii::importOiData(){
 void OiExchangeAscii::exportOiData(){
 
     try{
+        if(!this->device.isNull()){
+            this->device->open(QIODevice::ReadWrite);
+            qDebug() <<"in if";
+            QTextStream out(this->device);
+            foreach (QPointer<FeatureWrapper> fw, this->currentJob->getGeometriesList()) {
+                //write to file
+                QString line = "";
+                //QString delimiter = this->getDelimiter(this->usedDelimiter);
+                for(int i=0; i< this->userDefinedColumns.size(); i++){
+
+                    if(i>0){
+                        line.append(this->getDelimiter(this->usedDelimiter).pattern());
+                    }
+                    switch (this->userDefinedColumns.at(i)) {
+                    case eColumnFeatureName:
+                        line.append(fw->getFeature()->getFeatureName());
+                        break;
+                    case eColumnX:
+                        if(fw->getGeometry()->hasPosition()){
+                            line.append(QString::number(fw->getGeometry()->getPosition().getVector().getAt(0)));
+                        }else{
+                            line.append("-");
+                        }
+                        break;
+                    case eColumnY:
+                        if(fw->getGeometry()->hasPosition()){
+                            line.append(QString::number(fw->getGeometry()->getPosition().getVector().getAt(1)));
+                        }else{
+                            line.append("-");
+                        }
+                        break;
+                    case eColumnZ:
+                        if(fw->getGeometry()->hasPosition()){
+                            line.append(QString::number(fw->getGeometry()->getPosition().getVector().getAt(2)));
+                        }else{
+                            line.append("-");
+                        }
+                        break;
+                    case eColumnPrimaryI:
+                        if(fw->getGeometry()->hasDirection()){
+                            line.append(QString::number(fw->getGeometry()->getDirection().getVector().getAt(0)));
+                        }else{
+                            line.append("-");
+                        }
+                        break;
+                    case eColumnPrimaryJ:
+                        if(fw->getGeometry()->hasDirection()){
+                            line.append(QString::number(fw->getGeometry()->getDirection().getVector().getAt(1)));
+                        }else{
+                            line.append("-");
+                        }
+                        break;
+                    case eColumnPrimaryK:
+                        if(fw->getGeometry()->hasDirection()){
+                            line.append(QString::number(fw->getGeometry()->getDirection().getVector().getAt(2)));
+                        }else{
+                            line.append("-");
+                        }
+                        break;
+                    case eColumnRadiusA:
+                        if(fw->getGeometry()->hasRadius()){
+                            line.append(QString::number(fw->getGeometry()->getRadius().getRadius()));
+                        }else{
+                            line.append("-");
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                //write to file
+                qDebug() << line;
+                out << line;
+            }
+            this->device->close();
+            emit this->exportFinished(true);
+
+        }else{
+            qDebug() << "export device is NULL";
+            emit this->exportFinished(false);
+        }
 
     }catch(const exception &e){
         emit this->sendMessage(e.what(), eErrorMessage, eMessageBoxMessage);
