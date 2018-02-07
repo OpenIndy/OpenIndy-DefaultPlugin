@@ -7,6 +7,7 @@
 
 #include "exchangesimpleascii.h"
 #include "oijob.h"
+#include "util.h"
 
 using namespace std;
 using namespace oi;
