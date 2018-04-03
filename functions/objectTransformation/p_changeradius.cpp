@@ -16,9 +16,10 @@ void ChangeRadius::init(){
     //set spplicable for
     this->applicableFor.append(eSphereFeature);
     this->applicableFor.append(eCircleFeature);
+    this->applicableFor.append(eCylinderFeature);
 
     //set double parameter
-    this->doubleParameters.insert("offset", 0.0);
+    this->doubleParameters.insert("offset [mm]", 0.0);
 
 }
 
@@ -58,10 +59,12 @@ bool ChangeRadius::setUpResult(Sphere &sphere){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
+        offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
+        offset = offset / 1000.0;
     }
 
     //add offset to radius of the sphere
@@ -73,7 +76,6 @@ bool ChangeRadius::setUpResult(Sphere &sphere){
     sphere.setSphere(position, radius);
 
     return true;
-
 }
 
 /*!
@@ -85,10 +87,12 @@ bool ChangeRadius::setUpResult(Circle &circle){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
+        offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
+        offset = offset / 1000.0;
     }
 
     //add offset to radius of the circle
@@ -101,7 +105,6 @@ bool ChangeRadius::setUpResult(Circle &circle){
     circle.setCircle(position, direction, radius);
 
     return true;
-
 }
 
 /*!
@@ -113,10 +116,12 @@ bool ChangeRadius::setUpResult(Cylinder &cylinder){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
+        offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
+        offset = offset / 1000.0;
     }
 
     //add offset to radius of the cylinder
@@ -129,5 +134,4 @@ bool ChangeRadius::setUpResult(Cylinder &cylinder){
     cylinder.setCylinder(position, direction, radius);
 
     return true;
-
 }

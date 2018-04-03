@@ -27,7 +27,7 @@ void TranslateByValue::init(){
     this->applicableFor.append(eSphereFeature);
 
     //set double parameter
-    this->doubleParameters.insert("offset", 0.0);
+    this->doubleParameters.insert("offset [mm]", 0.0);
 
 }
 
@@ -85,10 +85,12 @@ bool TranslateByValue::setUpResult(Point &point){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
+        offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
+        offset = offset / 1000.0;
     }
 
     //get normalized vector
@@ -126,10 +128,12 @@ bool TranslateByValue::setUpResult(Line &line){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
+        offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
+        offset = offset / 1000.0;
     }
 
     //get normalized vector
@@ -167,10 +171,12 @@ bool TranslateByValue::setUpResult(Plane &plane){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
+        offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
+        offset = offset / 1000.0;
     }
 
     //get normalized vector
@@ -208,10 +214,12 @@ bool TranslateByValue::setUpResult(Sphere &sphere){
 
     //get and check offset
     double offset = 0.0;
-    if(this->scalarInputParams.doubleParameter.contains("offset")){
-        offset = this->scalarInputParams.doubleParameter.value("offset");
+    if(this->scalarInputParams.doubleParameter.contains("offset [mm]")){
+        offset = this->scalarInputParams.doubleParameter.value("offset [mm]");
+        offset = offset / 1000.0;
     }else{
-        offset = this->doubleParameters.value("offset");
+        offset = this->doubleParameters.value("offset [mm]");
+        offset = offset / 1000.0;
     }
 
     //get normalized vector

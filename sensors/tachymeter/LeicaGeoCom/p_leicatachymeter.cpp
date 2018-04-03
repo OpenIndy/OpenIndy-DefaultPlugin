@@ -55,9 +55,9 @@ void LeicaTachymeter::init(){
     this->defaultAccuracy.sigmaXyz.setAt(1, 0.001);
     this->defaultAccuracy.sigmaXyz.setAt(2, 0.001);
     this->defaultAccuracy.sigmaTemp = 0.5;
-    this->defaultAccuracy.sigmaRX = 0.00001570;
-    this->defaultAccuracy.sigmaRY = 0.00001570;
-    this->defaultAccuracy.sigmaRZ = 0.00001570;
+    this->defaultAccuracy.sigmaI = 0.00001570;
+    this->defaultAccuracy.sigmaJ = 0.00001570;
+    this->defaultAccuracy.sigmaK = 0.00001570;
 
     //general tachy inits
 

@@ -47,9 +47,8 @@ QList<QPointer<Function> > OiTemplatePlugin::createFunctions(){
     resultSet.append(new Register());
     resultSet.append(new Helmert7Param());
     //resultSet.append(new BestFitCircle());
-    resultSet.append(new SimpleTemperatureCompensation());
-    resultSet.append(new ExtendedTemperatureCompensation());
-    resultSet.append(new Helmert6Param());
+    //not stable, temporary not ready to use
+    //resultSet.append(new ExtendedTemperatureCompensation());
     resultSet.append(new BestFitSphere());
     resultSet.append(new BestFitCircleInPlane());
     resultSet.append(new RectifyToPoint());
@@ -61,12 +60,12 @@ QList<QPointer<Function> > OiTemplatePlugin::createFunctions(){
 }
 
 /*!
- * \brief OiTemplatePlugin::createNetworkAdjustments
+ * \brief OiTemplatePlugin::createBundleAdjustments
  * Returns a list with all network adjustments
  * \return
  */
-QList<QPointer<NetworkAdjustment> > OiTemplatePlugin::createNetworkAdjustments(){
-    QList<QPointer<NetworkAdjustment> > resultSet;
+QList<QPointer<BundleAdjustment> > OiTemplatePlugin::createBundleAdjustments(){
+    QList<QPointer<BundleAdjustment> > resultSet;
     return resultSet;
 }
 
@@ -167,13 +166,9 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
         result = new BestFitCircle();
     }*/else if(name.compare("BestFitCircleInPlane") == 0){
         result = new BestFitCircleInPlane();
-    }else if(name.compare("StandardTempComp") == 0){
-        result = new SimpleTemperatureCompensation();
-    }else if(name.compare("9ParameterHelmertTransformation") == 0){
+    }/*else if(name.compare("9ParameterHelmertTransformation") == 0){
         result = new ExtendedTemperatureCompensation();
-    }else if(name.compare("6ParameterHelmertTransformation") == 0){
-        result = new Helmert6Param();
-    }else if(name.compare("BestFitSphere") == 0){
+    }*/else if(name.compare("BestFitSphere") == 0){
         result = new BestFitSphere();
     }else if(name.compare("RectifyToPoint") == 0){
         result = new RectifyToPoint();
@@ -188,13 +183,13 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
 }
 
 /*!
- * \brief OiTemplatePlugin::createNetworkAdjustment
+ * \brief OiTemplatePlugin::createBundleAdjustment
  * Returns the network adjustment with the specified name
  * \param name
  * \return
  */
-QPointer<NetworkAdjustment> OiTemplatePlugin::createNetworkAdjustment(const QString &name){
-    QPointer<NetworkAdjustment> result(NULL);
+QPointer<BundleAdjustment> OiTemplatePlugin::createBundleAdjustment(const QString &name){
+    QPointer<BundleAdjustment> result(NULL);
     return result;
 }
 

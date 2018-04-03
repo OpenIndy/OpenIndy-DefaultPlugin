@@ -11,10 +11,7 @@ void Helmert6Param::init(){
     this->metaData.author = "jwa";
     this->metaData.description = QString("%1 %2 %3 %4 %5")
             .arg("This function calculates a 6 parameter helmert transformation.")
-            .arg("That transformation is based on identical points in start and target system.")
-            .arg("If you measure a expanded part object then create the movement first.")
-            .arg("If the movement is valid the nominals get expanded with the scale to get a correct translation.")
-            .arg("If no movement is set, the translation can be wrong.");
+            .arg("That transformation is based on identical points in start and target system.");
     this->metaData.iid = SystemTransformation_iidd;
 
     //set needed elements
@@ -26,10 +23,6 @@ void Helmert6Param::init(){
 
     //set spplicable for
     this->applicableFor.append(eTrafoParamFeature);
-
-    //set string parameter
-    this->stringParameters.insert("useTempComp", "false");
-    this->stringParameters.insert("useTempComp", "true");
 
 }
 
@@ -43,11 +36,8 @@ bool Helmert6Param::exec(TrafoParam &trafoParam)
    this->svdError = false;
 
     this->initPoints(); //fills the locSystem and refSystem vectors based on the given common points.
+
     if(locSystem.count() == refSystem.count() && locSystem.count() > 1){ //if enough common points available
-
-        //apply movement if necessary
-
-        this->applyMovements(trafoParam);
 
         //get rotation and translation
         this->rotation = this->approxRotation();
@@ -91,24 +81,6 @@ void Helmert6Param::initPoints(){
     this->locSystem.clear();
     this->refSystem.clear();
 
-    //get and check input points
-    /*if(!this->inputElements.contains(0) || this->inputElements[0].size() < 3
-            || !this->inputElements.contains(1) || this->inputElements[1].size() != this->inputElements[0].size()){
-        return;
-    }
-    for(int i = 0; i < this->inputElements[0].size(); i++){
-        if(this->inputElements[0].at(i).point.isNull() || this->inputElements[1].at(i).point.isNull()
-                || this->inputElements[0].at(i).point->getFeatureName().compare(this->inputElements[1].at(i).point->getFeatureName()) != 0){
-            this->setUseState(0, this->inputElements[0].at(i).point->getId(), false);
-            this->setUseState(1, this->inputElements[1].at(i).point->getId(), false);
-            continue;
-        }
-        this->setUseState(0, this->inputElements[0].at(i).point->getId(), true);
-        this->setUseState(1, this->inputElements[1].at(i).point->getId(), true);
-        this->locSystem.append(this->inputElements[0].at(i).point->getPosition().getVectorH());
-        this->refSystem.append(this->inputElements[1].at(i).point->getPosition().getVectorH());
-    }*/
-
     if(this->inputPointsStartSystem.size() >= 3 &&
             this->inputPointsStartSystem.size() == this->inputPointsDestinationSystem.size()){
 
@@ -116,11 +88,8 @@ void Helmert6Param::initPoints(){
 
             this->locSystem.append(this->inputPointsStartSystem.at(i).getPosition().getVector());
             this->refSystem.append(this->inputPointsDestinationSystem.at(i).getPosition().getVector());
-
         }
-
     }
-
 }
 
 /*!
@@ -440,15 +409,15 @@ OiVec Helmert6Param::fillL0Vector(OiVec x0)
 {
     OiVec l0(this->locSystem.length() * 3);
 
-    for(int row = 0; row < this->locSystem.length() * 3; row++){
-        if( (row+1) % 3 == 1 ){ //observation of x
-            l0.setAt(row, this->locSystem.at(row/3).getAt(0) + x0.getAt(2) * this->locSystem.at(row/3).getAt(1) -  x0.getAt(1) * this->locSystem.at(row/3).getAt(2) + x0.getAt(3));
-        }else if( (row+1) % 3 == 2 ){ //observation of y
-            l0.setAt(row, this->locSystem.at(row/3).getAt(1) - x0.getAt(2) * this->locSystem.at(row/3).getAt(0) + x0.getAt(0) * this->locSystem.at(row/3).getAt(2) + x0.getAt(4));
-        }else if( (row+1) % 3 == 0 ){ //observation of z
-            l0.setAt(row, this->locSystem.at(row/3).getAt(2) + x0.getAt(1) * this->locSystem.at(row/3).getAt(0) - x0.getAt(0) * this->locSystem.at(row/3).getAt(1) + x0.getAt(5));
+        for(int row = 0; row < this->locSystem.length() * 3; row++){
+            if( (row+1) % 3 == 1 ){ //observation of x
+                l0.setAt(row, this->locSystem.at(row/3).getAt(0) + x0.getAt(2) * this->locSystem.at(row/3).getAt(1) -  x0.getAt(1) * this->locSystem.at(row/3).getAt(2) + x0.getAt(3));
+            }else if( (row+1) % 3 == 2 ){ //observation of y
+                l0.setAt(row, this->locSystem.at(row/3).getAt(1) - x0.getAt(2) * this->locSystem.at(row/3).getAt(0) + x0.getAt(0) * this->locSystem.at(row/3).getAt(2) + x0.getAt(4));
+            }else if( (row+1) % 3 == 0 ){ //observation of z
+                l0.setAt(row, this->locSystem.at(row/3).getAt(2) + x0.getAt(1) * this->locSystem.at(row/3).getAt(0) - x0.getAt(0) * this->locSystem.at(row/3).getAt(1) + x0.getAt(5));
+            }
         }
-    }
     return l0;
 }
 
@@ -535,69 +504,6 @@ OiVec Helmert6Param::approxTranslation(OiVec rot)
     trans.setAt(3,1.0);
 
     return trans;
-}
-
-/*!
- * \brief applyMovements applys the first inverse movement to the nominal values to have a homogeneous system
- * Otherwise the expanded measured points will result in incorrect translation values to the nominal data
- * The thermal expansion of an part object should have no influence on this transformation, so it is necessary to
- * apply the movement to the nominal values. This results in an homogeneous system that has no temperature
- * influence. The expansion is compensated with another function.
- * If you don´t eliminate the influence of the expansion in this transformation, you compensate it twice and get wrong
- * correction values.
- * You can only expand the nominal points, because the actual points that should be compensated are not in the PART system
- * yet. So you need to go the inverse way.
- * \param tp
- */
-void Helmert6Param::applyMovements(TrafoParam &tp)
-{
-    QString use = "";
-
-    QMap<QString, QString> stringParameter = this->scalarInputParams.stringParameter;
-
-
-    if(this->scalarInputParams.stringParameter.contains("useTempComp")){
-        use = static_cast<QString>(stringParameter.find("useTempComp").value());
-    }
-    //if temperature compensation should be used
-    if(use.compare("true") == 0){
-        bool stationStart = false;
-        bool stationDest = false;
-
-        //find the coordsys that has movements
-        //parts don´t have movements
-        stationStart = this->getCoordSysWithMovements(tp.getStartSystem());
-        stationDest = this->getCoordSysWithMovements(tp.getDestinationSystem());
-
-        TrafoParam *t = NULL;
-        OiVec expansionOrigin(4);
-
-        //get movement parameters and expansion origin
-        if(stationStart && !stationDest){
-             t = this->getMovement(tp.getStartSystem());
-             expansionOrigin = tp.getDestinationSystem()->getExpansionOrigin().getVectorH();
-        }else if(!stationStart && stationDest){
-            t = this->getMovement(tp.getDestinationSystem());
-            expansionOrigin = tp.getStartSystem()->getExpansionOrigin().getVectorH();
-        }
-
-        if(t != NULL){
-
-            //expand nominals with inverse of movement parameters
-            for(int i=0; i<this->refSystem.size();i++){
-                OiVec refP = this->refSystem.at(i);
-
-                refP = refP - expansionOrigin;
-                refP = t->getHomogenMatrix().inv()*refP;
-                refP = refP + expansionOrigin;
-                refP.setAt(3,1.0);
-
-                this->refSystem.replace(i,refP);
-            }
-            this->protocol.append("reference points were expanded with inverse of");
-            this->protocol.append(" movement transformation to get correct translation values.");
-        }
-    }
 }
 
 /*!
@@ -706,51 +612,4 @@ OiMat Helmert6Param::getScaleMatrix(OiVec s)
     tmpScale.setAt(3,3,1.0);
 
     return tmpScale;
-}
-
-/*!
- * \brief getCoordSysWithMovements checks if the given coordinate systen has movement transformations
- * \param cs
- * \return
- */
-bool Helmert6Param::getCoordSysWithMovements(CoordinateSystem *cs)
-{
-    bool result = false;
-
-    for(int i=0; i<cs->getTransformationParameters().size();i++){
-        if(cs->getTransformationParameters().at(i)->getIsMovement() &&
-                cs->getTransformationParameters().at(i)->getIsUsed()){
-            //if has movements and they are on "use" state
-            result = true;
-        }
-    }
-
-    return result;
-}
-
-/*!
- * \brief getMovement returns the movement of the given coordinate system.
- * If the coord. sys. has more than one movement it will return the movement with the lowest valid time
- * \param cs
- * \return
- */
-TrafoParam *Helmert6Param::getMovement(CoordinateSystem *cs)
-{
-    TrafoParam *tp = NULL;
-    QMap<QDateTime,TrafoParam*> movements;
-
-    for(int i=0; i<cs->getTransformationParameters().size();i++){
-        if(cs->getTransformationParameters().at(i)->getIsMovement() &&
-                cs->getTransformationParameters().at(i)->getIsUsed()){
-
-            movements.insert(cs->getTransformationParameters().at(i)->getValidTime(),cs->getTransformationParameters().at(i));
-        }
-    }
-
-    if(movements.size() > 0){
-        tp = movements.values().at(0);
-    }
-
-
-    return tp;
 }

@@ -12,7 +12,7 @@
 #include "sensor.h"
 #include "function.h"
 
-#include "networkadjustment.h"
+#include "bundleadjustment.h"
 #include "lasertracker.h"
 #include "totalstation.h"
 #include "constructfunction.h"
@@ -46,7 +46,6 @@
 #include "p_shift.h"
 
 #include "p_helmert7Param.h"
-#include "p_simpletemperaturecompensation.h"
 #include "p_extendedtemperaturecompensation.h"
 #include "p_helmert6param.h"
 
@@ -76,7 +75,7 @@ public:
 
     QList<QPointer<Sensor> > createSensors();
     QList<QPointer<Function> > createFunctions();
-    QList<QPointer<NetworkAdjustment> > createNetworkAdjustments();
+    QList<QPointer<BundleAdjustment> > createBundleAdjustments();
     QList<QPointer<SimulationModel> > createSimulations();
     QList<QPointer<Tool> > createTools();
     QList<QPointer<ExchangeSimpleAscii> > createSimpleAsciiExchanges();
@@ -88,7 +87,7 @@ public:
 
     QPointer<Sensor> createSensor(const QString &name);
     QPointer<Function> createFunction(const QString &name);
-    QPointer<NetworkAdjustment> createNetworkAdjustment(const QString &name);
+    QPointer<BundleAdjustment> createBundleAdjustment(const QString &name);
     QPointer<SimulationModel> createSimulation(const QString &name);
     QPointer<Tool> createTool(const QString &name);
     QPointer<ExchangeSimpleAscii> createSimpleAsciiExchange(const QString &name);
