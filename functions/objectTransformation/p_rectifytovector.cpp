@@ -49,6 +49,26 @@ bool RectifyToVector::exec(Circle &circle){
 }
 
 /*!
+ * \brief RectifyToVector::exec
+ * \param line
+ * \return
+ */
+bool RectifyToVector::exec(Line &line)
+{
+    return this->setUpResult(line);
+}
+
+/*!
+ * \brief RectifyToVector::exec
+ * \param cylinder
+ * \return
+ */
+bool RectifyToVector::exec(Cylinder &cylinder)
+{
+    return this->setUpResult(cylinder);
+}
+
+/*!
  * \brief RectifyToVector::setUpResult
  * \param plane
  * \return
@@ -150,4 +170,106 @@ bool RectifyToVector::setUpResult(Circle &circle){
 
     return true;
 
+}
+
+/*!
+ * \brief RectifyToVector::setUpResult
+ * \param line
+ * \return
+ */
+bool RectifyToVector::setUpResult(Line &line)
+{
+    //get and check line
+    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
+        return false;
+    }
+    QPointer<Geometry> geometry = this->inputElements[0].at(0).geometry;
+    if(geometry.isNull() || !geometry->getIsSolved() || !geometry->hasDirection()){
+        return false;
+    }
+
+    //get the sense (positive or negative)
+    double sense = 1.0;
+    if(this->scalarInputParams.stringParameter.contains("sense")){
+        if(this->scalarInputParams.stringParameter.value("sense").compare("negative") == 0){
+            sense = -1.0;
+        }
+    }
+
+    //get the direction to compare
+    OiVec r_reference = geometry->getDirection().getVector();
+    r_reference.normalize();
+    OiVec r_line = line.getDirection().getVector();
+    r_line.normalize();
+
+    //calculate the angle between both directions
+    double angle = 0.0;
+    OiVec::dot(angle, r_reference, r_line);
+    angle = qAbs(qAcos(angle));
+
+    //invert the normal vector if the angle is greater than 90°
+    if(angle > PI/2.0){
+        r_line = -1.0 * r_line;
+    }
+
+    //invert the normal vector if sense is negative
+    r_line = sense * r_line;
+
+    //set result
+    Direction direction = line.getDirection();
+    direction.setVector(r_line);
+    line.setLine(line.getPosition(), direction);
+
+    return true;
+}
+
+/*!
+ * \brief RectifyToVector::setUpResult
+ * \param cylinder
+ * \return
+ */
+bool RectifyToVector::setUpResult(Cylinder &cylinder)
+{
+    //get and check cylinder
+    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
+        return false;
+    }
+    QPointer<Geometry> geometry = this->inputElements[0].at(0).geometry;
+    if(geometry.isNull() || !geometry->getIsSolved() || !geometry->hasDirection()){
+        return false;
+    }
+
+    //get the sense (positive or negative)
+    double sense = 1.0;
+    if(this->scalarInputParams.stringParameter.contains("sense")){
+        if(this->scalarInputParams.stringParameter.value("sense").compare("negative") == 0){
+            sense = -1.0;
+        }
+    }
+
+    //get the direction to compare
+    OiVec r_reference = geometry->getDirection().getVector();
+    r_reference.normalize();
+    OiVec r_cylinder = cylinder.getDirection().getVector();
+    r_cylinder.normalize();
+
+    //calculate the angle between both directions
+    double angle = 0.0;
+    OiVec::dot(angle, r_reference, r_cylinder);
+    angle = qAbs(qAcos(angle));
+
+    //invert the normal vector if the angle is greater than 90°
+    if(angle > PI/2.0){
+        r_cylinder = -1.0 * r_cylinder;
+    }
+
+    //invert the normal vector if sense is negative
+    r_cylinder = sense * r_cylinder;
+
+    //set result
+    Direction direction = cylinder.getDirection();
+    direction.setVector(r_cylinder);
+    cylinder.setCylinder(cylinder.getPosition(), direction, cylinder.getRadius());
+
+    return true;
 }
