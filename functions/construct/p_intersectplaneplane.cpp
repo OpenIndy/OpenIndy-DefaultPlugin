@@ -51,6 +51,13 @@ bool IntersectPlanePlane::setUpResult(Line &line){
             || !this->inputElements.contains(1) || this->inputElements[1].size() != 1){
         return false;
     }
+
+    //check if input elements are equal
+    if(this->inputElements[0].first().plane->getId() == this->inputElements[1].first().plane->getId()){
+        emit this->sendMessage(QString("Input geometries are equal."), eWarningMessage);
+        return false;
+    }
+
     QPointer<Plane> plane1 = this->inputElements[0].at(0).plane;
     QPointer<Plane> plane2 = this->inputElements[1].at(0).plane;
     if(plane1.isNull() || plane2.isNull() || !plane1->getIsSolved() || !plane2->getIsSolved()){

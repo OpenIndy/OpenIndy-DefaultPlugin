@@ -51,6 +51,13 @@ bool PointBetweenTwoPoints::setUpResult(Point &point){
             || !this->inputElements.contains(1) || this->inputElements.size() != 1){
         return false;
     }
+
+    //check if input elements are equal
+    if(this->inputElements[0].first().point->getId() == this->inputElements[1].first().point->getId()){
+        emit this->sendMessage(QString("Input geometries are equal."), eWarningMessage);
+        return false;
+    }
+
     QPointer<Point> point1 = this->inputElements[0].at(0).point;
     QPointer<Point> point2 = this->inputElements[1].at(0).point;
     if(point1.isNull() || point2.isNull() || !point1->getIsSolved() || !point2->getIsSolved()){
