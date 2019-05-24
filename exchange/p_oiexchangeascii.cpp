@@ -299,6 +299,10 @@ void OiExchangeAscii::importOiData(){
 
                     //set the point attribute depending on the current column
                     switch(this->userDefinedColumns.at(i)){
+                    case ExchangeSimpleAscii::eColumnCommonState:
+                        // I use QT property system for transportation, because "common" is not "common" of nominal point but actual point!
+                        myNominal->setProperty("OI_FEATURE_COMMONSTATE", columns.at(i));
+                        break;
                     case ExchangeSimpleAscii::eColumnFeatureName:
                         myNominal->setFeatureName(columns.at(i));
                         break;
