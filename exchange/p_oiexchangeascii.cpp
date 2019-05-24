@@ -261,15 +261,25 @@ void OiExchangeAscii::importOiData(){
             qint64 readSize = 0;
             qint64 numPoints = 0;
 
+            bool notSkipped = this->getSkipFirstLine();
             //read all lines
             QTextStream in(this->device);
             while (!in.atEnd()){
 
                 QString line = in.readLine();
-                //convert , to .
-                line.replace(",", ".");
-
                 readSize += line.size();
+
+                if(notSkipped // skip first line
+                   || line.startsWith("#") // skip comment
+                   || line.startsWith(";") // skip comment
+                   || line.trimmed().isEmpty() // skip empty lines
+                    ) {
+                    notSkipped = false;
+                    continue;
+                }
+
+                //convert , to .
+                line.replace(",", "."); // decimal separator TODO use locale format
 
                 //split the line at delimiter
                 QStringList columns = line.split(this->getDelimiter(this->usedDelimiter));
