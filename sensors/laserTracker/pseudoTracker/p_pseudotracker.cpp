@@ -216,22 +216,29 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
 
     QList<QPointer<Reading> > readings;
 
-    switch (mConfig.getTypeOfReading()) {
-    case ePolarReading:{
-        readings = measurePolar(mConfig);
-        break;
-    }case eDistanceReading:{
-        readings = measureDistance(mConfig);
-        break;
-    }case eDirectionReading:{
-        readings = measureDirection(mConfig);
-        break;
-    }case eCartesianReading:{
-        readings = measureCartesian(mConfig);
-        break;
-    }
-    default:
-        break;
+    const int faceCount = mConfig.getMeasureTwoSides() ? 2 : 1;
+    for(int face=0; face<faceCount; face++) {
+
+        switch (mConfig.getTypeOfReading()) {
+        case ePolarReading:{
+            readings += measurePolar(mConfig);
+            break;
+        }case eDistanceReading:{
+            readings += measureDistance(mConfig);
+            break;
+        }case eDirectionReading:{
+            readings += measureDirection(mConfig);
+            break;
+        }case eCartesianReading:{
+            readings += measureCartesian(mConfig);
+            break;
+        }
+        }
+
+        if(mConfig.getMeasureTwoSides() && face<(faceCount -1)) {
+            this->toggleSightOrientation();
+        }
+
     }
 
     if(readings.size() > 0){
@@ -430,7 +437,7 @@ QList<QPointer<Reading> > PseudoTracker::measurePolar(const MeasurementConfig &m
 
     QPointer<Reading> p = new Reading(rPolar);
 
-    p->setSensorFace(eFrontSide);
+    p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
     p->setMeasuredAt(QDateTime::currentDateTime());
 
     QThread::msleep(1000);
@@ -458,7 +465,7 @@ QList<QPointer<Reading> > PseudoTracker::measureDistance(const MeasurementConfig
 
     QPointer<Reading> p = new Reading(rDistance);
 
-    p->setSensorFace(eFrontSide);
+    p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
     p->setMeasuredAt(QDateTime::currentDateTime());
 
     QThread::msleep(1000);
@@ -489,7 +496,7 @@ QList<QPointer<Reading> > PseudoTracker::measureDirection(const MeasurementConfi
 
     QPointer<Reading> p = new Reading(rDirection);
 
-    p->setSensorFace(eFrontSide);
+    p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
     p->setMeasuredAt(QDateTime::currentDateTime());
 
     QThread::msleep(1000);
@@ -523,7 +530,7 @@ QList<QPointer<Reading> > PseudoTracker::measureCartesian(const MeasurementConfi
 
     QPointer<Reading> p = new Reading(rCartesian);
 
-    p->setSensorFace(eFrontSide);
+    p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
     p->setMeasuredAt(QDateTime::currentDateTime());
 
     QThread::msleep(1000);
