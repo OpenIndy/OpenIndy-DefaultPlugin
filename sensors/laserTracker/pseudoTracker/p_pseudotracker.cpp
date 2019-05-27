@@ -178,11 +178,7 @@ bool PseudoTracker::home(){
  * \return
  */
 bool PseudoTracker::changeMotorState(){
-    if(this->myMotor){
-        this->myMotor = false;
-    }else{
-        this->myMotor = true;
-    }
+    this->myMotor = !this->myMotor;
     QThread::msleep(1000);
     return true;
 }
