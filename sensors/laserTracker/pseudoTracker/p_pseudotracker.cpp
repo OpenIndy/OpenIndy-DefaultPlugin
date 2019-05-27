@@ -188,7 +188,7 @@ bool PseudoTracker::changeMotorState(){
  * \return
  */
 bool PseudoTracker::toggleSightOrientation(){
-    if(this->side = 1){
+    if(this->side == 1){
         this->side = 2;
     }else{
         this->side = 1;
