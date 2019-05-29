@@ -49,16 +49,9 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
         emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
         return false;
     }
+    QList<QPointer<Observation> > allUsableObservations;
     QList<QPointer<Observation> > inputObservations;
-    foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
-                && element.shouldBeUsed){
-            inputObservations.append(element.observation);
-            this->setIsUsed(0, element.id, true);
-            continue;
-        }
-        this->setIsUsed(0, element.id, false);
-    }
+    filterObservations(allUsableObservations, inputObservations);
     if(inputObservations.size() < 5){
         emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
         return false;
