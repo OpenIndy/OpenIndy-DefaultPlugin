@@ -226,16 +226,10 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         v_all = v_circle + v_plane;
 
         //set up display residual
-        Residual residual;
-        residual.elementId = observation->getId();
-        residual.dimension = eMetric;
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_all.getAt(0));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_all.getAt(1));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_all.getAt(2));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_all.getAt(0) * v_all.getAt(0)
-                                                                                                     + v_all.getAt(1) * v_all.getAt(1)
-                                                                                                     + v_all.getAt(2) * v_all.getAt(2)));
-        this->statistic.addDisplayResidual(residual);
+        addDisplayResidual(observation->getId(), v_all.getAt(0), v_all.getAt(1), v_all.getAt(2),
+                           qSqrt(v_all.getAt(0) * v_all.getAt(0)
+                                + v_all.getAt(1) * v_all.getAt(1)
+                                + v_all.getAt(2) * v_all.getAt(2)));
 
     }
 

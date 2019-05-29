@@ -928,15 +928,10 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         v_obs = distance * v_obs;
 
         //set up display residuals
-        Residual residual;
-        residual.elementId = obs->getId();
-        residual.dimension = eMetric;
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_obs.getAt(0));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_obs.getAt(1));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_obs.getAt(2));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
-                                                                                                + v_obs.getAt(2) * v_obs.getAt(2)));
-        this->statistic.addDisplayResidual(residual);
+        addDisplayResidual(obs->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
+                           qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
+                                + v_obs.getAt(2) * v_obs.getAt(2))
+                           );
 
         sumVV += distance * distance;
 
@@ -1625,15 +1620,10 @@ bool BestFitCylinder::fitTest(Cylinder &cylinder, const QList<QPointer<Observati
         v_obs = distance * v_obs;
 
         //set up display residuals
-        Residual residual;
-        residual.elementId = obs->getId();
-        residual.dimension = eMetric;
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_obs.getAt(0));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_obs.getAt(1));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_obs.getAt(2));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
-                                                                                                + v_obs.getAt(2) * v_obs.getAt(2)));
-        this->statistic.addDisplayResidual(residual);
+        addDisplayResidual(obs->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
+                            qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
+                                + v_obs.getAt(2) * v_obs.getAt(2))
+                           );
 
         sumVV += distance * distance;
 

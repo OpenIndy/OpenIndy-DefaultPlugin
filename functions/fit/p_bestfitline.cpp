@@ -122,16 +122,10 @@ bool BestFitLine::setUpResult(Line &line){
         v_line.setAt(2, observation->getXYZ().getAt(2) - v_line.getAt(2));
 
         //set up display residual
-        Residual residual;
-        residual.elementId = observation->getId();
-        residual.dimension = eMetric;
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_line.getAt(0));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_line.getAt(1));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_line.getAt(2));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), qSqrt(v_line.getAt(0) * v_line.getAt(0)
-                                                                                                     + v_line.getAt(1) * v_line.getAt(1)
-                                                                                                     + v_line.getAt(2) * v_line.getAt(2)));
-        this->statistic.addDisplayResidual(residual);
+        addDisplayResidual(observation->getId(), v_line.getAt(0), v_line.getAt(1), v_line.getAt(2),
+                                qSqrt(v_line.getAt(0) * v_line.getAt(0)
+                                    + v_line.getAt(1) * v_line.getAt(1)
+                                    + v_line.getAt(2) * v_line.getAt(2)));
 
     }
 

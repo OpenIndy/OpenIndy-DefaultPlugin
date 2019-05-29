@@ -115,14 +115,7 @@ bool BestFitPoint::setUpResult(Point &point){
             qDebug() << "used observation: " << observation->getId();
         }
 
-        Residual residual;
-        residual.elementId = observation->getId();
-        residual.dimension = eMetric;
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), _vx);
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), _vy);
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), _vz);
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), _corr);
-        this->statistic.addDisplayResidual(residual);
+        addDisplayResidual(observation->getId(), _vx, _vy, _vz, _corr);
     }
 
     //calculate standard deviation
