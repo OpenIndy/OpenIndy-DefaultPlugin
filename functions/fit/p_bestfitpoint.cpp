@@ -52,19 +52,7 @@ bool BestFitPoint::setUpResult(Point &point){
 
     QList<QPointer<Observation> > allUsableObservations;
     QList<QPointer<Observation> > inputObservations;
-    foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull()
-                && element.observation->getIsSolved()
-                && element.observation->getIsValid()) {
-            allUsableObservations.append(element.observation);
-            this->setIsUsed(0, element.id, element.shouldBeUsed);
-            if(element.shouldBeUsed){
-                inputObservations.append(element.observation);
-            }
-            continue;
-        }
-        this->setIsUsed(0, element.id, false);
-    }
+    filterObservations(allUsableObservations, inputObservations);
     if(inputObservations.size() < 1){
         emit this->sendMessage(QString("Not enough valid observations to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
         return false;
