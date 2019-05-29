@@ -50,16 +50,9 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         emit this->sendMessage(QString("Not enough valid observations to fit the circle %1").arg(circle.getFeatureName()), eWarningMessage);
         return false;
     }
+    QList<QPointer<Observation> > allUsableObservations;
     QList<QPointer<Observation> > inputObservations;
-    foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
-                && element.shouldBeUsed){
-            inputObservations.append(element.observation);
-            this->setIsUsed(0, element.id, true);
-            continue;
-        }
-        this->setIsUsed(0, element.id, false);
-    }
+    filterObservations(allUsableObservations, inputObservations);
     if(inputObservations.size() < 3){
         emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(circle.getFeatureName()), eWarningMessage);
         return false;
