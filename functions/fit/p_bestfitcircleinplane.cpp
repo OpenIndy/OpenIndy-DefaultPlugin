@@ -131,13 +131,18 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
 
     //calculate centroid reduced coordinates in 2D space
     QList<OiVec> centroidReducedCoordinates;
+    QList<OiVec> allCentroidReducedCoordinates;
     OiVec xyz(4);
-    for(int i = 0; i < inputObservations.size(); i++){
-        xyz = inputObservations.at(i)->getXYZ();
+    foreach(const QPointer<Observation> &observation, allUsableObservations){
+        xyz = observation->getXYZ();
         xyz.removeLast(); //remove the homogeneous item
         xyz = t * xyz;
         xyz.removeLast();
-        centroidReducedCoordinates.append(xyz - centroid2D);
+        OiVec reduced = xyz - centroid2D;
+        allCentroidReducedCoordinates.append(reduced);
+        if(inputObservations.contains(observation)) {
+            centroidReducedCoordinates.append(reduced);
+        }
         xyz.add(1.0); //add two items so xyz is of size 4 again
         xyz.add(1.0);
     }
@@ -172,19 +177,23 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
 
     //calculate distance of each observation from the 2D circle
     OiVec circleDistances;
-    OiVec diff(2);
-    for(int i = 0; i < centroidReducedCoordinates.size(); i++){
-
-        diff.setAt(0, centroidReducedCoordinates.at(i).getAt(0) + centroid2D.getAt(0) - xm.getAt(0));
-        diff.setAt(1, centroidReducedCoordinates.at(i).getAt(1) + centroid2D.getAt(1) - xm.getAt(1));
+    OiVec allCircleDistances;
+    int i=0;
+    foreach(const QPointer<Observation> &observation, allUsableObservations){
+        OiVec reduced = allCentroidReducedCoordinates[i++];
+        OiVec diff(2);
+        diff.setAt(0, reduced.getAt(0) + centroid2D.getAt(0) - xm.getAt(0));
+        diff.setAt(1, reduced.getAt(1) + centroid2D.getAt(1) - xm.getAt(1));
 
         double distance = 0.0;
         OiVec::dot(distance, diff, diff);
         distance = qSqrt(distance);
         distance = qAbs(distance - radius);
 
-        circleDistances.add(distance);
-
+        allCircleDistances.add(distance);
+        if(inputObservations.contains(observation)) {
+            circleDistances.add(distance);
+        }
     }
 
     //transform center into 3D space
@@ -192,23 +201,25 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
     xm = t_inv * xm;
 
     //calculate 3D residuals for each observation
-    OiVec v_circle(3);
-    OiVec v_plane(3);
-    OiVec v_all(3);
-    double distance = 0.0;
-    for(int i = 0; i < centroidReducedCoordinates.size(); i++){
+    for(int i = 0; i < allUsableObservations.size(); i++){
+        const QPointer<Observation> &observation = allUsableObservations[i];
+        OiVec reduced = allCentroidReducedCoordinates[i];
+
+        OiVec v_circle(3);
+        OiVec v_plane(3);
+        OiVec v_all(3);
 
         //calculate residual vector of 2D circle fit
-        v_circle.setAt(0, centroidReducedCoordinates.at(i).getAt(0) + centroid2D.getAt(0) - xm.getAt(0));
-        v_circle.setAt(1, centroidReducedCoordinates.at(i).getAt(1) + centroid2D.getAt(1) - xm.getAt(1));
+        v_circle.setAt(0, reduced.getAt(0) + centroid2D.getAt(0) - xm.getAt(0));
+        v_circle.setAt(1, reduced.getAt(1) + centroid2D.getAt(1) - xm.getAt(1));
         v_circle.setAt(2, 0.0);
         v_circle.normalize();
-        v_circle = circleDistances.getAt(i) * v_circle;
+        v_circle = allCircleDistances.getAt(i) * v_circle; // TODO
         v_circle = t_inv * v_circle;
 
         //calculate residual vector of plane fit
-        distance = n.getAt(0) * inputObservations[i]->getXYZ().getAt(0) + n.getAt(1) * inputObservations[i]->getXYZ().getAt(1)
-                + n.getAt(2) * inputObservations[i]->getXYZ().getAt(2) - dOrigin;
+        double distance = n.getAt(0) * observation->getXYZ().getAt(0) + n.getAt(1) * observation->getXYZ().getAt(1)
+                + n.getAt(2) * observation->getXYZ().getAt(2) - dOrigin;
         v_plane = distance * n;
 
         //calculate the at all residual vector
@@ -216,7 +227,7 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
 
         //set up display residual
         Residual residual;
-        residual.elementId = inputObservations[i]->getId();
+        residual.elementId = observation->getId();
         residual.dimension = eMetric;
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_all.getAt(0));
         residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_all.getAt(1));
