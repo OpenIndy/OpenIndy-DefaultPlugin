@@ -65,11 +65,15 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     centroid = centroid / (double)inputObservations.size();
 
     //calculate centroid reduced observations
+    QList<QPointer<Observation> > allReducedInputObservations;
     QList<QPointer<Observation> > reducedInputObservations;
-    foreach(const QPointer<Observation> &obs, inputObservations){
+    foreach(const QPointer<Observation> &obs, allUsableObservations){
         Observation *rObs = new Observation(*obs.data());
         rObs->setXYZ(obs->getXYZ() - centroid);
-        reducedInputObservations.append(rObs);
+        allReducedInputObservations.append(rObs);
+        if(inputObservations.contains(obs)) {
+            reducedInputObservations.append(rObs);
+        }
     }
 
     //approximate cylinder by 2D circle fit
@@ -88,7 +92,7 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
             stdev = stdev;
         }
 
-        bool success = this->fitCylinder(cylinder, reducedInputObservations, this->approximations[i]);
+        bool success = this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, this->approximations[i]);
         if(success && cylinder.getStatistic().getStdev() < stdev){
             bestSolution = i;
             stdev = cylinder.getStatistic().getStdev();
@@ -139,7 +143,7 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
 
 
 
-    if(!this->fitCylinder(cylinder, reducedInputObservations, this->approximations[bestSolution])){
+    if(!this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, this->approximations[bestSolution])){
         return false;
     }
 
@@ -588,7 +592,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
  * \param approximation
  * \return
  */
-bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, const CylinderApproximation &approximation){
+bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, const QList<QPointer<Observation> > &allUsableObservations, const CylinderApproximation &approximation){
 
     //get the number of observations
     int numPoints = inputObservations.size();
@@ -893,14 +897,11 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
 
     //calculate sum vv
     double sumVV = 0.0;
-    OiVec v_obs(3);
-    for(int i = 0; i < numPoints; i++){
-
-        QPointer<Observation> obs = inputObservations.at(i);
-
-        _x = obs->getXYZ().getAt(0);
-        _y = obs->getXYZ().getAt(1);
-        _z = obs->getXYZ().getAt(2);
+    foreach(const QPointer<Observation> &observation, allUsableObservations){
+        OiVec v_obs(3);
+        _x = observation->getXYZ().getAt(0);
+        _y = observation->getXYZ().getAt(1);
+        _z = observation->getXYZ().getAt(2);
 
         float b[3]; //vector between point on cylinder axis and point p which is probably on cylinder
         b[0] = _x - xyz.getAt(0);
@@ -928,12 +929,14 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         v_obs = distance * v_obs;
 
         //set up display residuals
-        addDisplayResidual(obs->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
+        addDisplayResidual(observation->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
                            qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
                                 + v_obs.getAt(2) * v_obs.getAt(2))
                            );
 
-        sumVV += distance * distance;
+        if(inputObservations.contains(observation)) {
+            sumVV += distance * distance;
+        }
 
     }
 
@@ -1048,7 +1051,7 @@ bool BestFitCylinder::test(Cylinder &cylinder){
     int bestSolution = -1;
     double stdev = numeric_limits<double>::max();
     for(int i = 0; i < this->approximations.size(); i++){
-        bool success = this->fitCylinder(cylinder, inputObservations, this->approximations[i]);
+        bool success = this->fitCylinder(cylinder, inputObservations, inputObservations, this->approximations[i]);
         if(success && cylinder.getStatistic().getStdev() < stdev){
             bestSolution = i;
             stdev = cylinder.getStatistic().getStdev();
@@ -1585,14 +1588,11 @@ bool BestFitCylinder::fitTest(Cylinder &cylinder, const QList<QPointer<Observati
 
     //calculate sum vv
     double sumVV = 0.0;
-    OiVec v_obs(3);
-    for(int i = 0; i < numPoints; i++){
-
-        QPointer<Observation> obs = inputObservations.at(i);
-
-        _x = obs->getXYZ().getAt(0);
-        _y = obs->getXYZ().getAt(1);
-        _z = obs->getXYZ().getAt(2);
+    foreach(const QPointer<Observation> &observation, inputObservations){
+        OiVec v_obs(3);
+        _x = observation->getXYZ().getAt(0);
+        _y = observation->getXYZ().getAt(1);
+        _z = observation->getXYZ().getAt(2);
 
         float b[3]; //vector between point on cylinder axis and point p which is probably on cylinder
         b[0] = _x - xyz.getAt(0);
@@ -1620,13 +1620,14 @@ bool BestFitCylinder::fitTest(Cylinder &cylinder, const QList<QPointer<Observati
         v_obs = distance * v_obs;
 
         //set up display residuals
-        addDisplayResidual(obs->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
+        addDisplayResidual(observation->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
                             qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
                                 + v_obs.getAt(2) * v_obs.getAt(2))
                            );
 
-        sumVV += distance * distance;
-
+        if(inputObservations.contains(observation)) {
+            sumVV += distance * distance;
+        }
     }
 
     //set up result

@@ -57,7 +57,7 @@ private:
     bool setUpResult(Cylinder &cylinder);
 
     bool approximateCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations);
-    bool fitCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, const CylinderApproximation &approximation);
+    bool fitCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, const QList<QPointer<Observation> > &allUsableObservations, const CylinderApproximation &approximation);
 
     double getCorrespondingCos(double a);
     double getCorrespondingSin(double a);
