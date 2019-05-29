@@ -61,7 +61,9 @@ bool BestFitPoint::setUpResult(Point &point){
             if(element.shouldBeUsed){
                 inputObservations.append(element.observation);
             }
+            continue;
         }
+        this->setIsUsed(0, element.id, false);
     }
     if(inputObservations.size() < 1){
         emit this->sendMessage(QString("Not enough valid observations to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
