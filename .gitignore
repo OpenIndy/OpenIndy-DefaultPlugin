@@ -12,6 +12,7 @@
 
 *.bak
 *.pdb
+*.tmp
 
 # directories
 bin/
