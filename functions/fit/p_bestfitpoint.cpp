@@ -49,16 +49,10 @@ bool BestFitPoint::setUpResult(Point &point){
         emit this->sendMessage(QString("Not enough valid observations to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
         return false;
     }
+
+    QList<QPointer<Observation> > allUsableObservations;
     QList<QPointer<Observation> > inputObservations;
-    foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
-                && element.shouldBeUsed){
-            inputObservations.append(element.observation);
-            this->setIsUsed(0, element.id, true);
-            continue;
-        }
-        this->setIsUsed(0, element.id, false);
-    }
+    filterObservations(allUsableObservations, inputObservations);
     if(inputObservations.size() < 1){
         emit this->sendMessage(QString("Not enough valid observations to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
         return false;
@@ -103,18 +97,25 @@ bool BestFitPoint::setUpResult(Point &point){
 
     //calculate point based corrections
     OiVec corr;
-    for(int i = 0; i < inputObservations.size(); i++){
-        corr.add(qSqrt(v.getAt(3*i)*v.getAt(3*i)
-                       + v.getAt(3*i+1)*v.getAt(3*i+1)
-                       + v.getAt(3*i+2)*v.getAt(3*i+2)));
-        Residual residual;
-        residual.elementId = inputObservations[i]->getId();
-        residual.dimension = eMetric;
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v.getAt(3*i));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v.getAt(3*i+1));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v.getAt(3*i+2));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), corr.getAt(i));
-        this->statistic.addDisplayResidual(residual);
+
+    foreach(const QPointer<Observation> &observation, allUsableObservations){
+
+        double _vx = x.getAt(0) - observation->getXYZ().getAt(0);
+        double _vy = x.getAt(1) - observation->getXYZ().getAt(1);
+        double _vz = x.getAt(2) - observation->getXYZ().getAt(2);
+
+        double _corr = qSqrt(
+                            qPow(_vx, 2)
+                          + qPow(_vy, 2)
+                          + qPow(_vz, 2)
+                          );
+
+        if(inputObservations.contains(observation)) {
+            corr.add(_corr);
+            qDebug() << "used observation: " << observation->getId();
+        }
+
+        addDisplayResidual(observation->getId(), _vx, _vy, _vz, _corr);
     }
 
     //calculate standard deviation

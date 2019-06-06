@@ -49,16 +49,10 @@ bool BestFitPlane::setUpResult(Plane &plane){
         emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(plane.getFeatureName()), eWarningMessage);
         return false;
     }
+
+    QList<QPointer<Observation> > allUsableObservations;
     QList<QPointer<Observation> > inputObservations;
-    foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
-                && element.shouldBeUsed){
-            inputObservations.append(element.observation);
-            this->setIsUsed(0, element.id, true);
-            continue;
-        }
-        this->setIsUsed(0, element.id, false);
-    }
+    filterObservations(allUsableObservations, inputObservations);
     if(inputObservations.size() < 3){
         emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(plane.getFeatureName()), eWarningMessage);
         return false;
@@ -102,24 +96,16 @@ bool BestFitPlane::setUpResult(Plane &plane){
     double dOrigin = n.getAt(0) * centroid.getAt(0) + n.getAt(1) * centroid.getAt(1) + n.getAt(2) * centroid.getAt(2);
 
     //calculate display residuals for each observation
-    double distance = 0.0;
-    OiVec v_plane(3);
-    for(int i = 0; i < inputObservations.size(); i++){
+    foreach(const QPointer<Observation> &observation, allUsableObservations){
 
         //calculate residual vector
-        distance = n.getAt(0) * inputObservations[i]->getXYZ().getAt(0) + n.getAt(1) * inputObservations[i]->getXYZ().getAt(1)
-                + n.getAt(2) * inputObservations[i]->getXYZ().getAt(2) - dOrigin;
-        v_plane = distance * n;
+        double distance = n.getAt(0) * observation->getXYZ().getAt(0)
+                + n.getAt(1) * observation->getXYZ().getAt(1)
+                + n.getAt(2) * observation->getXYZ().getAt(2) - dOrigin;
+        OiVec v_plane = distance * n;
 
         //set up display residual
-        Residual residual;
-        residual.elementId = inputObservations[i]->getId();
-        residual.dimension = eMetric;
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVX), v_plane.getAt(0));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVY), v_plane.getAt(1));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayVZ), v_plane.getAt(2));
-        residual.corrections.insert(getObservationDisplayAttributesName(eObservationDisplayV), distance);
-        this->statistic.addDisplayResidual(residual);
+        addDisplayResidual(observation->getId(), v_plane.getAt(0), v_plane.getAt(1), v_plane.getAt(2), distance);
 
     }
 
