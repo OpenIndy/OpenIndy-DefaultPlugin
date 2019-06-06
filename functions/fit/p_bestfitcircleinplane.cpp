@@ -214,7 +214,7 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         v_circle.setAt(1, reduced.getAt(1) + centroid2D.getAt(1) - xm.getAt(1));
         v_circle.setAt(2, 0.0);
         v_circle.normalize();
-        v_circle = allCircleDistances.getAt(i) * v_circle; // TODO
+        v_circle = allCircleDistances.getAt(i) * v_circle;
         v_circle = t_inv * v_circle;
 
         //calculate residual vector of plane fit
