@@ -3,6 +3,7 @@
 # Project created by QtCreator 2013-10-12T15:43:14
 #
 #-------------------------------------------------
+CONFIG += c++11
 
 QT       += core gui widgets serialport xml
 
