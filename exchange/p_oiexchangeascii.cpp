@@ -18,6 +18,7 @@ void OiExchangeAscii::init(){
 
     //set supported geometries
     this->supportedGeometries.append(ePointGeometry);
+    this->supportedGeometries.append(ePlaneGeometry);
 
 }
 
