@@ -263,186 +263,185 @@ void OiExchangeAscii::importOiData(){
         //set the number of error prone lines to 0
         int numErrors = 0;
 
-        switch(this->typeOfGeometry){
-        case ePointGeometry:
+        //check if device exists
+        if(this->device.isNull()){
+            emit this->importFinished(false);
+            return;
+        }
 
-            //check if device exists
-            if(this->device.isNull()){
-                emit this->importFinished(false);
-                return;
+        //if device is not opened yet, open it
+        if(!this->device->isOpen()){
+            this->device->open(QIODevice::ReadOnly | QIODevice::Text);
+        }
+
+        qint64 fileSize = this->device->size();
+        qint64 readSize = 0;
+        qint64 numPoints = 0;
+
+        bool notSkipped = this->getSkipFirstLine();
+        //read all lines
+        QTextStream in(this->device);
+        while (!in.atEnd()){
+
+            QString line = in.readLine();
+            readSize += line.size();
+
+            if(notSkipped // skip first line
+               || line.startsWith("#") // skip comment
+               || line.startsWith(";") // skip comment
+               || line.trimmed().isEmpty() // skip empty lines
+                ) {
+                notSkipped = false;
+                continue;
             }
 
-            //if device is not opened yet, open it
-            if(!this->device->isOpen()){
-                this->device->open(QIODevice::ReadOnly | QIODevice::Text);
-            }
+            //convert , to .
+            line.replace(",", "."); // decimal separator TODO use locale format
 
-            qint64 fileSize = this->device->size();
-            qint64 readSize = 0;
-            qint64 numPoints = 0;
+            //split the line at delimiter
+            QStringList columns = line.split(this->getDelimiter(this->usedDelimiter));
 
-            bool notSkipped = this->getSkipFirstLine();
-            //read all lines
-            QTextStream in(this->device);
-            while (!in.atEnd()){
+            bool errorWhileParsing = false;
 
-                QString line = in.readLine();
-                readSize += line.size();
+            ColumnData columnData = { "", "", "", "", OiVec(3), OiVec(3)};
 
-                if(notSkipped // skip first line
-                   || line.startsWith("#") // skip comment
-                   || line.startsWith(";") // skip comment
-                   || line.trimmed().isEmpty() // skip empty lines
-                    ) {
-                    notSkipped = false;
-                    continue;
+            for(int i = 0; i < columns.size(); i++){
+
+                //stop parsing if the current line has too many columns
+                if(this->userDefinedColumns.size() <= i){
+                    break;
                 }
 
-                //convert , to .
-                line.replace(",", "."); // decimal separator TODO use locale format
+                //set the point attribute depending on the current column
+                switch(this->userDefinedColumns.at(i)){
+                case ExchangeSimpleAscii::eColumnCommonState:
+                    // I use QT property system for transportation, because "common" is not "common" of nominal point but actual point!
+                    columnData.oiFeatureCommonState = columns.at(i);
+                    break;
+                case ExchangeSimpleAscii::eColumnFeatureName:
+                    columnData.featureName = columns.at(i);
+                    break;
+                case ExchangeSimpleAscii::eColumnComment:
+                    columnData.comment = columns.at(i);
+                    break;
+                case ExchangeSimpleAscii::eColumnGroupName:
+                    columnData.groupName = columns.at(i);
+                    break;
+                case ExchangeSimpleAscii::eColumnX:{
 
-                //split the line at delimiter
-                QStringList columns = line.split(this->getDelimiter(this->usedDelimiter));
+                    double x = 0.0;
+                    x = columns.at(i).toDouble(&errorWhileParsing);
+                    errorWhileParsing = !errorWhileParsing;
 
-
-                //create a point object
-                QPointer<Point> myNominal = new Point(true);
-
-                bool errorWhileParsing = false;
-
-                for(int i = 0; i < columns.size(); i++){
-
-                    //stop parsing if the current line has too many columns
-                    if(this->userDefinedColumns.size() <= i){
-                        break;
+                    //transform the unit of the imported coordinate to [m]
+                    if(this->units.contains(eMetric) && this->units.value(eMetric) != eUnitMeter){
+                        x = convertToDefault(x, this->units.value(eMetric));
                     }
 
-                    //set the point attribute depending on the current column
-                    switch(this->userDefinedColumns.at(i)){
-                    case ExchangeSimpleAscii::eColumnCommonState:
-                        // I use QT property system for transportation, because "common" is not "common" of nominal point but actual point!
-                        myNominal->setProperty("OI_FEATURE_COMMONSTATE", columns.at(i));
-                        break;
-                    case ExchangeSimpleAscii::eColumnFeatureName:
-                        myNominal->setFeatureName(columns.at(i));
-                        break;
-                    case ExchangeSimpleAscii::eColumnComment:
-                        myNominal->setComment(columns.at(i));
-                        break;
-                    case ExchangeSimpleAscii::eColumnGroupName:
-                        myNominal->setGroupName(columns.at(i));
-                        break;
-                    case ExchangeSimpleAscii::eColumnX:{
-
-                        double x = 0.0;
-                        x = columns.at(i).toDouble(&errorWhileParsing);
-                        errorWhileParsing = !errorWhileParsing;
-
-                        //transform the unit of the imported coordinate to [m]
-                        if(this->units.contains(eMetric) && this->units.value(eMetric) != eUnitMeter){
-                            x = convertToDefault(x, this->units.value(eMetric));
-                        }
-
-                        if(!errorWhileParsing){
-                            Position position = myNominal->getPosition();
-                            OiVec vec = position.getVector();
-                            vec.setAt(0, x);
-                            position.setVector(vec);
-                            myNominal->setPoint(position);
-                        }
-
-                        break;
-
-                    }case ExchangeSimpleAscii::eColumnY:{
-
-                        double y = 0.0;
-                        y = columns.at(i).toDouble(&errorWhileParsing);
-                        errorWhileParsing = !errorWhileParsing;
-
-                        //transform the unit of the imported coordinate to [m]
-                        if(this->units.contains(eMetric) && this->units.value(eMetric) != eUnitMeter){
-                            y = convertToDefault(y, this->units.value(eMetric));
-                        }
-
-                        if(!errorWhileParsing){
-                            Position position = myNominal->getPosition();
-                            OiVec vec = position.getVector();
-                            vec.setAt(1, y);
-                            position.setVector(vec);
-                            myNominal->setPoint(position);
-                        }
-
-                        break;
-
-                    }case ExchangeSimpleAscii::eColumnZ:{
-
-                        double z = 0.0;
-                        z = columns.at(i).toDouble(&errorWhileParsing);
-                        errorWhileParsing = !errorWhileParsing;
-
-                        //transform the unit of the imported coordinate to [m]
-                        if(this->units.contains(eMetric) && this->units.value(eMetric) != eUnitMeter){
-                            z = convertToDefault(z, this->units.value(eMetric));
-                        }
-
-                        if(!errorWhileParsing){
-                            Position position = myNominal->getPosition();
-                            OiVec vec = position.getVector();
-                            vec.setAt(2, z);
-                            position.setVector(vec);
-                            myNominal->setPoint(position);
-                        }
-
-                        break;
-
-                    }case ExchangeSimpleAscii::eColumnIgnore:{
-                        break;
-                    }}
-
-                    //if an error occured continue with the next line
-                    if(errorWhileParsing){
-                        numErrors++;
-                        delete myNominal;
-                        break;
+                    if(!errorWhileParsing){
+                        columnData.position.setAt(0, x);
                     }
 
+                    break;
+
+                }case ExchangeSimpleAscii::eColumnY:{
+
+                    double y = 0.0;
+                    y = columns.at(i).toDouble(&errorWhileParsing);
+                    errorWhileParsing = !errorWhileParsing;
+
+                    //transform the unit of the imported coordinate to [m]
+                    if(this->units.contains(eMetric) && this->units.value(eMetric) != eUnitMeter){
+                        y = convertToDefault(y, this->units.value(eMetric));
+                    }
+
+                    if(!errorWhileParsing){
+                        columnData.position.setAt(1, y);
+                    }
+
+                    break;
+
+                }case ExchangeSimpleAscii::eColumnZ:{
+
+                    double z = 0.0;
+                    z = columns.at(i).toDouble(&errorWhileParsing);
+                    errorWhileParsing = !errorWhileParsing;
+
+                    //transform the unit of the imported coordinate to [m]
+                    if(this->units.contains(eMetric) && this->units.value(eMetric) != eUnitMeter){
+                        z = convertToDefault(z, this->units.value(eMetric));
+                    }
+
+                    if(!errorWhileParsing){
+                        columnData.position.setAt(2, z);
+                    }
+
+                    break;
+
+                }case ExchangeSimpleAscii::eColumnIgnore:{
+                    break;
+                }}
+
+                //if an error occured continue with the next line
+                if(errorWhileParsing){
+                    numErrors++;
+                    break;
                 }
 
-                //set group of the geometry
-                if(this->groupName.compare("") != 0){
-                    myNominal->setGroupName(this->groupName);
-                }
+            } // loop over colums
 
-                //set nominal system
-                myNominal->setNominalSystem(this->nominalSystem);
 
-                //add the imported nominal to OpenIndy
-                if(!errorWhileParsing){
+
+            //create geometry and add the imported nominal to OpenIndy
+            if(!errorWhileParsing){
+                switch (this->typeOfGeometry) {
+                case ePointGeometry:
+
+                    QPointer<Point> myNominal = new Point(true);
+                    myNominal->setProperty("OI_FEATURE_COMMONSTATE",columnData.oiFeatureCommonState);
+
+                    myNominal->setFeatureName(columnData.featureName);
+                    myNominal->setGroupName(columnData.groupName);
+                    myNominal->setComment(columnData.comment);
+                    myNominal->setPoint(Position(columnData.position));
+
+                    //set group of the geometry
+                    if(this->groupName.compare("") != 0){
+                        myNominal->setGroupName(this->groupName);
+                    }
+
+                    //set nominal system
+                    myNominal->setNominalSystem(this->nominalSystem);
+
                     QPointer<FeatureWrapper> myGeometry = new FeatureWrapper();
                     myGeometry->setPoint(myNominal);
                     this->features.append(myGeometry);
+
+                    break;
+
                 }
 
-                //update import progress
-                int progress = (int)(((float)readSize / (float)fileSize) * 100.0);
-                if(progress == 100){
-                    progress = 99;
-                }
-                numPoints++;
-                emit this->updateProgress(progress, QString("%1 nominal(s) loaded").arg(numPoints) );
-                readSize += 2;
+
+
 
             }
 
-            //close the device
-            this->device->close();
-
-            //emit import finished signal
-            emit this->importFinished(true);
-
-            break;
+            //update import progress
+            int progress = (int)(((float)readSize / (float)fileSize) * 100.0);
+            if(progress == 100){
+                progress = 99;
+            }
+            numPoints++;
+            emit this->updateProgress(progress, QString("%1 nominal(s) loaded").arg(numPoints) );
+            readSize += 2;
 
         }
+
+        //close the device
+        this->device->close();
+
+        //emit import finished signal
+        emit this->importFinished(true);
 
     }catch(const exception &e){
         emit this->sendMessage(e.what(), eErrorMessage, eMessageBoxMessage);
