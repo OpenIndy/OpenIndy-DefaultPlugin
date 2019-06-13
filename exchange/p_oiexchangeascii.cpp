@@ -386,9 +386,54 @@ void OiExchangeAscii::importOiData(){
 
                     break;
 
-                }case ExchangeSimpleAscii::eColumnIgnore:{
+                }case ExchangeSimpleAscii::eColumnIgnore:
                     break;
-                }}
+                case ExchangeSimpleAscii::eColumnPrimaryI:
+                {
+                    double value = columns.at(i).toDouble(&errorWhileParsing);
+                    errorWhileParsing = !errorWhileParsing;
+
+                    //transform the unit of the imported coordinate to [m]
+                    if(this->units.contains(eAngular) && this->units.value(eAngular) != eUnitDecimalDegree){
+                        value = convertToDefault(value, this->units.value(eAngular));
+                    }
+
+                    if(!errorWhileParsing){
+                        columnData.direction.setAt(0, value);
+                    }
+                    break;
+                }
+                case ExchangeSimpleAscii::eColumnPrimaryJ:
+                {
+                    double value = columns.at(i).toDouble(&errorWhileParsing);
+                    errorWhileParsing = !errorWhileParsing;
+
+                    //transform the unit of the imported coordinate to [m]
+                    if(this->units.contains(eAngular) && this->units.value(eAngular) != eUnitDecimalDegree){
+                        value = convertToDefault(value, this->units.value(eAngular));
+                    }
+
+                    if(!errorWhileParsing){
+                        columnData.direction.setAt(1, value);
+                    }
+                    break;
+                }
+                case ExchangeSimpleAscii::eColumnPrimaryK:
+                {
+                    double value = columns.at(i).toDouble(&errorWhileParsing);
+                    errorWhileParsing = !errorWhileParsing;
+
+                    //transform the unit of the imported coordinate to [m]
+                    if(this->units.contains(eAngular) && this->units.value(eAngular) != eUnitDecimalDegree){
+                        value = convertToDefault(value, this->units.value(eAngular));
+                    }
+
+                    if(!errorWhileParsing){
+                        columnData.direction.setAt(2, value);
+                    }
+                    break;
+                }
+                }
 
                 //if an error occured continue with the next line
                 if(errorWhileParsing){
