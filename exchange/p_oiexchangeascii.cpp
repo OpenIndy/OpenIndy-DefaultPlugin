@@ -1,5 +1,14 @@
 #include "p_oiexchangeascii.h"
 
+struct ColumnData {
+    QString featureName;
+    QString comment;
+    QString groupName;
+    QString oiFeatureCommonState;
+    OiVec position;
+    OiVec direction;
+};
+
 /*!
  * \brief OiExchangeAscii::init
  */
