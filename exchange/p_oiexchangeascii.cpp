@@ -60,6 +60,13 @@ QList<ExchangeSimpleAscii::ColumnType> OiExchangeAscii::getDefaultColumnOrder(co
 
             QString line = in.readLine();
 
+            if(line.startsWith("#") // skip comment
+               || line.startsWith(";") // skip comment
+               || line.trimmed().isEmpty() // skip empty lines
+                ) {
+                continue;
+            }
+
             //split the line and compare its column count to the maximum column count found before
             QStringList columns = line.split(this->getDelimiter(this->usedDelimiter));
             if(columns.size() > numColumns){
