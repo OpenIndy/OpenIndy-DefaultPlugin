@@ -449,7 +449,7 @@ void OiExchangeAscii::importOiData(){
             if(!errorWhileParsing){
                 switch (this->typeOfGeometry) {
                 case ePointGeometry:
-
+                {
                     QPointer<Point> myNominal = new Point(true);
                     myNominal->setProperty("OI_FEATURE_COMMONSTATE",columnData.oiFeatureCommonState);
 
@@ -471,8 +471,34 @@ void OiExchangeAscii::importOiData(){
                     this->features.append(myGeometry);
 
                     break;
-
                 }
+                case ePlaneGeometry:
+                {
+                    QPointer<Plane> plane = new Plane(true);
+                    plane->setProperty("OI_FEATURE_COMMONSTATE",columnData.oiFeatureCommonState);
+
+                    plane->setFeatureName(columnData.featureName);
+                    plane->setGroupName(columnData.groupName);
+                    plane->setComment(columnData.comment);
+
+                    //plane->setPoint(Position(columnData.position));
+                    plane->setPlane(Position(columnData.position), Direction(columnData.direction));
+
+                    //set group of the geometry
+                    if(this->groupName.compare("") != 0){
+                        plane->setGroupName(this->groupName);
+                    }
+
+                    //set nominal system
+                    plane->setNominalSystem(this->nominalSystem);
+
+                    QPointer<FeatureWrapper> geometry = new FeatureWrapper();
+                    geometry->setPlane(plane);
+                    this->features.append(geometry);
+
+                    break;
+                }
+                } //switch
 
 
 
