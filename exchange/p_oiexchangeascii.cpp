@@ -90,6 +90,7 @@ QList<ExchangeSimpleAscii::ColumnType> OiExchangeAscii::getDefaultColumnOrder(co
                 defaultColumnOrder.append(OiExchangeAscii::eColumnPrimaryJ);
                 defaultColumnOrder.append(OiExchangeAscii::eColumnPrimaryK);
             }
+            break;
         case ePointGeometry:
             if(numColumns == 1){
                 defaultColumnOrder.append(OiExchangeAscii::eColumnX);
