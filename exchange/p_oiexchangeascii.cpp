@@ -64,6 +64,16 @@ QList<ExchangeSimpleAscii::ColumnType> OiExchangeAscii::getDefaultColumnOrder(co
 
         //depending on the geometry type and the number of columns fill the default columns order
         switch(typeOfGeometry){
+        case ePlaneGeometry:
+            if(numColumns == 7){
+                defaultColumnOrder.append(OiExchangeAscii::eColumnFeatureName);
+                defaultColumnOrder.append(OiExchangeAscii::eColumnX);
+                defaultColumnOrder.append(OiExchangeAscii::eColumnY);
+                defaultColumnOrder.append(OiExchangeAscii::eColumnZ);
+                defaultColumnOrder.append(OiExchangeAscii::eColumnPrimaryI);
+                defaultColumnOrder.append(OiExchangeAscii::eColumnPrimaryJ);
+                defaultColumnOrder.append(OiExchangeAscii::eColumnPrimaryK);
+            }
         case ePointGeometry:
             if(numColumns == 1){
                 defaultColumnOrder.append(OiExchangeAscii::eColumnX);
