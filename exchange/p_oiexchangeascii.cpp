@@ -81,7 +81,7 @@ QList<ExchangeSimpleAscii::ColumnType> OiExchangeAscii::getDefaultColumnOrder(co
 
         //depending on the geometry type and the number of columns fill the default columns order
         switch(typeOfGeometry){
-        case ePlaneGeometry: // no break!
+        case ePlaneGeometry:
         case ePlaneLevelGeometry:
             if(numColumns == 7){
                 defaultColumnOrder.append(OiExchangeAscii::eColumnFeatureName);
@@ -474,7 +474,7 @@ void OiExchangeAscii::importOiData(){
 
                     break;
                 }
-                case ePlaneGeometry: // no break!
+                case ePlaneGeometry:
                 case ePlaneLevelGeometry:
                 {
                     QPointer<Plane> plane = new Plane(true);
