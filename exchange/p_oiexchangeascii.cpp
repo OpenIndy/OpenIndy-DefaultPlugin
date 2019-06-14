@@ -28,6 +28,7 @@ void OiExchangeAscii::init(){
     //set supported geometries
     this->supportedGeometries.append(ePointGeometry);
     this->supportedGeometries.append(ePlaneGeometry);
+    this->supportedGeometries.append(ePlaneLevelGeometry);
 
 }
 
@@ -80,7 +81,8 @@ QList<ExchangeSimpleAscii::ColumnType> OiExchangeAscii::getDefaultColumnOrder(co
 
         //depending on the geometry type and the number of columns fill the default columns order
         switch(typeOfGeometry){
-        case ePlaneGeometry:
+        case ePlaneGeometry: // no break!
+        case ePlaneLevelGeometry:
             if(numColumns == 7){
                 defaultColumnOrder.append(OiExchangeAscii::eColumnFeatureName);
                 defaultColumnOrder.append(OiExchangeAscii::eColumnX);
@@ -323,7 +325,6 @@ void OiExchangeAscii::importOiData(){
                 //set the point attribute depending on the current column
                 switch(this->userDefinedColumns.at(i)){
                 case ExchangeSimpleAscii::eColumnCommonState:
-                    // I use QT property system for transportation, because "common" is not "common" of nominal point but actual point!
                     columnData.oiFeatureCommonState = columns.at(i);
                     break;
                 case ExchangeSimpleAscii::eColumnFeatureName:
@@ -451,6 +452,7 @@ void OiExchangeAscii::importOiData(){
                 case ePointGeometry:
                 {
                     QPointer<Point> myNominal = new Point(true);
+                    // I use QT property system for transportation, because "common" is not "common" of nominal point but actual point!
                     myNominal->setProperty("OI_FEATURE_COMMONSTATE",columnData.oiFeatureCommonState);
 
                     myNominal->setFeatureName(columnData.featureName);
@@ -472,10 +474,12 @@ void OiExchangeAscii::importOiData(){
 
                     break;
                 }
-                case ePlaneGeometry:
+                case ePlaneGeometry: // no break!
+                case ePlaneLevelGeometry:
                 {
                     QPointer<Plane> plane = new Plane(true);
-                    plane->setProperty("OI_FEATURE_COMMONSTATE",columnData.oiFeatureCommonState);
+                    // I use QT property system for transportation, because level is a special plane
+                    plane->setProperty("OI_FEATURE_PLANE_LEVEL", this->typeOfGeometry == ePlaneLevelGeometry);
 
                     plane->setFeatureName(columnData.featureName);
                     plane->setGroupName(columnData.groupName);
