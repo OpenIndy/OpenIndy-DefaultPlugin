@@ -112,7 +112,7 @@ bool BestFitPoint::setUpResult(Point &point){
 
         if(inputObservations.contains(observation)) {
             corr.add(_corr);
-            qDebug() << "used observation: " << observation->getId();
+            // qDebug() << "used observation: " << observation->getId();
         }
 
         addDisplayResidual(observation->getId(), _vx, _vy, _vz, _corr);
