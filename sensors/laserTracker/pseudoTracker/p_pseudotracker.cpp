@@ -57,7 +57,8 @@ void PseudoTracker::init(){
     this->stringParameters.insert("active probe", "1.5''");
 
     //set self defined actions
-    this->selfDefinedActions.append("echo");
+    this->selfDefinedActions.append("echo(Alt+E)");
+    this->selfDefinedActions.append("dummy");
 
     //set default accuracy
     this->defaultAccuracy.sigmaAzimuth = 0.000001570;
