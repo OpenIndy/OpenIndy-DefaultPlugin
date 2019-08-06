@@ -1,0 +1,17 @@
+{
+    "isOiPlugin": true,
+
+    "name"  : "OpenIndy Default Plugin",
+    "pluginVersion" : "1.0.2",
+    "author"  : "OpenIndyOrg",
+
+    "compiler" : "COMPILER",
+    "operatingSystem" : "OS",
+
+    "description" : "Plugin with many functions and sensors available as standard",
+
+    "dependencies" : false,
+    "libPaths" : [
+        { "name": "dependencies", "path": "app" }
+    ]
+}
