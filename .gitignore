@@ -27,3 +27,4 @@ Makefile
 *.Debug
 *.Release
 build/*_resource.rc
+metaInfo.json
