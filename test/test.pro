@@ -31,18 +31,27 @@ INCLUDEPATH += \
     $$PWD/../lib/OpenIndy-Core/include/geometry \
     $$PWD/../lib/OpenIndy-Core/include/plugin/function
 
+
 CONFIG(debug, debug|release) {
-LIBS += \
-    "$$PWD/../bin/debug/.obj/*.obj" \
-    "$$PWD/../lib/OpenIndy-Core/bin/debug/.obj/*.obj" \
-    "$$PWD/../lib/OpenIndy-Core/lib/OpenIndy-Math/bin/debug/.obj/*.obj"
-
+    BUILD_DIR=debug
 } else {
-LIBS += \
-    "$$PWD/../bin/release/.obj/*.obj" \
-    "$$PWD/../lib/OpenIndy-Core/bin/release/.obj/*.obj" \
-    "$$PWD/../lib/OpenIndy-Core/lib/OpenIndy-Math/bin/release/.obj/*.obj"
+    BUILD_DIR=release
+}
 
+win32-g++ {
+LIBS += \
+    "$$PWD/../bin/$$BUILD_DIR/.obj/*.o"
+
+LIBS += \
+    -L$$PWD/../lib/OpenIndy-Core/bin/$$BUILD_DIR -lopenIndyCore1 \
+    -L$$PWD/../lib/OpenIndy-Core/lib/OpenIndy-Math/bin/$$BUILD_DIR -lopenIndyMath1
+
+}else:win32 {
+
+LIBS += \
+    "$$PWD/../bin/$$BUILD_DIR/*.obj" \
+    "$$PWD/../lib/OpenIndy-Core/bin/$$BUILD_DIR/.obj/*.obj" \
+    "$$PWD/../lib/OpenIndy-Core/lib/OpenIndy-Math/bin/$$BUILD_DIR/.obj/*.obj"
 }
 
 win32 {
@@ -59,3 +68,5 @@ LIBS += \
 
     }
 }
+
+message($$LIBS)
