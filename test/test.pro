@@ -38,7 +38,16 @@ CONFIG(debug, debug|release) {
     BUILD_DIR=release
 }
 
-win32-g++ {
+linux-g++ {
+LIBS += \
+    "$$PWD/../bin/$$BUILD_DIR/.obj/*.o"
+
+
+LIBS += \
+    -L$$PWD/../lib/OpenIndy-Core/bin/$$BUILD_DIR -lopenIndyCore \
+    -L$$PWD/../lib/OpenIndy-Core/lib/OpenIndy-Math/bin/$$BUILD_DIR -lopenIndyMath
+
+}else:win32-g++ {
 LIBS += \
     "$$PWD/../bin/$$BUILD_DIR/.obj/*.o"
 
