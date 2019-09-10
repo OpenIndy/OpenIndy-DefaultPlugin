@@ -77,5 +77,3 @@ LIBS += \
 
     }
 }
-
-message($$LIBS)
