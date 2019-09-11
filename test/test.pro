@@ -56,9 +56,11 @@ LIBS += \
 
 } else : win32 {
 LIBS += \
-    "$$PWD/../bin/$$BUILD_DIR/*.obj" \
-    "$$PWD/../lib/OpenIndy-Core/bin/$$BUILD_DIR/.obj/*.obj" \
-    "$$PWD/../lib/OpenIndy-Core/lib/OpenIndy-Math/bin/$$BUILD_DIR/.obj/*.obj"
+    "$$PWD/../bin/$$BUILD_DIR/.obj/*.obj"
+
+LIBS += \
+    -L$$PWD/../lib/OpenIndy-Core/bin/$$BUILD_DIR -lopenIndyCore1 \
+    -L$$PWD/../lib/OpenIndy-Core/lib/OpenIndy-Math/bin/$$BUILD_DIR -lopenIndyMath1
 }
 
 win32 {
