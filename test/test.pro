@@ -42,12 +42,11 @@ linux-g++ {
 LIBS += \
     "$$PWD/../bin/$$BUILD_DIR/.obj/*.o"
 
-
 LIBS += \
     -L$$PWD/../lib/OpenIndy-Core/bin/$$BUILD_DIR -lopenIndyCore \
     -L$$PWD/../lib/OpenIndy-Core/lib/OpenIndy-Math/bin/$$BUILD_DIR -lopenIndyMath
 
-}else:win32-g++ {
+} else : win32-g++ {
 LIBS += \
     "$$PWD/../bin/$$BUILD_DIR/.obj/*.o"
 
@@ -55,8 +54,7 @@ LIBS += \
     -L$$PWD/../lib/OpenIndy-Core/bin/$$BUILD_DIR -lopenIndyCore1 \
     -L$$PWD/../lib/OpenIndy-Core/lib/OpenIndy-Math/bin/$$BUILD_DIR -lopenIndyMath1
 
-}else:win32 {
-
+} else : win32 {
 LIBS += \
     "$$PWD/../bin/$$BUILD_DIR/*.obj" \
     "$$PWD/../lib/OpenIndy-Core/bin/$$BUILD_DIR/.obj/*.obj" \
