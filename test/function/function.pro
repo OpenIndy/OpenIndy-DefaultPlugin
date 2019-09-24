@@ -20,16 +20,15 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 # test dependencies
 INCLUDEPATH += \
     $$PWD/../.. \
-    $$PWD/../../exchange \
-    $$PWD/../../lib/OpenIndy-Core/include/plugin/exchange \
+    $$PWD/../../functions/objectTransformation \
     $$PWD/../../lib/OpenIndy-Core/include/plugin \
     $$PWD/../../lib/OpenIndy-Core/include/util \
     $$PWD/../../lib/OpenIndy-Core/include \
     $$PWD/../../lib/OpenIndy-Core/lib/OpenIndy-Math/include \
-    $$PWD/../../lib/OpenIndy-Core/include/plugin/simulation \
-    $$PWD/../../lib/OpenIndy-Core/include/plugin/sensor \
     $$PWD/../../lib/OpenIndy-Core/include/geometry \
-    $$PWD/../../lib/OpenIndy-Core/include/plugin/function
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/function \
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/simulation \
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/sensor
 
 
 CONFIG(debug, debug|release) {
