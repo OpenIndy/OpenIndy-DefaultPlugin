@@ -9,23 +9,23 @@
 
 using namespace oi;
 
-class DefaultPluginTest : public QObject
+class OiExchangeAsciiTest : public QObject
 {
     Q_OBJECT
 
 public:
-    DefaultPluginTest();
+    OiExchangeAsciiTest();
 
 private Q_SLOTS:
     void testImportNominal();
     void testImportLevel();
 };
 
-DefaultPluginTest::DefaultPluginTest()
+OiExchangeAsciiTest::OiExchangeAsciiTest()
 {
 }
 
-void DefaultPluginTest::testImportNominal()
+void OiExchangeAsciiTest::testImportNominal()
 {
 
     QString data("\
@@ -91,7 +91,7 @@ P20	-749.56	2987.57	-453.59\r\n\
     delete exchange;
 }
 
-void DefaultPluginTest::testImportLevel()
+void OiExchangeAsciiTest::testImportLevel()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -154,6 +154,6 @@ Level_2  0.0 0.0 0.0 0.001023 -0.001945 0.999989\r\n\
     delete exchange;
 }
 
-QTEST_APPLESS_MAIN(DefaultPluginTest)
+QTEST_APPLESS_MAIN(OiExchangeAsciiTest)
 
-#include "tst_defaultplugintest.moc"
+#include "tst_oiexchangeascii.moc"
