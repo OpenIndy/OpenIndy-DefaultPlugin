@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
-SUBDIRS = oiexchangeascii
+SUBDIRS = oiexchangeascii \
+    function
 
 INSTALLS = 
 
