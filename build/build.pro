@@ -3,6 +3,7 @@
 # Project created by QtCreator 2013-10-12T15:43:14
 #
 #-------------------------------------------------
+CONFIG += c++11
 
 QT       += core gui widgets serialport xml
 
@@ -16,6 +17,9 @@ CONFIG += c++11
 
 DEFINES += DEFAULT_LIBRARY
 DEFINES += WITH_FITTING_UTILS
+
+# create metainfo.json
+include($$PWD/metainfo.pri)
 
 # version number from git
 include($$PWD/version.pri)

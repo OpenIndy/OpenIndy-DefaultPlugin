@@ -15,7 +15,8 @@
 
 # directories
 bin/
-
+test/release
+test/debug
 # Qt-es
 
 *.pro.user
@@ -26,3 +27,5 @@ Makefile
 *-build-*
 *.Debug
 *.Release
+build/*_resource.rc
+metaInfo.json

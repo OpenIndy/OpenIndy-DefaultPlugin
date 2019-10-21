@@ -5,8 +5,8 @@
     "pluginVersion" : "1.0.2",
     "author"  : "OpenIndyOrg",
 
-    "compiler" : "MVSC 64bit",
-    "operatingSystem" : "windows",
+    "compiler" : "COMPILER",
+    "operatingSystem" : "OS",
 
     "description" : "Plugin with many functions and sensors available as standard",
 
