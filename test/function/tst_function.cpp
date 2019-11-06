@@ -197,6 +197,7 @@ void FunctionTest::testBestFitCylinder()
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
     QPointer<Cylinder> cylinder = new Cylinder(false);
     QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
