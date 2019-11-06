@@ -89,7 +89,7 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
 
         if(approximations[i].stdev < stdev){
             bestSolution = i;
-            stdev = stdev;
+            stdev = approximations[i].stdev;
         }
 
         bool success = this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, this->approximations[i]);
