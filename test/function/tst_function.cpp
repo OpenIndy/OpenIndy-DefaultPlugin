@@ -18,6 +18,8 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
+
     void testRegisterPoint();
     void testRegisterSphere();
     void testRegisterCircle();
@@ -27,6 +29,10 @@ private Q_SLOTS:
 
 FunctionTest::FunctionTest()
 {
+}
+
+void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest) {
+    qDebug() << msg;
 }
 
 void FunctionTest::testRegisterPoint()
