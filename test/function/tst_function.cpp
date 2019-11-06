@@ -3,6 +3,7 @@
 #include <QPointer>
 
 #include "p_register.h"
+#include "p_bestfitcylinder.h"
 #include "featurewrapper.h"
 #include "types.h"
 #include "chooselalib.h"
@@ -20,6 +21,8 @@ private Q_SLOTS:
     void testRegisterPoint();
     void testRegisterSphere();
     void testRegisterCircle();
+
+    void testBestFitCylinder();
 };
 
 FunctionTest::FunctionTest()
@@ -179,6 +182,25 @@ void FunctionTest::testRegisterCircle()
     delete plane.data();
     delete circle.data();
     delete circleFeature.data();
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCylinder()
+{
+    // ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+
     delete function.data();
 }
 
