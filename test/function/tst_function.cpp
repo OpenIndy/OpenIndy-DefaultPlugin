@@ -9,6 +9,10 @@
 #include "types.h"
 #include "chooselalib.h"
 
+#define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
+#define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
+#define DEBUG_CYLINDER(cylinder) qDebug() << cylinder->getStatistic().getStdev() << ", position=" << _OI_VEC(cylinder->getPosition().getVector()) << ", direction=" << _OI_VEC(cylinder->getDirection().getVector()) << "radius=" << cylinder->getRadius().getRadius() << ", stdev=";
+
 using namespace oi;
 
 class FunctionTest : public QObject
@@ -261,7 +265,9 @@ void FunctionTest::testBestFitCylinder1()
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
-    qDebug() << "radius" << cylinder->getRadius().getRadius();
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 1205.0, 0.005);
 
     delete function.data();
 }
@@ -299,7 +305,7 @@ void FunctionTest::testBestFitCylinder2()
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
-    qDebug() << "radius" << cylinder->getRadius().getRadius();
+    DEBUG_CYLINDER(cylinder);
 
     delete function.data();
 }
@@ -337,7 +343,9 @@ void FunctionTest::testBestFitCylinder3()
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
-    qDebug() << "radius" << cylinder->getRadius().getRadius();
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 1206.11, 0.005);
 
     delete function.data();
 }
@@ -375,7 +383,9 @@ void FunctionTest::testBestFitCylinder4()
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
-    qDebug() << "radius" << cylinder->getRadius().getRadius();
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 1205.01, 0.005);
 
     delete function.data();
 }
