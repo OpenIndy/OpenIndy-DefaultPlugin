@@ -91,19 +91,21 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
             bestSolution = i;
             stdev = approximations[i].stdev;
         }
-
-        bool success = this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, this->approximations[i]);
-        if(success && cylinder.getStatistic().getStdev() < stdev){
-            bestSolution = i;
-            stdev = cylinder.getStatistic().getStdev();
-        }
     }
     if(bestSolution < 0){
         emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
         return false;
     }
 
+    if( this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, this->approximations[bestSolution])
+            && cylinder.getStatistic().getStdev() < stdev){
+        stdev = cylinder.getStatistic().getStdev();
+    } else {
+        emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
+        return false;
+    }
 
+    emit this->sendMessage(QString("cylinder (%1) best solution: %2").arg(cylinder.getFeatureName()).arg(approximations[bestSolution].comment), eInformationMessage);
 
     OiMat Ralpha(4,4);
     OiMat Rbeta(4,4);
