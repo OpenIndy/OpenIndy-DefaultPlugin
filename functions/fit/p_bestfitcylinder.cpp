@@ -218,20 +218,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
         QPointer<Observation> obs = inputObservations.at(k);
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                double a = 0.0, b = 0.0;
-                if (i == 0)
-                    a = obs->getXYZ().getAt(0) - centroid3D.getAt(0);
-                else if (i == 1)
-                    a = obs->getXYZ().getAt(1) - centroid3D.getAt(1);
-                else
-                    a = obs->getXYZ().getAt(2) - centroid3D.getAt(2);
-                if (j == 0)
-                    b = obs->getXYZ().getAt(0) - centroid3D.getAt(0);
-                else if (j == 1)
-                    b = obs->getXYZ().getAt(1) - centroid3D.getAt(1);
-                else
-                    b = obs->getXYZ().getAt(2) - centroid3D.getAt(2);
-                H.setAt(i,j, H.getAt(i,j) + a * b);
+                H.setAt(i,j, H.getAt(i, j) + (obs->getXYZ().getAt(i) - centroid3D.getAt(i)) * (obs->getXYZ().getAt(j) - centroid3D.getAt(j)));
             }
         }
     }
