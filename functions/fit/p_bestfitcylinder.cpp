@@ -413,6 +413,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
         approximation.approxYm = -1.0 * y_m;
         approximation.approxRadius = radius;
         approximation.stdev = sum_vv;
+        approximation.comment = QString("eigenvector %1").arg( i == 0 ? "x" : ( i== 1 ? "y" : "z"));
         this->approximations.append(approximation);
 
     }
@@ -566,6 +567,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
     approximation.approxYm = -1.0 * y_m;
     approximation.approxRadius = radius;
     approximation.stdev = sum_vv;
+    approximation.comment = "first two cylinder points";
     this->approximations.append(approximation);
 
     return true;

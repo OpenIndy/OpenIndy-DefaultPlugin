@@ -23,6 +23,7 @@ public:
     double approxAlpha;
     double approxBeta;
     double stdev;
+    QString comment;
 };
 
 /*!
