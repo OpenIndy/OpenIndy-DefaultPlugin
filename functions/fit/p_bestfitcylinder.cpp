@@ -860,7 +860,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
     }while( stopXX > 0.0000000000001 && numIterations < 1000 );
 
     if(numIterations >= 1000){
-        emit this->sendMessage(QString("to many iterations: %1").arg(numIterations), eErrorMessage);
+        emit this->sendMessage(QString("to many iterations: %1").arg(numIterations), eWarningMessage);
         return false;
     }
 
