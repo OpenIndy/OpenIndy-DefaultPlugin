@@ -390,7 +390,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
         //solve equation system to get circle parameters
         try{
             if(!OiMat::solve(s, A2.t() * A2, -1.0 * A2.t() * A1)){
-                return false;
+                continue;
             }
         }catch(const exception &e){
             emit this->sendMessage(QString("inv error cylinder minimum solution: %1").arg(e.what()), eErrorMessage);
