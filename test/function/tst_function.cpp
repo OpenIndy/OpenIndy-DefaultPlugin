@@ -281,7 +281,8 @@ void FunctionTest::testBestFitCylinder1()
 
     DEBUG_CYLINDER(cylinder);
 
-    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 1205.0, 0.005);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2), 1.0, 0.00001);
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 10438.54, 0.01);
 
     delete function.data();
 }
@@ -325,6 +326,9 @@ void FunctionTest::testBestFitCylinder2()
 
     DEBUG_CYLINDER(cylinder);
 
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2), 1.0, 0.00001);
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 10449.77, 0.01);
+
     delete function.data();
 }
 
@@ -367,7 +371,8 @@ void FunctionTest::testBestFitCylinder3()
 
     DEBUG_CYLINDER(cylinder);
 
-    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 1206.11, 0.005);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2), 1.0, 0.00001);
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 10438.54, 0.01);
 
     delete function.data();
 }
@@ -411,7 +416,8 @@ void FunctionTest::testBestFitCylinder4()
 
     DEBUG_CYLINDER(cylinder);
 
-    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 1205.01, 0.005);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2), 1.0, 0.00001);
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 10185.71, 0.01);
 
     delete function.data();
 }
