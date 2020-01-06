@@ -83,44 +83,50 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     }
 
     //fit the cylinder using the previously generated approximations
-    int bestSolution = -1;
-    double stdev = numeric_limits<double>::max();
-    for(int i = 0; i < this->approximations.size(); i++){
+    bool foundSolution = false;
+    CylinderApproximation approximation;
+    QMap<double, CylinderApproximation> approximationsFitted; // key: stdev from fitting, value: approximation
 
-        if(approximations[i].stdev < stdev){
-            bestSolution = i;
-            stdev = approximations[i].stdev;
+    foreach (const CylinderApproximation &appr, approximations) {
+        qDebug() << "approximation" << appr.comment << ", stdev" << appr.stdev;
+
+        if(this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, appr)) {
+            approximationsFitted.insert(cylinder.getStatistic().getStdev(), appr);
+            foundSolution = true;
         }
     }
-    if(bestSolution < 0){
+
+    if(!foundSolution){
         emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
         return false;
     }
 
-    if( this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, this->approximations[bestSolution])
-            && cylinder.getStatistic().getStdev() < stdev){
-        stdev = cylinder.getStatistic().getStdev();
-    } else {
-        emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
-        return false;
+    double stdev = numeric_limits<double>::max();
+    QMap<double, CylinderApproximation>::iterator stdevApprox;
+    for (stdevApprox = approximationsFitted.begin(); stdevApprox != approximationsFitted.end(); ++stdevApprox) {
+        qDebug() << "approximationsFitted" << stdevApprox.key() << ", " << stdevApprox.value().comment  << ", stdev" << stdevApprox.value().stdev;
+        if(stdevApprox.key() < stdev) {
+            stdev = stdevApprox.key();
+            approximation = stdevApprox.value();
+        }
     }
 
-    emit this->sendMessage(QString("cylinder (%1) best solution: %2").arg(cylinder.getFeatureName()).arg(approximations[bestSolution].comment), eInformationMessage);
+    emit this->sendMessage(QString("cylinder (%1) best solution: %2").arg(cylinder.getFeatureName()).arg(approximation.comment), eInformationMessage);
 
     OiMat Ralpha(4,4);
     OiMat Rbeta(4,4);
     OiMat Rall(4,4);
 
     Ralpha.setAt(0, 0, 1.0);
-    Ralpha.setAt(1, 1, qCos(approximations[bestSolution].approxAlpha));
-    Ralpha.setAt(1, 2, -qSin(approximations[bestSolution].approxAlpha));
-    Ralpha.setAt(2, 1, qSin(approximations[bestSolution].approxAlpha));
-    Ralpha.setAt(2, 2, qCos(approximations[bestSolution].approxAlpha));
-    Rbeta.setAt(0, 0, qCos(approximations[bestSolution].approxBeta));
-    Rbeta.setAt(0, 2, qSin(approximations[bestSolution].approxBeta));
+    Ralpha.setAt(1, 1, qCos(approximation.approxAlpha));
+    Ralpha.setAt(1, 2, -qSin(approximation.approxAlpha));
+    Ralpha.setAt(2, 1, qSin(approximation.approxAlpha));
+    Ralpha.setAt(2, 2, qCos(approximation.approxAlpha));
+    Rbeta.setAt(0, 0, qCos(approximation.approxBeta));
+    Rbeta.setAt(0, 2, qSin(approximation.approxBeta));
     Rbeta.setAt(1, 1, 1.0);
-    Rbeta.setAt(2, 0, -qSin(approximations[bestSolution].approxBeta));
-    Rbeta.setAt(2, 2, qCos(approximations[bestSolution].approxBeta));
+    Rbeta.setAt(2, 0, -qSin(approximation.approxBeta));
+    Rbeta.setAt(2, 2, qCos(approximation.approxBeta));
 
     Rall = Rbeta * Ralpha;
     Rall.setAt(3,3,1.0);
@@ -139,13 +145,13 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
         return false;
     }*/
 
-    approximations[bestSolution].approxAlpha = 0.0;
-    approximations[bestSolution].approxBeta = 0.0;
+    approximation.approxAlpha = 0.0;
+    approximation.approxBeta = 0.0;
 
 
 
 
-    if(!this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, this->approximations[bestSolution])){
+    if(!this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, approximation)){
         return false;
     }
 
@@ -429,7 +435,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
         approximation.approxYm = -1.0 * y_m;
         approximation.approxRadius = radius;
         approximation.stdev = sum_vv;
-        approximation.comment = QString("eigenvector %1").arg( i == 0 ? "x" : ( i== 1 ? "y" : "z"));
+        approximation.comment = QString("eigenvector %1").arg(i);
         this->approximations.append(approximation);
 
     }
