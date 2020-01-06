@@ -273,13 +273,20 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
     for(int i = 0; i < 3; i++){
 
         U.getCol(pn, i); //get eigenvector i
-
         //calculate rotation angles
-        a = pn.getAt(1) == 0.0 ? 1.0 : qSqrt(1.0 / (1.0 + (pn.getAt(2)/pn.getAt(1))*(pn.getAt(2)/pn.getAt(1))));
-        b = pn.getAt(1) == 0.0 ? 0.0 : a * pn.getAt(2) / pn.getAt(1);
+        if (pn.getAt(1) == 0 && pn.getAt(2) == 0) {
+            a_alpha = 0;
+            b_alpha = 0;
+        } else if(pn.getAt(1) == 0) {
+            a_alpha = PI / 2;
+            b_alpha = PI / 2;
+        } else {
+            a = qSqrt(1.0 / (1.0 + qPow(pn.getAt(2)/(pn.getAt(1)), 2)));
+            b = a * pn.getAt(2) / (pn.getAt(1));
 
-        b_alpha = qAcos(b);
-        a_alpha = qAsin(a);
+            a_alpha = qAsin(a);
+            b_alpha = qAcos(b);
+        }
 
         alpha = 0.0;
 
@@ -300,12 +307,19 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
         pn.setAt(1, _y * qCos(alpha) - _z * qSin(alpha));
         pn.setAt(2, _y * qSin(alpha) + _z * qCos(alpha));
 
-        a = 0.0, b = 0.0;
-        a = pn.getAt(0) ? 1.0 : qSqrt(1.0 / (1.0 + (-1.0 * pn.getAt(2) / pn.getAt(0))*(-1.0 * pn.getAt(2) / pn.getAt(0))));
-        b = pn.getAt(0) ? 0.0 : -1.0 * pn.getAt(2) * a / pn.getAt(0);
+        if (pn.getAt(0) == 0 && pn.getAt(2) == 0) {
+            a_alpha = 0;
+            b_alpha = 0;
+        } else if(pn.getAt(0) == 0) {
+            a_alpha = - PI / 2;
+            b_alpha = PI / 2;
+        } else {
+            a = qSqrt(1.0 / (1.0 + qPow(-1.0 * pn.getAt(2) / pn.getAt(0),2)));
+            b = -1.0 * pn.getAt(2) * a / pn.getAt(0);
 
-        b_beta = qAcos(b);
-        a_beta = qAsin(a);
+            a_alpha = qAsin(a);
+            b_alpha = qAcos(b);
+        }
 
         beta = 0.0;
 
@@ -429,11 +443,19 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
     pn = diff;
 
     //calculate rotation angles
-    a = pn.getAt(1) ? 1.0 : qSqrt(1.0 / (1.0 + (pn.getAt(2)/pn.getAt(1))*(pn.getAt(2)/pn.getAt(1))));
-    b = pn.getAt(1) ? 0.0 : a * pn.getAt(2) / pn.getAt(1);
+    if (pn.getAt(1) == 0 && pn.getAt(2) == 0) {
+        a_alpha = 0;
+        b_alpha = 0;
+    } else if(pn.getAt(1) == 0) {
+        a_alpha = PI / 2;
+        b_alpha = PI / 2;
+    } else {
+        a = qSqrt(1.0 / (1.0 + qPow(pn.getAt(2)/(pn.getAt(1)), 2)));
+        b = a * pn.getAt(2) / (pn.getAt(1));
 
-    b_alpha = qAcos(b);
-    a_alpha = qAsin(a);
+        a_alpha = qAsin(a);
+        b_alpha = qAcos(b);
+    }
 
     alpha = 0.0;
 
@@ -454,12 +476,19 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
     pn.setAt(1, _y * qCos(alpha) - _z * qSin(alpha));
     pn.setAt(2, _y * qSin(alpha) + _z * qCos(alpha));
 
-    a = 0.0, b = 0.0;
-    a = pn.getAt(0) ? 1.0 : qSqrt(1.0 / (1.0 + (-1.0 * pn.getAt(2) / pn.getAt(0))*(-1.0 * pn.getAt(2) / pn.getAt(0))));
-    b = pn.getAt(0) ? 0.0 : -1.0 * pn.getAt(2) * a / pn.getAt(0);
+    if (pn.getAt(0) == 0 && pn.getAt(2) == 0) {
+        a_alpha = 0;
+        b_alpha = 0;
+    } else if(pn.getAt(0) == 0) {
+        a_alpha = - PI / 2;
+        b_alpha = PI / 2;
+    } else {
+        a = qSqrt(1.0 / (1.0 + qPow(-1.0 * pn.getAt(2) / pn.getAt(0),2)));
+        b = -1.0 * pn.getAt(2) * a / pn.getAt(0);
 
-    b_beta = qAcos(b);
-    a_beta = qAsin(a);
+        a_alpha = qAsin(a);
+        b_alpha = qAcos(b);
+    }
 
     beta = 0.0;
 
