@@ -21,6 +21,11 @@ void BestFitCylinder::init(){
     param1.infinite = true;
     param1.typeOfElement = eObservationElement;
     this->neededElements.append(param1);
+    NeededElement param2;
+    param2.description = "approximation direction.";
+    param2.infinite = true;
+    param2.typeOfElement = eLineElement;
+    this->neededElements.append(param2);
 
     //set spplicable for
     this->applicableFor.append(eCylinderFeature);
