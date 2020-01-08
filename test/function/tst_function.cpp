@@ -25,6 +25,8 @@ public:
 private Q_SLOTS:
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
+    void testBestFitCylinderAproximationDirection1();
+
     void testRegisterPoint();
     void testRegisterSphere();
     void testRegisterCircle();
@@ -666,6 +668,75 @@ void FunctionTest::testBestFitCylinder10()
 
     delete function.data();
 }
+
+// OI-627
+void FunctionTest::testBestFitCylinderAproximationDirection1()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-59.57 -7.72 17.57\n\
+-34.43 -5.00 18.49\n\
+-59.44 -18.23 5.86\n\
+-58.84 10.00 16.30\n\
+-33.61 11.09 15.63\n\
+-53.82 -4.73 18.56\n\
+-58.87 15.80 10.89\n\
+-41.04 16.85 9.11\n\
+");
+
+
+    addInputObservations(data, function);
+
+
+    // QDEBUG : FunctionTest::testBestFitCylinder10() position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
+
+    OiVec * p = new OiVec(4);
+    p->setAt(0, 0);
+    p->setAt(1, 0);
+    p->setAt(2, 0);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * a = new OiVec(4);
+    a->setAt(0, 0.9);
+    a->setAt(1, 0);
+    a->setAt(2, 0);
+    a->setAt(3, 1.0);
+    Direction * axis = new Direction(*a);
+
+    Line * line = new Line(false, *xyz, *axis);
+    line->setIsSolved(true);
+
+    InputElement * element = new InputElement(2000);
+    element->typeOfElement = eLineElement;
+    element->line = line;
+
+    function->addInputElement(*element, 0);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
+    COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
+
+    delete function.data();
+}
+
+
 
 QTEST_APPLESS_MAIN(FunctionTest)
 
