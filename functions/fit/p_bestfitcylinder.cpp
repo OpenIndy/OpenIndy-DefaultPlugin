@@ -89,6 +89,8 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
         if(this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, appr)) {
             approximationsFitted.insert(cylinder.getStatistic().getStdev(), appr);
             foundSolution = true;
+        } else {
+            qDebug() << "approximation" << appr.comment << ", fitCylinder==false";
         }
     }
 
