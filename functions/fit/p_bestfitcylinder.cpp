@@ -45,10 +45,6 @@ bool BestFitCylinder::exec(Cylinder &cylinder){
 bool BestFitCylinder::setUpResult(Cylinder &cylinder){
 
     //get and check input observations
-    if(!this->inputElements.contains(0) || this->inputElements[0].size() < 5){
-        emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
-        return false;
-    }
     QList<QPointer<Observation> > allUsableObservations;
     QList<QPointer<Observation> > inputObservations;
     filterObservations(allUsableObservations, inputObservations);
