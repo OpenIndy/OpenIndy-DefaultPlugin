@@ -929,10 +929,12 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         v_obs = distance * v_obs;
 
         //set up display residuals
-        addDisplayResidual(observation->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
-                           qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
-                                + v_obs.getAt(2) * v_obs.getAt(2))
-                           );
+        if(false) {
+            addDisplayResidual(observation->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
+                               qSqrt(v_obs.getAt(0) * v_obs.getAt(0) + v_obs.getAt(2) * v_obs.getAt(2)));
+        } else {
+            addDisplayResidual(observation->getId(), distance);
+        }
 
         if(inputObservations.contains(observation)) {
             sumVV += distance * distance;
@@ -1620,10 +1622,12 @@ bool BestFitCylinder::fitTest(Cylinder &cylinder, const QList<QPointer<Observati
         v_obs = distance * v_obs;
 
         //set up display residuals
-        addDisplayResidual(observation->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
-                            qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
-                                + v_obs.getAt(2) * v_obs.getAt(2))
-                           );
+        if(false) {
+            addDisplayResidual(observation->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
+                               qSqrt(v_obs.getAt(0) * v_obs.getAt(0) + v_obs.getAt(2) * v_obs.getAt(2)));
+        } else {
+            addDisplayResidual(observation->getId(), distance);
+        }
 
         if(inputObservations.contains(observation)) {
             sumVV += distance * distance;
