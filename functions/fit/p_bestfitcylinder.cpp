@@ -118,9 +118,6 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     foreach(CylinderApproximation approximation, approximationsFitted.values(stdev)) {
         qDebug() << "approximationsFitted final" <<approximation.comment;
 
-
-        emit this->sendMessage(QString("cylinder (%1) best solution: %2").arg(cylinder.getFeatureName()).arg(approximation.comment), eInformationMessage);
-
         OiMat Ralpha(4,4);
         OiMat Rbeta(4,4);
 
@@ -155,6 +152,9 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
             emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
             continue;
         }
+
+
+        emit this->sendMessage(QString("cylinder (%1) best solution: %2").arg(cylinder.getFeatureName()).arg(approximation.comment), eInformationMessage);
 
         fittingSuccess=true;
         break;
