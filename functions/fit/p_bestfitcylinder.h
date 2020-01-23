@@ -26,6 +26,12 @@ public:
     QString comment;
 };
 
+enum ApproximationTypes{
+    eFirstTwoPoints = 0,
+    eDirection,
+    eGuessAxis
+};
+
 /*!
  * \brief The BestFitCylinder class
  */
