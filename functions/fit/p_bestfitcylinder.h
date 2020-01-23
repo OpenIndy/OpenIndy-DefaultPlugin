@@ -63,7 +63,7 @@ private:
 
     bool setUpResult(Cylinder &cylinder);
 
-    bool approximateCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations);
+    bool approximateCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, ApproximationTypes approximationType);
     bool approximateCylinder(OiVec pn, const QList<QPointer<Observation> > &inputObservations, QString label);
     bool fitCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, const QList<QPointer<Observation> > &allUsableObservations, const CylinderApproximation &approximation);
 
