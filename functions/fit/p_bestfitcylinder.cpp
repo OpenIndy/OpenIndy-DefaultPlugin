@@ -30,6 +30,10 @@ void BestFitCylinder::init(){
     //set spplicable for
     this->applicableFor.append(eCylinderFeature);
 
+    this->stringParameters.insert("approximation", "first two points");
+    this->stringParameters.insert("approximation", "direction");
+    this->stringParameters.insert("approximation", "guess axis");
+
 }
 
 /*!
@@ -56,6 +60,15 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     if(inputObservations.size() < 5){
         emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
         return false;
+    }
+
+    ApproximationTypes approximationType = eFirstTwoPoints; // default
+    if(this->scalarInputParams.stringParameter.contains("approximation")){
+        if(this->scalarInputParams.stringParameter.value("approximation").compare("direction") == 0){
+            approximationType = eDirection;
+        } else if(this->scalarInputParams.stringParameter.value("approximation").compare("guess axis") == 0){
+            approximationType = eGuessAxis;
+        }
     }
 
     //calculate centroid of all observations
