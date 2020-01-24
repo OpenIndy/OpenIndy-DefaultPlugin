@@ -59,6 +59,7 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     filterObservations(allUsableObservations, inputObservations);
     if(inputObservations.size() < 5){
         emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
+        cylinder.setIsSolved(false);
         return false;
     }
 
@@ -141,6 +142,7 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
 
     if(!this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, bestApproximation)){
         emit this->sendMessage(QString("Error while fitting cylinder %1 with solution: %2").arg(cylinder.getFeatureName()).arg(bestApproximation.comment), eErrorMessage);
+        cylinder.setIsSolved(false);
         return false;
     }
 
@@ -232,13 +234,17 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
             }
 
             //one of the eigen-vectors is the approximate cylinder axis
+            bool foundOneVaildApproximation = false;
             for(int i = 0; i < 3; i++){
                 OiVec pn; //possible normal vector
 
                 U.getCol(pn, i); //get eigenvector i
 
-                approximateCylinder(pn, inputObservations, QString("eigenvector %1").arg(i));
+                if(approximateCylinder(pn, inputObservations, QString("eigenvector %1").arg(i))) {
+                    foundOneVaildApproximation = true;
+                }
             }
+            return foundOneVaildApproximation;
             break;
         }
     case eDirection: {
@@ -262,7 +268,9 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
                 && an.getAt(1) == 0
                 && an.getAt(2) == 0)) {
 
-                approximateCylinder(an, inputObservations, "approxmation direction");
+                return approximateCylinder(an, inputObservations, "approxmation direction");
+            } else {
+                return false;
             }
 
             break;
@@ -276,13 +284,13 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
             OiVec diff = inputObservations.at(0)->getXYZ() - inputObservations.at(1)->getXYZ();
             diff.removeLast();
 
-            approximateCylinder(diff, inputObservations, "first two cylinder points");
+            return approximateCylinder(diff, inputObservations, "first two cylinder points");
 
             break;
         }
     }
 
-    return true;
+    return false;
 
 }
 
