@@ -900,6 +900,8 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
 
     //calculate sum vv
     double sumVV = 0.0;
+    float vrMin = numeric_limits<float>::max();
+    float vrMax = numeric_limits<float>::min();
     foreach(const QPointer<Observation> &observation, allUsableObservations){
         OiVec v_obs(3);
         _x = observation->getXYZ().getAt(0);
@@ -923,6 +925,8 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         float distance = 0.0f;
 
         distance = radiusActual - _r; //distance error
+        vrMin = min(vrMin, distance);
+        vrMax = max(vrMax, distance);
 
         //calculate residual vector
         v_obs.setAt(0, b[0]);
@@ -944,6 +948,8 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         }
 
     }
+
+    this->statistic.setFormError(vrMax - vrMin); // roundness
 
     //set up result
     Radius cylinderRadius(_r);
