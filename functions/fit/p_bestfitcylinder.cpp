@@ -895,6 +895,9 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
     axis.setAt(2, 1.0);
     OiMat::solve(axis, Rall, axis);
 
+    // reset / clear statistic
+    this->statistic.reset();
+
     //calculate sum vv
     double sumVV = 0.0;
     foreach(const QPointer<Observation> &observation, allUsableObservations){
