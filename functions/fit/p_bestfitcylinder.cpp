@@ -34,6 +34,8 @@ void BestFitCylinder::init(){
     this->stringParameters.insert("approximation", "direction");
     this->stringParameters.insert("approximation", "guess axis");
 
+    this->scalarInputParams.isValid = true;
+    this->scalarInputParams.stringParameter.insert("approximation", "first two points"); // default
 }
 
 /*!
