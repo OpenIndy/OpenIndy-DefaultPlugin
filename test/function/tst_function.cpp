@@ -278,6 +278,7 @@ void FunctionTest::testVRadial()
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
 
+    COMPARE_DOUBLE(function->getStatistic().getFormError(), 0.067, 0.001);
 
     delete function.data();
 }
