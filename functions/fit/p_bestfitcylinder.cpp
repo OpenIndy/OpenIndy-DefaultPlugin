@@ -107,12 +107,12 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
         }
     }
 
-    OiMat Rall(4,4);
 
     qDebug() << "bestApproximation" << bestApproximation;
 
     OiMat Ralpha(4,4);
     OiMat Rbeta(4,4);
+    OiMat Rall(4,4);
 
     Ralpha.setAt(0, 0, 1.0);
     Ralpha.setAt(1, 1, qCos(bestApproximation.approxAlpha));
