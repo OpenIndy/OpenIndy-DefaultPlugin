@@ -1,11 +1,17 @@
 #include <QString>
 #include <QtTest>
 #include <QPointer>
+#include <QList>
 
 #include "p_register.h"
+#include "p_bestfitcylinder.h"
 #include "featurewrapper.h"
 #include "types.h"
 #include "chooselalib.h"
+
+#define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
+#define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
+#define DEBUG_CYLINDER(cylinder) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(cylinder->getPosition().getVector()) << ", direction=" << _OI_VEC(cylinder->getDirection().getVector()) << ", radius=" << cylinder->getRadius().getRadius() << ", stdev=" << cylinder->getStatistic().getStdev();
 
 using namespace oi;
 
@@ -17,13 +23,54 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
+
     void testRegisterPoint();
     void testRegisterSphere();
     void testRegisterCircle();
+
+private:
+    void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
+
 };
 
 FunctionTest::FunctionTest()
 {
+}
+
+void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest) {
+    qDebug() << msg;
+}
+
+void FunctionTest::addInputObservations(QString data, QPointer<Function> function, double conversionFactor) {
+    QTextStream stream(data.toUtf8());
+    int id=1000;
+    while(!stream.atEnd()) {
+        id++;
+
+        QStringList xyz = stream.readLine().split(" ");
+        if(xyz.size() == 0) {
+            continue;
+        }
+
+        OiVec * vec = new OiVec(4);
+        vec->setAt(0, xyz.at(0).toDouble() * conversionFactor);
+        vec->setAt(1, xyz.at(1).toDouble() * conversionFactor);
+        vec->setAt(2, xyz.at(2).toDouble() * conversionFactor);
+        vec->setAt(3, 1.0);
+
+        // vecList.append(vec);
+
+        Observation * observation = new Observation(*vec, id, true);
+        observation->setIsSolved(true);
+
+        InputElement * element = new InputElement(id);
+        element->typeOfElement = eObservationElement;
+        element->observation = observation;
+
+
+        function->addInputElement(*element, 0);
+     }
 }
 
 void FunctionTest::testRegisterPoint()
