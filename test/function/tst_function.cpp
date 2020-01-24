@@ -29,6 +29,8 @@ private Q_SLOTS:
     void testRegisterSphere();
     void testRegisterCircle();
 
+    void testVRadial();
+
 private:
     void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
 
@@ -226,6 +228,57 @@ void FunctionTest::testRegisterCircle()
     delete plane.data();
     delete circle.data();
     delete circleFeature.data();
+    delete function.data();
+}
+
+// OI-494
+void FunctionTest::testVRadial()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-3283.654 -79.927 194.917\n\
+-3271.578 -84.991 203.643\n\
+-3292.599 -64.647 196.517\n\
+-3308.806 -73.417 213.805\n\
+-3301.555 -87.819 210.971\n\
+-3289.428 -79.973 198.027\n\
+-3292.505 -57.849 200.595\n\
+-3303.342 -63.362 213.794\n\
+");
+
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
+    COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1),   0.026, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (-0.037), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1),   0.010, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.003), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
+
+
     delete function.data();
 }
 
