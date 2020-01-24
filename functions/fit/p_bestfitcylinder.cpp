@@ -252,18 +252,18 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
             // approximation direction
             //########################
 
-            Direction aproxAxis;
+            Direction approxAxis;
             // find first direction
             foreach(const InputElement &element, this->getInputElements()[0]){
                 if(!element.line.isNull()
                         && element.line->getIsSolved()) {
-                    aproxAxis = element.line->getDirection();
+                    approxAxis = element.line->getDirection();
                     break;
                 }
 
             }
             // valid direction found
-            OiVec an = aproxAxis.getVector();
+            OiVec an = approxAxis.getVector();
             if  (!(an.getAt(0) == 0
                 && an.getAt(1) == 0
                 && an.getAt(2) == 0)) {
