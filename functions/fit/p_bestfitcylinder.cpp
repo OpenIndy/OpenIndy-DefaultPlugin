@@ -925,8 +925,10 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         float distance = 0.0f;
 
         distance = radiusActual - _r; //distance error
-        vrMin = min(vrMin, distance);
-        vrMax = max(vrMax, distance);
+        if(inputObservations.contains(observation)) { // calculate form error from "used" observations
+            vrMin = min(vrMin, distance);
+            vrMax = max(vrMax, distance);
+        }
 
         //calculate residual vector
         v_obs.setAt(0, b[0]);
