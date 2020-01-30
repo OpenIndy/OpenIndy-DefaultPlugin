@@ -29,7 +29,16 @@ private Q_SLOTS:
     void testRegisterSphere();
     void testRegisterCircle();
 
+    void testBestFitCylinder1();
+    void testBestFitCylinder2();
+    void testBestFitCylinder3();
+    void testBestFitCylinder4();
+    void testBestFitCylinder5();
     void testVRadial();
+
+private:
+    void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
+
 
 private:
     void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
@@ -282,6 +291,233 @@ void FunctionTest::testVRadial()
     delete function.data();
 }
 
+// OI-566
+void FunctionTest::testBestFitCylinder1()
+{
+    // ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+900 19.05 -1205\n\
+900 19.05 1205\n\
+700 12.34 -1205\n\
+700 12.34 1205\n\
+200 12.34 -1205\n\
+200 12.34 1205\n\
+0 19.05 -1205\n\
+0 19.05 1205\n\
+");
+
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 1205.0, 0.005);
+
+    delete function.data();
+}
+
+// OI-566
+void FunctionTest::testBestFitCylinder2()
+{
+    // ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+901 19.05 -1205\n\
+900 19.05 1205\n\
+700 12.34 -1205\n\
+700 12.34 1205\n\
+200 12.34 -1205\n\
+200 12.34 1205\n\
+0 19.05 -1205\n\
+0 19.05 1205\n\
+");
+
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    delete function.data();
+}
+
+// OI-566
+void FunctionTest::testBestFitCylinder3()
+{
+    // ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+900 19.05 -1206\n\
+900 19.05 1205\n\
+700 12.34 -1205\n\
+700 12.34 1205\n\
+200 12.34 -1205\n\
+200 12.34 1205\n\
+0 19.05 -1205\n\
+0 19.05 1205\n\
+");
+
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 1206.11, 0.005);
+
+    delete function.data();
+}
+
+// OI-566
+void FunctionTest::testBestFitCylinder4()
+{
+    // ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+900 20.05 -1205\n\
+900 19.05 1205\n\
+700 12.34 -1205\n\
+700 12.34 1205\n\
+200 12.34 -1205\n\
+200 12.34 1205\n\
+0 19.05 -1205\n\
+0 19.05 1205\n\
+");
+
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 1205.01, 0.005);
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCylinder5()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+10.50 0.50 1\n\
+9.13 5.49 1\n\
+5.48 9.13 1\n\
+0.50 10.53 1\n\
+-4.49 9.14 1\n\
+-8.13 5.49 1\n\
+-9.45 0.50 1\n\
+-8.18 -4.51 1\n\
+-4.52 -8.19 1\n\
+0.50 -9.47 1\n\
+5.51 -8.17 1\n\
+9.13 -4.48 1\n\
+10.69 3.60 50\n\
+8.07 8.07 50\n\
+3.58 10.64 50\n\
+-1.60 10.70 50\n\
+-6.05 8.05 50\n\
+-8.65 3.59 50\n\
+-8.70 -1.60 50\n\
+-6.05 -6.05 50\n\
+-1.59 -8.65 50\n\
+3.59 -8.67 50\n\
+8.05 -6.05 50\n\
+10.68 -1.59 50\n\
+10.27 3.66 100\n\
+7.57 8.06 100\n\
+3.00 10.48 100\n\
+-2.16 10.27 100\n\
+-6.57 7.58 100\n\
+-8.98 3.00 100\n\
+-8.83 -2.18 100\n\
+-6.04 -6.53 100\n\
+-1.49 -8.94 100\n\
+3.68 -8.84 100\n\
+8.05 -6.06 100\n\
+10.51 -1.50 100\n\
+");
+
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 10.00, 0.01);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2), 0.999993, 0.000001)
+    COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.197, 0.001);
+
+    delete function.data();
+}
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
