@@ -33,6 +33,7 @@ private Q_SLOTS:
     void testBestFitCylinder2();
     void testBestFitCylinder3();
     void testBestFitCylinder4();
+    void testBestFitCylinder5();
 
     void testBestFitCylinder5();
     void testBestFitCylinder6();
@@ -245,6 +246,7 @@ void FunctionTest::testRegisterCircle()
 void FunctionTest::testBestFitCylinder1()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();

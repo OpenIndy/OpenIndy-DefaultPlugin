@@ -741,6 +741,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         //solve the normal equation system
         try{
             if(!OiMat::solve(res, N, -1.0*c)){
+                emit this->sendMessage(QString("solve error cylinder fit"), eErrorMessage);
                 return false;
             }
         }catch(const exception &e){
@@ -885,6 +886,7 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
     }while( stopXX > 0.0000000000001 && numIterations < 1000 );
 
     if(numIterations >= 1000){
+        emit this->sendMessage(QString("to many iterations: %1").arg(numIterations), eWarningMessage);
         return false;
     }
 
