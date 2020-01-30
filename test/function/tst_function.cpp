@@ -39,10 +39,6 @@ private Q_SLOTS:
 private:
     void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
 
-
-private:
-    void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
-
 };
 
 FunctionTest::FunctionTest()
