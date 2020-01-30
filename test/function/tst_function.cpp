@@ -35,7 +35,6 @@ private Q_SLOTS:
     void testBestFitCylinder4();
     void testBestFitCylinder5();
 
-    void testBestFitCylinder5();
     void testBestFitCylinder6();
     void testBestFitCylinder7();
     void testBestFitCylinder8();
