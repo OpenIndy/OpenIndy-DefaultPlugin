@@ -490,6 +490,8 @@ bool BestFitCylinder::approximateCylinder(OiVec pn, const QList<QPointer<Observa
     approximation.stdev = sum_vv;
     approximation.comment = label;
     this->approximations.append(approximation);
+
+    return true;
 }
 
 /*!
