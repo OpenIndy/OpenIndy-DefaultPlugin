@@ -801,8 +801,9 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
     InputElement * element = new InputElement(2000);
     element->typeOfElement = eLineElement;
     element->line = line;
+    element->geometry = line;
 
-    function->addInputElement(*element, 0);
+    function->addInputElement(*element, 1);
 
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
