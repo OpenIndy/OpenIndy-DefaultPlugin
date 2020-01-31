@@ -24,7 +24,7 @@ void BestFitCylinder::init(){
     NeededElement param2;
     param2.description = "approximation direction.";
     param2.infinite = true;
-    param2.typeOfElement = eLineElement;
+    param2.typeOfElement = eDirectionElement;
     this->neededElements.append(param2);
 
     //set spplicable for
@@ -256,10 +256,11 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
 
             Direction approxAxis;
             // find first direction
-            foreach(const InputElement &element, this->getInputElements()[0]){
-                if(!element.line.isNull()
-                        && element.line->getIsSolved()) {
-                    approxAxis = element.line->getDirection();
+            foreach(const InputElement &element, this->getInputElements()[1]){
+                if(!element.geometry.isNull()
+                        && element.geometry->getIsSolved()
+                        && element.geometry->hasDirection()) {
+                    approxAxis = element.geometry->getDirection();
                     break;
                 }
 
@@ -489,6 +490,8 @@ bool BestFitCylinder::approximateCylinder(OiVec pn, const QList<QPointer<Observa
     approximation.stdev = sum_vv;
     approximation.comment = label;
     this->approximations.append(approximation);
+
+    return true;
 }
 
 /*!
