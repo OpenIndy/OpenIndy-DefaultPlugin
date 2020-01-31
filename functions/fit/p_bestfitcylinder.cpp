@@ -895,8 +895,13 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
     axis.setAt(2, 1.0);
     OiMat::solve(axis, Rall, axis);
 
+    // reset / clear statistic
+    this->statistic.reset();
+
     //calculate sum vv
     double sumVV = 0.0;
+    float vrMin = numeric_limits<float>::max();
+    float vrMax = numeric_limits<float>::min();
     foreach(const QPointer<Observation> &observation, allUsableObservations){
         OiVec v_obs(3);
         _x = observation->getXYZ().getAt(0);
@@ -920,6 +925,10 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         float distance = 0.0f;
 
         distance = radiusActual - _r; //distance error
+        if(inputObservations.contains(observation)) { // calculate form error from "used" observations
+            vrMin = min(vrMin, distance);
+            vrMax = max(vrMax, distance);
+        }
 
         //calculate residual vector
         v_obs.setAt(0, b[0]);
@@ -929,16 +938,20 @@ bool BestFitCylinder::fitCylinder(Cylinder &cylinder, const QList<QPointer<Obser
         v_obs = distance * v_obs;
 
         //set up display residuals
-        addDisplayResidual(observation->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
-                           qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
-                                + v_obs.getAt(2) * v_obs.getAt(2))
-                           );
+        if(false) {
+            addDisplayResidual(observation->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
+                               qSqrt(v_obs.getAt(0) * v_obs.getAt(0) + v_obs.getAt(2) * v_obs.getAt(2)));
+        } else {
+            addDisplayResidual(observation->getId(), distance);
+        }
 
         if(inputObservations.contains(observation)) {
             sumVV += distance * distance;
         }
 
     }
+
+    this->statistic.setFormError(vrMax - vrMin); // roundness
 
     //set up result
     Radius cylinderRadius(_r);
@@ -1620,10 +1633,12 @@ bool BestFitCylinder::fitTest(Cylinder &cylinder, const QList<QPointer<Observati
         v_obs = distance * v_obs;
 
         //set up display residuals
-        addDisplayResidual(observation->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
-                            qSqrt(v_obs.getAt(0) * v_obs.getAt(0)
-                                + v_obs.getAt(2) * v_obs.getAt(2))
-                           );
+        if(false) {
+            addDisplayResidual(observation->getId(), v_obs.getAt(0), v_obs.getAt(1), v_obs.getAt(2),
+                               qSqrt(v_obs.getAt(0) * v_obs.getAt(0) + v_obs.getAt(2) * v_obs.getAt(2)));
+        } else {
+            addDisplayResidual(observation->getId(), distance);
+        }
 
         if(inputObservations.contains(observation)) {
             sumVV += distance * distance;
