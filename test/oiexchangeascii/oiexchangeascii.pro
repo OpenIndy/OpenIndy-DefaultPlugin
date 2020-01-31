@@ -3,7 +3,7 @@
 # Project created by QtCreator 2019-06-12T15:53:07
 #
 #-------------------------------------------------
-
+CONFIG += c++11
 QT       += testlib
 
 QT       += core gui widgets serialport xml
