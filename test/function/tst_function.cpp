@@ -31,18 +31,21 @@ private Q_SLOTS:
     void testRegisterSphere();
     void testRegisterCircle();
 
+    // OI-566
     void testBestFitCylinder1();
-    void testBestFitCylinder2();
-    void testBestFitCylinder3();
-    void testBestFitCylinder4();
-    void testBestFitCylinder5();
-    void testVRadial();
+    void testBestFitCylinder1_modifyX();
+    void testBestFitCylinder1_modifyZ();
+    void testBestFitCylinder1_modifyY();
 
-    void testBestFitCylinder6();
-    void testBestFitCylinder7();
-    void testBestFitCylinder8();
-    void testBestFitCylinder9();
-    void testBestFitCylinder10();
+    // OI-298
+    void testBestFitCylinder2_trafo_guess_axis_3();
+    void testBestFitCylinder2_trafo_1st_2_pts();
+    void testBestFitCylinder2_trafo_guess_axis_2();
+    void testBestFitCylinder2_trafo_guess_axis_1();
+    void testBestFitCylinder2_guess_axis();
+    void testBestFitCylinder2_1st_2_pts();
+
+    void testVRadial();
 
 private:
     void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
@@ -348,7 +351,7 @@ void FunctionTest::testBestFitCylinder1()
 }
 
 // OI-566
-void FunctionTest::testBestFitCylinder2()
+void FunctionTest::testBestFitCylinder1_modifyX()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -393,7 +396,7 @@ void FunctionTest::testBestFitCylinder2()
 }
 
 // OI-566
-void FunctionTest::testBestFitCylinder3()
+void FunctionTest::testBestFitCylinder1_modifyZ()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -438,7 +441,7 @@ void FunctionTest::testBestFitCylinder3()
 }
 
 // OI-566
-void FunctionTest::testBestFitCylinder4()
+void FunctionTest::testBestFitCylinder1_modifyY()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -483,7 +486,7 @@ void FunctionTest::testBestFitCylinder4()
 }
 
 // OI-298
-void FunctionTest::testBestFitCylinder5()
+void FunctionTest::testBestFitCylinder2_trafo_guess_axis_3()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -527,7 +530,7 @@ void FunctionTest::testBestFitCylinder5()
 }
 
 // OI-298
-void FunctionTest::testBestFitCylinder6()
+void FunctionTest::testBestFitCylinder2_trafo_1st_2_pts()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -568,7 +571,7 @@ void FunctionTest::testBestFitCylinder6()
 }
 
 // OI-298
-void FunctionTest::testBestFitCylinder7()
+void FunctionTest::testBestFitCylinder2_trafo_guess_axis_2()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -614,7 +617,7 @@ void FunctionTest::testBestFitCylinder7()
 }
 
 // OI-298
-void FunctionTest::testBestFitCylinder8()
+void FunctionTest::testBestFitCylinder2_trafo_guess_axis_1()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -660,7 +663,7 @@ void FunctionTest::testBestFitCylinder8()
 }
 
 // OI-298
-void FunctionTest::testBestFitCylinder9()
+void FunctionTest::testBestFitCylinder2_guess_axis()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -705,7 +708,7 @@ void FunctionTest::testBestFitCylinder9()
 }
 
 // OI-298 direction
-void FunctionTest::testBestFitCylinder10()
+void FunctionTest::testBestFitCylinder2_1st_2_pts()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
