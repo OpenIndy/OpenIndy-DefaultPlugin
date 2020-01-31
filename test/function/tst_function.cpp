@@ -274,6 +274,10 @@ void FunctionTest::testVRadial()
 
     addInputObservations(data, function);
 
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "guess axis");
+    function->setScalarInputParams(scalarInputParams);
+
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
