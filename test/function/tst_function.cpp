@@ -454,6 +454,10 @@ void FunctionTest::testBestFitCylinder5()
 ";
     addInputObservations(data, function);
 
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "guess axis");
+    function->setScalarInputParams(scalarInputParams);
+
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
@@ -536,6 +540,11 @@ void FunctionTest::testBestFitCylinder7()
 
     addInputObservations(data, function);
 
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "guess axis");
+    function->setScalarInputParams(scalarInputParams);
+
+
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
@@ -577,6 +586,11 @@ void FunctionTest::testBestFitCylinder8()
 
     addInputObservations(data, function);
 
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "guess axis");
+    function->setScalarInputParams(scalarInputParams);
+
+
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
@@ -617,6 +631,10 @@ void FunctionTest::testBestFitCylinder9()
 
 
     addInputObservations(data, function);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "guess axis");
+    function->setScalarInputParams(scalarInputParams);
 
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
@@ -700,6 +718,9 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
 
     addInputObservations(data, function);
 
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "direction");
+    function->setScalarInputParams(scalarInputParams);
 
     // QDEBUG : FunctionTest::testBestFitCylinder10() position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
 

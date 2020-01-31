@@ -24,6 +24,17 @@ public:
     double approxBeta;
     double stdev;
     QString comment;
+
+    operator QString() const {
+        return QString("comment=%1, stdev=%2, approxXm=%3, approxYm=%4, approxAlpha=%5, approxBeta=%6, approxRadius=%7")
+                    .arg(comment).arg(stdev).arg(approxXm).arg(approxYm).arg(approxAlpha).arg(approxBeta).arg(approxRadius);
+    }
+};
+
+enum ApproximationTypes{
+    eFirstTwoPoints = 0,
+    eDirection,
+    eGuessAxis
 };
 
 /*!
@@ -57,7 +68,7 @@ private:
 
     bool setUpResult(Cylinder &cylinder);
 
-    bool approximateCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations);
+    bool approximateCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, ApproximationTypes approximationType);
     bool approximateCylinder(OiVec pn, const QList<QPointer<Observation> > &inputObservations, QString label);
     bool fitCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, const QList<QPointer<Observation> > &allUsableObservations, const CylinderApproximation &approximation);
 
