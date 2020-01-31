@@ -21,10 +21,21 @@ void BestFitCylinder::init(){
     param1.infinite = true;
     param1.typeOfElement = eObservationElement;
     this->neededElements.append(param1);
+    NeededElement param2;
+    param2.description = "approximation direction.";
+    param2.infinite = true;
+    param2.typeOfElement = eLineElement;
+    this->neededElements.append(param2);
 
     //set spplicable for
     this->applicableFor.append(eCylinderFeature);
 
+    this->stringParameters.insert("approximation", "first two points");
+    this->stringParameters.insert("approximation", "direction");
+    this->stringParameters.insert("approximation", "guess axis");
+
+    this->scalarInputParams.isValid = true;
+    this->scalarInputParams.stringParameter.insert("approximation", "first two points"); // default
 }
 
 /*!
@@ -45,16 +56,22 @@ bool BestFitCylinder::exec(Cylinder &cylinder){
 bool BestFitCylinder::setUpResult(Cylinder &cylinder){
 
     //get and check input observations
-    if(!this->inputElements.contains(0) || this->inputElements[0].size() < 5){
-        emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
-        return false;
-    }
     QList<QPointer<Observation> > allUsableObservations;
     QList<QPointer<Observation> > inputObservations;
     filterObservations(allUsableObservations, inputObservations);
     if(inputObservations.size() < 5){
         emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
+        cylinder.setIsSolved(false);
         return false;
+    }
+
+    ApproximationTypes approximationType = eFirstTwoPoints; // default
+    if(this->scalarInputParams.stringParameter.contains("approximation")){
+        if(this->scalarInputParams.stringParameter.value("approximation").compare("direction") == 0){
+            approximationType = eDirection;
+        } else if(this->scalarInputParams.stringParameter.value("approximation").compare("guess axis") == 0){
+            approximationType = eGuessAxis;
+        }
     }
 
     //calculate centroid of all observations
@@ -64,7 +81,7 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     }
     centroid = centroid / (double)inputObservations.size();
 
-    //calculate centroid reduced observations
+    // calculate centroid reduced observations
     QList<QPointer<Observation> > allReducedInputObservations;
     QList<QPointer<Observation> > reducedInputObservations;
     foreach(const QPointer<Observation> &obs, allUsableObservations){
@@ -76,57 +93,40 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
         }
     }
 
-    //approximate cylinder by 2D circle fit
-    if(!this->approximateCylinder(cylinder, reducedInputObservations)){
+    // approximate cylinder by 2D circle fit
+    if(!this->approximateCylinder(cylinder, reducedInputObservations, approximationType)){
         emit this->sendMessage(QString("Error while generating approximations for cylinder parameters of cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
         return false;
     }
 
-    //fit the cylinder using the previously generated approximations
-    bool foundSolution = false;
-    CylinderApproximation approximation;
-    QMap<double, CylinderApproximation> approximationsFitted; // key: stdev from fitting, value: approximation
-
-    foreach (const CylinderApproximation &appr, approximations) {
-        qDebug() << "approximation" << appr.comment << ", stdev" << appr.stdev;
-
-        if(this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, appr)) {
-            approximationsFitted.insert(cylinder.getStatistic().getStdev(), appr);
-            foundSolution = true;
+    // filter the best approximation
+    CylinderApproximation bestApproximation;
+    double bestStdev  = numeric_limits<double>::max();
+    foreach (const CylinderApproximation &approximation, approximations) {
+        qDebug() << "approximation" << approximation;
+        if(approximation.stdev < bestStdev) {
+            bestStdev = approximation.stdev;
+            bestApproximation = approximation;
         }
     }
 
-    if(!foundSolution){
-        emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
-        return false;
-    }
 
-    double stdev = numeric_limits<double>::max();
-    QMap<double, CylinderApproximation>::iterator stdevApprox;
-    for (stdevApprox = approximationsFitted.begin(); stdevApprox != approximationsFitted.end(); ++stdevApprox) {
-        qDebug() << "approximationsFitted" << stdevApprox.key() << ", " << stdevApprox.value().comment  << ", stdev" << stdevApprox.value().stdev;
-        if(stdevApprox.key() < stdev) {
-            stdev = stdevApprox.key();
-            approximation = stdevApprox.value();
-        }
-    }
-
-    emit this->sendMessage(QString("cylinder (%1) best solution: %2").arg(cylinder.getFeatureName()).arg(approximation.comment), eInformationMessage);
+    qDebug() << "bestApproximation" << bestApproximation;
 
     OiMat Ralpha(4,4);
     OiMat Rbeta(4,4);
     OiMat Rall(4,4);
 
     Ralpha.setAt(0, 0, 1.0);
-    Ralpha.setAt(1, 1, qCos(approximation.approxAlpha));
-    Ralpha.setAt(1, 2, -qSin(approximation.approxAlpha));
-    Ralpha.setAt(2, 1, qSin(approximation.approxAlpha));
-    Ralpha.setAt(2, 2, qCos(approximation.approxAlpha));
-    Rbeta.setAt(0, 0, qCos(approximation.approxBeta));
-    Rbeta.setAt(0, 2, qSin(approximation.approxBeta));
+    Ralpha.setAt(1, 1, qCos(bestApproximation.approxAlpha));
+    Ralpha.setAt(1, 2, -qSin(bestApproximation.approxAlpha));
+    Ralpha.setAt(2, 1, qSin(bestApproximation.approxAlpha));
+    Ralpha.setAt(2, 2, qCos(bestApproximation.approxAlpha));
+    Rbeta.setAt(0, 0, qCos(bestApproximation.approxBeta));
+    Rbeta.setAt(0, 2, qSin(bestApproximation.approxBeta));
     Rbeta.setAt(1, 1, 1.0);
-    Rbeta.setAt(2, 0, -qSin(approximation.approxBeta));
-    Rbeta.setAt(2, 2, qCos(approximation.approxBeta));
+    Rbeta.setAt(2, 0, -qSin(bestApproximation.approxBeta));
+    Rbeta.setAt(2, 2, qCos(bestApproximation.approxBeta));
 
     Rall = Rbeta * Ralpha;
     Rall.setAt(3,3,1.0);
@@ -138,28 +138,19 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
         obs->setXYZ(tmp);
     }
 
-/*
-    //approximate cylinder by 2D circle fit
-    if(!this->approximateCylinder(cylinder, reducedInputObservations)){
-        emit this->sendMessage(QString("Error while generating approximations for cylinder parameters of cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
-        return false;
-    }*/
-
-    approximation.approxAlpha = 0.0;
-    approximation.approxBeta = 0.0;
+    bestApproximation.approxAlpha = 0.0;
+    bestApproximation.approxBeta = 0.0;
 
 
-
-
-    if(!this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, approximation)){
+    if(!this->fitCylinder(cylinder, reducedInputObservations, allReducedInputObservations, bestApproximation)){
+        emit this->sendMessage(QString("Error while fitting cylinder %1 with solution: %2").arg(cylinder.getFeatureName()).arg(bestApproximation.comment), eErrorMessage);
+        cylinder.setIsSolved(false);
         return false;
     }
 
 
-    /*if(!this->fitCylinder(cylinder, inputObservations)){
-        emit this->sendMessage(QString("Error while fitting cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
-        return false;
-    }*/
+    emit this->sendMessage(QString("cylinder (%1) best solution: %2").arg(cylinder.getFeatureName()).arg(bestApproximation.comment), eInformationMessage);
+
 
     //transform cylinder position (centroid + rotation)
     Position cylinderPosition = cylinder.getPosition();
@@ -204,49 +195,114 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
  * \param inputObservations
  * \return
  */
-bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations){
+bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPointer<Observation> > &inputObservations, ApproximationTypes approximationType){
 
     //clear current approximations
     this->approximations.clear();
 
-    //get the number of observations
-    int numPoints = inputObservations.size();
+    switch(approximationType) {
+        case eGuessAxis: {
+            //get the number of observations
+            int numPoints = inputObservations.size();
 
-    //calculate centroid of all observations
-    OiVec centroid3D(4);
-    foreach(const QPointer<Observation> &obs, inputObservations){
-        centroid3D = centroid3D + obs->getXYZ();
-    }
-    centroid3D.removeLast();
-    centroid3D = centroid3D / numPoints;
-
-    //set up covariance matrix of all observations
-    OiMat H(3, 3);
-    for (int k = 0; k < numPoints; k++) {
-        QPointer<Observation> obs = inputObservations.at(k);
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                H.setAt(i,j, H.getAt(i, j) + (obs->getXYZ().getAt(i) - centroid3D.getAt(i)) * (obs->getXYZ().getAt(j) - centroid3D.getAt(j)));
+            //calculate centroid of all observations
+            OiVec centroid3D(4);
+            foreach(const QPointer<Observation> &obs, inputObservations){
+                centroid3D = centroid3D + obs->getXYZ();
             }
+            centroid3D.removeLast();
+            centroid3D = centroid3D / numPoints;
+
+            //set up covariance matrix of all observations
+            OiMat H(3, 3);
+            for (int k = 0; k < numPoints; k++) {
+                QPointer<Observation> obs = inputObservations.at(k);
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        H.setAt(i,j, H.getAt(i, j) + (obs->getXYZ().getAt(i) - centroid3D.getAt(i)) * (obs->getXYZ().getAt(j) - centroid3D.getAt(j)));
+                    }
+                }
+            }
+
+            //singular value decomposition of H to get the major axis direction of the cylinder observations
+            OiMat U(3, 3);
+            OiVec d(3);
+            OiMat V(3, 3);
+            try{
+                H.svd(U, d, V);
+            }catch(const exception &e){
+                emit this->sendMessage(QString("SVD error cylinder minimum solution: %1").arg(e.what()), eErrorMessage);
+                return false;
+            }
+
+            //one of the eigen-vectors is the approximate cylinder axis
+            bool foundOneVaildApproximation = false;
+            for(int i = 0; i < 3; i++){
+                OiVec pn; //possible normal vector
+
+                U.getCol(pn, i); //get eigenvector i
+
+                if(approximateCylinder(pn, inputObservations, QString("eigenvector %1").arg(i))) {
+                    foundOneVaildApproximation = true;
+                }
+            }
+            return foundOneVaildApproximation;
+            break;
+        }
+    case eDirection: {
+            //########################
+            // approximation direction
+            //########################
+
+            Direction approxAxis;
+            // find first direction
+            foreach(const InputElement &element, this->getInputElements()[0]){
+                if(!element.line.isNull()
+                        && element.line->getIsSolved()) {
+                    approxAxis = element.line->getDirection();
+                    break;
+                }
+
+            }
+            // valid direction found
+            OiVec an = approxAxis.getVector();
+            if  (!(an.getAt(0) == 0
+                && an.getAt(1) == 0
+                && an.getAt(2) == 0)) {
+
+                return approximateCylinder(an, inputObservations, "approxmation direction");
+            } else {
+                return false;
+            }
+
+            break;
+        }
+        case eFirstTwoPoints: {
+        default:
+            //##############################################################
+            //another approximation comes from the first two cylinder points
+            //##############################################################
+
+            OiVec diff = inputObservations.at(0)->getXYZ() - inputObservations.at(1)->getXYZ();
+            diff.removeLast();
+
+            return approximateCylinder(diff, inputObservations, "first two cylinder points");
+
+            break;
         }
     }
 
-    //singular value decomposition of H to get the major axis direction of the cylinder observations
-    OiMat U(3, 3);
-    OiVec d(3);
-    OiMat V(3, 3);
-    try{
-        H.svd(U, d, V);
-    }catch(const exception &e){
-        emit this->sendMessage(QString("SVD error cylinder minimum solution: %1").arg(e.what()), eErrorMessage);
-        return false;
-    }
+    return false;
+
+}
+
+bool BestFitCylinder::approximateCylinder(OiVec pn, const QList<QPointer<Observation> > &inputObservations, QString label) {
+    //get the number of observations
+    int numPoints = inputObservations.size();
 
     //init helper variables
     OiVec centroid2D(2); //centroid of 2D circle
-    double alpha_n = 0.0, beta_n = 0.0, radius_n = 0.0, x_m_n = 0.0, y_m_n = 0.0; //final solutions of cylinder approximation
-    double vv_ref = numeric_limits<double>::max(); //smallest vv that has been found
-    OiVec pn; //possible normal vector
+
     double a = 0.0, b = 0.0; //sin + cos of rotation angles
     double a_alpha = 0.0, b_alpha = 0.0, a_beta = 0.0, b_beta = 0.0; //possible rotation angles (check acos + asin)
     double alpha = 0.0, beta = 0.0; //rotation angles
@@ -274,179 +330,6 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
     //rotated centroid reduced 2D points
     QList<float> centroidreduced2D_x;
     QList<float> centroidreduced2D_y;
-
-    //one of the eigen-vectors is the approximate cylinder axis
-    for(int i = 0; i < 3; i++){
-
-        U.getCol(pn, i); //get eigenvector i
-        //calculate rotation angles
-        if (pn.getAt(1) == 0 && pn.getAt(2) == 0) {
-            a_alpha = PI / 2;
-            b_alpha = PI / 2;
-        } else if(pn.getAt(1) == 0) {
-            a_alpha = 0;
-            b_alpha = 0;
-        } else {
-            a = qSqrt(1.0 / (1.0 + qPow(pn.getAt(2)/(pn.getAt(1)), 2)));
-            b = a * pn.getAt(2) / (pn.getAt(1));
-
-            a_alpha = qAsin(a);
-            b_alpha = qAcos(b);
-        }
-
-        alpha = 0.0;
-
-        //cos and sin are ambiguous, therefor check the right angle here
-        if(this->compareAngles(b_alpha, a_alpha)){
-            alpha = a_alpha;
-        }else if(this->compareAngles(this->getCorrespondingCos(b_alpha), a_alpha)){
-            alpha = a_alpha;
-        }else if(this->compareAngles(b_alpha, this->getCorrespondingSin(a_alpha))){
-            alpha = b_alpha;
-        }else{
-            alpha = this->getCorrespondingCos(b_alpha);
-        }
-
-        //transform eigenvector --> y-component should be 0 now
-        _y = pn.getAt(1);
-        _z = pn.getAt(2);
-        pn.setAt(1, _y * qCos(alpha) - _z * qSin(alpha));
-        pn.setAt(2, _y * qSin(alpha) + _z * qCos(alpha));
-
-        if (pn.getAt(0) == 0 && pn.getAt(2) == 0) {
-            a_beta = PI / 2;
-            b_beta = PI / 2;
-        } else if(pn.getAt(0) == 0) {
-            a_beta = 0;
-            b_beta = 0;
-        } else {
-            a = qSqrt(1.0 / (1.0 + qPow(pn.getAt(2) / pn.getAt(0),2)));
-            b = -1.0 * pn.getAt(2) * a / pn.getAt(0);
-
-            a_beta = qAsin(a);
-            b_beta = qAcos(b);
-        }
-
-        beta = 0.0;
-
-        //cos and sin are ambiguous, therefor check the right angle here
-        if(this->compareAngles(b_beta, a_beta)){
-            beta = b_beta;
-        }else if(this->compareAngles(this->getCorrespondingCos(b_beta), a_beta)){
-            beta = a_beta;
-        }else if(this->compareAngles(b_beta, this->getCorrespondingSin(a_beta))){
-            beta = b_beta;
-        }else{
-            beta = this->getCorrespondingCos(b_beta);
-        }
-
-        //set up rotation matrices
-        Ralpha.setAt(0, 0, 1.0);
-        Ralpha.setAt(1, 1, qCos(alpha));
-        Ralpha.setAt(1, 2, -qSin(alpha));
-        Ralpha.setAt(2, 1, qSin(alpha));
-        Ralpha.setAt(2, 2, qCos(alpha));
-        Rbeta.setAt(0, 0, qCos(beta));
-        Rbeta.setAt(0, 2, qSin(beta));
-        Rbeta.setAt(1, 1, 1.0);
-        Rbeta.setAt(2, 0, -qSin(beta));
-        Rbeta.setAt(2, 2, qCos(beta));
-
-        Rall = Rbeta * Ralpha;
-
-        //###########################################
-        //circle fit to determine midpoint and radius
-        //###########################################
-
-        //clear transformed point lists
-        points2D_x.clear();
-        points2D_y.clear();
-        centroidreduced2D_x.clear();
-        centroidreduced2D_y.clear();
-
-        //reset 2D centroid and recalculate with new rotation
-        centroid2D = OiVec(2);
-
-        //rotate observations in XY-plane and calculate 2D centroid
-        for(int j = 0; j < numPoints; j++){
-
-            QPointer<Observation> obs = inputObservations.at(j);
-
-            tx = Rall.getAt(0,0)*obs->getXYZ().getAt(0)
-                    + Rall.getAt(0,1)*obs->getXYZ().getAt(1)
-                    + Rall.getAt(0,2)*obs->getXYZ().getAt(2);
-            ty = Rall.getAt(1,0)*obs->getXYZ().getAt(0)
-                    + Rall.getAt(1,1)*obs->getXYZ().getAt(1)
-                    + Rall.getAt(1,2)*obs->getXYZ().getAt(2);
-
-            points2D_x.append( tx );
-            points2D_y.append( ty );
-
-            centroid2D.setAt(0, centroid2D.getAt(0) + tx);
-            centroid2D.setAt(1, centroid2D.getAt(1) + ty);
-
-        }
-        centroid2D.setAt(0, centroid2D.getAt(0) / (float)numPoints);
-        centroid2D.setAt(1, centroid2D.getAt(1) / (float)numPoints);
-
-        //calculate centroid reduced 2D coordinates
-        for(int j = 0; j < numPoints; j++){
-            centroidreduced2D_x.append( points2D_x.at(j) - centroid2D.getAt(0) );
-            centroidreduced2D_y.append( points2D_y.at(j) - centroid2D.getAt(1) );
-        }
-
-        //fill a matrices
-        for(int j = 0; j < numPoints; j++){
-            tx = centroidreduced2D_x.at(j);
-            ty = centroidreduced2D_y.at(j);
-
-            A1.setAt(j, tx*tx + ty*ty);
-
-            A2.setAt(j,0,tx);
-            A2.setAt(j,1,ty);
-            A2.setAt(j,2,1.0);
-        }
-
-        //solve equation system to get circle parameters
-        try{
-            if(!OiMat::solve(s, A2.t() * A2, -1.0 * A2.t() * A1)){
-                continue;
-            }
-        }catch(const exception &e){
-            emit this->sendMessage(QString("inv error cylinder minimum solution: %1").arg(e.what()), eErrorMessage);
-            return false;
-        }
-
-        //calculate midpoint + radius
-        x_m = (-1.0 * s.getAt(0) / 2.0) + centroid2D.getAt(0);
-        y_m = (-1.0 * s.getAt(1) / 2.0) + centroid2D.getAt(1);
-        radius = qSqrt(0.25 * (s.getAt(0) * s.getAt(0) + s.getAt(1) * s.getAt(1)) - s.getAt(2));
-
-        //calculate statistic
-        v = -1.0 * A1 - A2 * s;
-        OiVec::dot(sum_vv, v,v);
-        sum_vv = qSqrt(sum_vv / (numPoints-3.0));
-
-        //add approximation
-        CylinderApproximation approximation;
-        approximation.approxAlpha = alpha;
-        approximation.approxBeta = beta;
-        approximation.approxXm = -1.0 * x_m;
-        approximation.approxYm = -1.0 * y_m;
-        approximation.approxRadius = radius;
-        approximation.stdev = sum_vv;
-        approximation.comment = QString("eigenvector %1").arg(i);
-        this->approximations.append(approximation);
-
-    }
-
-    //##############################################################
-    //another approximation comes from the first two cylinder points
-    //##############################################################
-
-    OiVec diff = inputObservations.at(0)->getXYZ() - inputObservations.at(1)->getXYZ();
-    diff.removeLast();
-    pn = diff;
 
     //calculate rotation angles
     if (pn.getAt(1) == 0 && pn.getAt(2) == 0) {
@@ -483,11 +366,11 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
     pn.setAt(2, _y * qSin(alpha) + _z * qCos(alpha));
 
     if (pn.getAt(0) == 0 && pn.getAt(2) == 0) {
-        a_beta = 0;
-        b_beta = 0;
-    } else if(pn.getAt(0) == 0) {
         a_beta = PI / 2;
         b_beta = PI / 2;
+    } else if(pn.getAt(0) == 0) {
+        a_beta = 0;
+        b_beta = 0;
     } else {
         a = qSqrt(1.0 / (1.0 + qPow(pn.getAt(2) / pn.getAt(0),2)));
         b = -1.0 * pn.getAt(2) * a / pn.getAt(0);
@@ -604,11 +487,8 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
     approximation.approxYm = -1.0 * y_m;
     approximation.approxRadius = radius;
     approximation.stdev = sum_vv;
-    approximation.comment = "first two cylinder points";
+    approximation.comment = label;
     this->approximations.append(approximation);
-
-    return true;
-
 }
 
 /*!
@@ -1070,7 +950,7 @@ bool BestFitCylinder::test(Cylinder &cylinder){
     }
 
     //approximate cylinder by 2D circle fit
-    if(!this->approximateCylinder(cylinder, inputObservations)){
+    if(!this->approximateCylinder(cylinder, inputObservations, eGuessAxis)){
         emit this->sendMessage(QString("Error while generating approximations for cylinder parameters of cylinder %1").arg(cylinder.getFeatureName()), eErrorMessage);
         return false;
     }
