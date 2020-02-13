@@ -25,6 +25,10 @@ void BestFitPoint::init(){
     //set spplicable for
     this->applicableFor.append(ePointFeature);
 
+    this->stringParameters.insert(key, value_no);
+    this->stringParameters.insert(key, value_yes);
+    this->scalarInputParams.isValid = true;
+    this->scalarInputParams.stringParameter.insert(key, value_no); // default
 }
 
 /*!
