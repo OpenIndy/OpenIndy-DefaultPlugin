@@ -48,7 +48,7 @@ private Q_SLOTS:
     void testVRadial();
 
 private:
-    void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
+    void addInputObservations(QString data, QPointer<Function> function);
 
 };
 
@@ -60,7 +60,7 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
     qDebug() << msg;
 }
 
-void FunctionTest::addInputObservations(QString data, QPointer<Function> function, double conversionFactor) {
+void FunctionTest::addInputObservations(QString data, QPointer<Function> function) {
     QTextStream stream(data.toUtf8());
     int id=1000;
     while(!stream.atEnd()) {
@@ -72,9 +72,9 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
         }
 
         OiVec * vec = new OiVec(4);
-        vec->setAt(0, xyz.at(0).toDouble() * conversionFactor);
-        vec->setAt(1, xyz.at(1).toDouble() * conversionFactor);
-        vec->setAt(2, xyz.at(2).toDouble() * conversionFactor);
+        vec->setAt(0, xyz.at(0).toDouble());
+        vec->setAt(1, xyz.at(1).toDouble());
+        vec->setAt(2, xyz.at(2).toDouble());
         vec->setAt(3, 1.0);
 
         // vecList.append(vec);
