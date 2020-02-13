@@ -8,10 +8,12 @@
 #include "featurewrapper.h"
 #include "types.h"
 #include "chooselalib.h"
+#include "p_bestfitpoint.h"
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
 #define DEBUG_CYLINDER(cylinder) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(cylinder->getPosition().getVector()) << ", direction=" << _OI_VEC(cylinder->getDirection().getVector()) << ", radius=" << cylinder->getRadius().getRadius() << ", stdev=" << cylinder->getStatistic().getStdev();
+#define DEBUG_POINT(point) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(point->getPosition().getVector()) << ", direction=" << _OI_VEC(point->getDirection().getVector()) << ", stdev=" << point->getStatistic().getStdev();
 
 using namespace oi;
 
@@ -46,6 +48,9 @@ private Q_SLOTS:
     void testBestFitCylinder2_1st_2_pts();
 
     void testVRadial();
+
+    void testDisableAllObservationsButLastOne_no();
+    void testDisableAllObservationsButLastOne_yes();
 
 private:
     void addInputObservations(QString data, QPointer<Function> function);
@@ -819,7 +824,87 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
     delete function.data();
 }
 
+// OI-573
+void FunctionTest::testDisableAllObservationsButLastOne_no()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("disable all observations but last one", "no");
+    function->setScalarInputParams(scalarInputParams);
+
+    QPointer<Point> point = new Point(false);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1.0 1.1 1.2\n\
+1.1 1.2 1.3\n\
+1.2 1.3 1.4\n\
+1.3 1.4 1.5\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.15, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.25, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.35, 0.01);
+
+    delete function.data();
+}
+
+// OI-573
+void FunctionTest::testDisableAllObservationsButLastOne_yes()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("disable all observations but last one", "yes");
+    function->setScalarInputParams(scalarInputParams);
+
+    QPointer<Point> point = new Point(false);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1.0 1.1 1.2\n\
+1.1 1.2 1.3\n\
+1.2 1.3 1.4\n\
+1.3 1.4 1.5\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.3, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.4, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.5, 0.01);
+
+    delete function.data();
+}
 
 QTEST_APPLESS_MAIN(FunctionTest)
 
