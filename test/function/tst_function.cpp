@@ -49,7 +49,7 @@ private Q_SLOTS:
     void testVRadial();
 
 private:
-    void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
+    void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0, int position = 0);
 
 };
 
@@ -61,7 +61,7 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
     qDebug() << msg;
 }
 
-void FunctionTest::addInputObservations(QString data, QPointer<Function> function, double conversionFactor) {
+void FunctionTest::addInputObservations(QString data, QPointer<Function> function, double conversionFactor, int position) {
     QTextStream stream(data.toUtf8());
     int id=1000;
     while(!stream.atEnd()) {
@@ -88,7 +88,7 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
         element->observation = observation;
 
 
-        function->addInputElement(*element, 0);
+        function->addInputElement(*element, position);
      }
 }
 
