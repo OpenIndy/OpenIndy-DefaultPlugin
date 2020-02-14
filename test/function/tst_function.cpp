@@ -8,6 +8,7 @@
 #include "featurewrapper.h"
 #include "types.h"
 #include "chooselalib.h"
+#include "p_bestfitplane.h"
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
@@ -47,6 +48,9 @@ private Q_SLOTS:
     void testBestFitCylinder2_1st_2_pts();
 
     void testVRadial();
+
+    void testBestFitPlane();
+    void testBestFitPlaneDummyPoint();
 
 private:
     void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0, int position = 0);
@@ -820,7 +824,82 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
     delete function.data();
 }
 
+// OI-577: old behavior
+void FunctionTest::testBestFitPlane()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(planeFeature);
+
+
+    // QDEBUG : FunctionTest::testBestFitPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 3.654760904e-10
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+// OI-557
+void FunctionTest::testBestFitPlaneDummyPoint() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("-1.0 0.4 0.2", function, 1);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
+
+
+    delete function.data();
+}
 
 QTEST_APPLESS_MAIN(FunctionTest)
 
