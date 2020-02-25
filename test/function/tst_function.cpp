@@ -9,6 +9,7 @@
 #include "types.h"
 #include "chooselalib.h"
 #include "p_bestfitplane.h"
+#include "p_bestfitcircleinplane.h"
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
@@ -25,8 +26,12 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
-    void testBestFitPlaneDummyPoint1();
-    void testBestFitPlaneDummyPoint2();
+    void testBestFitCircleInPlane_DummyPoint1();
+    void testBestFitCircleInPlane_DummyPoint2();
+    void testBestFitCircleInPlane();
+
+    void testBestFitPlane_DummyPoint1();
+    void testBestFitPlane_DummyPoint2();
 
     void testBestFitCylinderAproximationDirection1();
 
@@ -866,7 +871,7 @@ void FunctionTest::testBestFitPlane()
 }
 
 // OI-557
-void FunctionTest::testBestFitPlaneDummyPoint1() {
+void FunctionTest::testBestFitPlane_DummyPoint1() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<Function> function = new BestFitPlane();
@@ -888,7 +893,7 @@ void FunctionTest::testBestFitPlaneDummyPoint1() {
 ");
 
     addInputObservations(data, function);
-    addInputObservations("-1.0 0.4 0.2\n", function, InputElementKey::eDummyPoint);
+    addInputObservations("0.0 0.0 -10\n", function, InputElementKey::eDummyPoint);
 
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
@@ -904,7 +909,7 @@ void FunctionTest::testBestFitPlaneDummyPoint1() {
 }
 
 // OI-557
-void FunctionTest::testBestFitPlaneDummyPoint2() {
+void FunctionTest::testBestFitPlane_DummyPoint2() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<Function> function = new BestFitPlane();
@@ -926,7 +931,7 @@ void FunctionTest::testBestFitPlaneDummyPoint2() {
 ");
 
     addInputObservations(data, function);
-    addInputObservations("1.0 0.4 0.2\n", function, InputElementKey::eDummyPoint);
+    addInputObservations("0.0 0.0 10\n", function, InputElementKey::eDummyPoint);
 
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
@@ -942,6 +947,120 @@ void FunctionTest::testBestFitPlaneDummyPoint2() {
 }
 
 
+// OI-577: old behavior
+void FunctionTest::testBestFitCircleInPlane()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(circleFeature);
+
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 10\n", function, InputElementKey::eDummyPoint);
+    bool res = function->exec(circleFeature);
+
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 -10\n", function, InputElementKey::eDummyPoint);
+    bool res = function->exec(circleFeature);
+
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
+
+
+    delete function.data();
+}
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
