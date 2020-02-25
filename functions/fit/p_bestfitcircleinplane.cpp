@@ -23,6 +23,12 @@ void BestFitCircleInPlane::init(){
     param1.typeOfElement = eObservationElement;
     this->neededElements.append(param1);
 
+    NeededElement param2;
+    param2.description = "Dummy point to indicate circle normal.";
+    param2.infinite = true;
+    param2.typeOfElement = eObservationElement;
+    this->neededElements.append(param2);
+
     //set spplicable for
     this->applicableFor.append(eCircleFeature);
 
@@ -100,6 +106,16 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
     OiVec direction(3);
     OiVec::cross(direction, ab, ac);
     direction.normalize();
+
+    if(this->inputElements.contains(InputElementKey::eDummyPoint) && this->inputElements[InputElementKey::eDummyPoint].size() > 0) {
+        // computing circle normale by dummy point
+        OiVec dummyPoint = inputElements[InputElementKey::eDummyPoint][0].observation->getXYZ();
+        dummyPoint.removeLast();
+        double dot;
+        OiVec::dot(dot, dummyPoint - centroid, centroid);
+        direction = - dot * dummyPoint;
+        direction.normalize();
+    }
     double angle = 0.0; //angle between n and direction
     OiVec::dot(angle, n, direction);
     angle = qAbs(qAcos(angle));
