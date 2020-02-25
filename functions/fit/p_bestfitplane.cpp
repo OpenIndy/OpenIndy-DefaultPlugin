@@ -51,7 +51,7 @@ bool BestFitPlane::exec(Plane &plane){
 bool BestFitPlane::setUpResult(Plane &plane){
 
     //get and check input observations
-    if(!this->inputElements.contains(0) || this->inputElements[0].size() < 3){
+    if(!this->inputElements.contains(InputElementKey::eDefault) || this->inputElements[InputElementKey::eDefault].size() < 3){
         emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(plane.getFeatureName()), eWarningMessage);
         return false;
     }
@@ -115,19 +115,24 @@ bool BestFitPlane::setUpResult(Plane &plane){
 
     }
 
-    //check that the normal vector of the plane is defined by the first three points A, B and C (cross product)
-    OiVec ab = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
-    ab.removeLast();
-    OiVec ac = inputObservations.at(2)->getXYZ() - inputObservations.at(0)->getXYZ();
-    ac.removeLast();
-    OiVec direction(3);
-    OiVec::cross(direction, ab, ac);
-    direction.normalize();
-    double angle = 0.0; //angle between n and direction
-    OiVec::dot(angle, n, direction);
-    angle = qAbs(qAcos(angle));
-    if(angle > (PI/2.0)){
-        n = n * -1.0;
+    if(this->inputElements.contains(InputElementKey::eDummyPoint) && this->inputElements[InputElementKey::eDummyPoint].size() > 0) {
+        // computing plane normale by dummy point
+        OiVec dummyPoint = inputElements[InputElementKey::eDummyPoint][0].observation->getXYZ();
+    } else {
+        //check that the normal vector of the plane is defined by the first three points A, B and C (cross product)
+        OiVec ab = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
+        ab.removeLast();
+        OiVec ac = inputObservations.at(2)->getXYZ() - inputObservations.at(0)->getXYZ();
+        ac.removeLast();
+        OiVec direction(3);
+        OiVec::cross(direction, ab, ac);
+        direction.normalize();
+        double angle = 0.0; //angle between n and direction
+        OiVec::dot(angle, n, direction);
+        angle = qAbs(qAcos(angle));
+        if(angle > (PI/2.0)){
+            n = n * -1.0;
+        }
     }
 
     //set result

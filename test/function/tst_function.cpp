@@ -25,7 +25,7 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
-    void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
+    void testBestFitPlaneDummyPoint();
 
     void testBestFitCylinderAproximationDirection1();
 
@@ -50,10 +50,10 @@ private Q_SLOTS:
     void testVRadial();
 
     void testBestFitPlane();
-    void testBestFitPlaneDummyPoint();
+
+    void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
-    void addInputObservations(QString data, QPointer<Function> function);
     void addInputObservations(QString data, QPointer<Function> function, int position);
 
 };
@@ -66,11 +66,7 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
     qDebug() << msg;
 }
 
-void FunctionTest::addInputObservations(QString data, QPointer<Function> function) {
-    this->addInputObservations(data, function, 0);
-}
-
-void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int position) {
+void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int position = InputElementKey::eDefault) {
     QTextStream stream(data.toUtf8());
     int id=1000;
     while(!stream.atEnd()) {
@@ -891,7 +887,7 @@ void FunctionTest::testBestFitPlaneDummyPoint() {
 ");
 
     addInputObservations(data, function);
-    addInputObservations("-1.0 0.4 0.2", function, 1);
+    addInputObservations("-1.0 0.4 0.2\n", function, InputElementKey::eDummyPoint);
 
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
