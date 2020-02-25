@@ -25,7 +25,8 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
-    void testBestFitPlaneDummyPoint();
+    void testBestFitPlaneDummyPoint1();
+    void testBestFitPlaneDummyPoint2();
 
     void testBestFitCylinderAproximationDirection1();
 
@@ -865,7 +866,7 @@ void FunctionTest::testBestFitPlane()
 }
 
 // OI-557
-void FunctionTest::testBestFitPlaneDummyPoint() {
+void FunctionTest::testBestFitPlaneDummyPoint1() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<Function> function = new BestFitPlane();
@@ -901,6 +902,45 @@ void FunctionTest::testBestFitPlaneDummyPoint() {
 
     delete function.data();
 }
+
+// OI-557
+void FunctionTest::testBestFitPlaneDummyPoint2() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("1.0 0.4 0.2\n", function, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
 
 QTEST_APPLESS_MAIN(FunctionTest)
 
