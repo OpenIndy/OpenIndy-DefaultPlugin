@@ -131,7 +131,8 @@ bool BestFitPlane::setUpResult(Plane &plane){
         dummyPoint.removeLast();
         double dot;
         OiVec::dot(dot, dummyPoint - centroid, centroid);
-        direction = dot * direction;
+        direction = - dot * dummyPoint;
+        direction.normalize();
     }
     double angle = 0.0; //angle between n and direction
     OiVec::dot(angle, n, direction);
