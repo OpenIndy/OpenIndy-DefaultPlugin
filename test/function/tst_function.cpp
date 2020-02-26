@@ -60,7 +60,7 @@ private Q_SLOTS:
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
-    void addInputObservations(QString data, QPointer<Function> function, int position);
+    void addInputObservations(QString data, QPointer<Function> function, int position, int id);
 
 };
 
@@ -72,9 +72,8 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
     qDebug() << msg;
 }
 
-void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int position = InputElementKey::eDefault) {
+void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int position = InputElementKey::eDefault, int id = 1000) {
     QTextStream stream(data.toUtf8());
-    int id=1000;
     while(!stream.atEnd()) {
         id++;
 
