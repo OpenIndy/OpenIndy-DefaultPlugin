@@ -1143,7 +1143,7 @@ void FunctionTest::testBestFitCylinder1__DummyPoint2()
 
 
     addInputObservations(data, function);
-    addInputObservations("0. 0. 0.\n-2000. 10. 10.\n", function, InputElementKey::eDummyPoint, 2000);
+    addInputObservations("2000. 0. 0.\n0. 10. 10.\n", function, InputElementKey::eDummyPoint, 2000);
 
     ScalarInputParams scalarInputParams;
     scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
