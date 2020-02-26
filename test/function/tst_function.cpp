@@ -806,7 +806,7 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
     Position * xyz = new Position(*p);
 
     OiVec * a = new OiVec(4);
-    a->setAt(0, 0.9);
+    a->setAt(0, -0.9);
     a->setAt(1, 0);
     a->setAt(2, 0);
     a->setAt(3, 1.0);
@@ -825,7 +825,12 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
+    // QDEBUG : FunctionTest::testBestFitCylinderAproximationDirection1() position= -49.95613858 , 0.002538946657 , 0.003555186993 , direction= 0.9999999383 , 0.0001974276497 , -0.0002907078213 , radius= 19.15680458 , stdev= 0.03371845401
     DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(0), (-0.9999999383), 0.000001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(1), (-0.0001974276497), 0.000001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2), (0.0002907078213), 0.000001);
 
     COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
     COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
