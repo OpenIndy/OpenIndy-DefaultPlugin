@@ -34,7 +34,8 @@ public:
 enum ApproximationTypes{
     eFirstTwoPoints = 0,
     eDirection,
-    eGuessAxis
+    eGuessAxis,
+    eFirstTwoDummyPoint
 };
 
 /*!

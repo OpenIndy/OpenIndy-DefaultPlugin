@@ -27,10 +27,18 @@ void BestFitCylinder::init(){
     param2.typeOfElement = eDirectionElement;
     this->neededElements.append(param2);
 
+    NeededElement param3;
+    param3.description = "Dummy point to indicate cylinder normal.";
+    param3.infinite = true;
+    param3.typeOfElement = eObservationElement;
+    param3.key = InputElementKey::eDummyPoint;
+    this->neededElements.append(param2);
+
     //set spplicable for
     this->applicableFor.append(eCylinderFeature);
 
     this->stringParameters.insert("approximation", "first two points");
+    this->stringParameters.insert("approximation", "first two dummy points");
     this->stringParameters.insert("approximation", "direction");
     this->stringParameters.insert("approximation", "guess axis");
 
@@ -71,6 +79,10 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
             approximationType = eDirection;
         } else if(this->scalarInputParams.stringParameter.value("approximation").compare("guess axis") == 0){
             approximationType = eGuessAxis;
+        } else if(this->scalarInputParams.stringParameter.value("approximation").compare("first two dummy points") == 0){
+            approximationType = eFirstTwoDummyPoint;
+        } else if(this->scalarInputParams.stringParameter.value("approximation").compare("first two points") == 0){
+            approximationType = eFirstTwoPoints;
         }
     }
 
@@ -278,6 +290,24 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
 
             break;
         }
+    case eFirstTwoDummyPoint: {
+        QList<QPointer<Observation> > dummyPoints;
+        foreach(const InputElement &element, this->getInputElements()[InputElementKey::eDummyPoint]){
+            if(!element.observation.isNull()
+                    && element.observation->getIsSolved()) {
+                dummyPoints.append(element.observation);
+            }
+        }
+        if(dummyPoints.size() < 2){
+            return false;
+        }
+        OiVec diff = dummyPoints.at(0)->getXYZ() - dummyPoints.at(1)->getXYZ();
+        diff.removeLast();
+        diff.normalize();
+        return approximateCylinder(diff, inputObservations, "first two dummy points");
+
+        break;
+    }
         case eFirstTwoPoints: {
         default:
             //##############################################################
