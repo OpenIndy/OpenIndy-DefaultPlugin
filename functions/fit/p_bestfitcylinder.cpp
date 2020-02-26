@@ -178,16 +178,56 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     axis.normalize();
     cylinderAxis.setVector(axis);
 
-    //check that the direction vector is defined by the first two observations
-    OiVec pos1 = inputObservations.at(0)->getXYZ();
-    pos1.removeLast();
-    OiVec pos2 = inputObservations.at(1)->getXYZ();
-    pos2.removeLast();
-    OiVec direction = pos2 - pos1;
-    direction.normalize();
+
+    OiVec direction(3);
+    switch(approximationType) {
+        case eGuessAxis: {
+            break;
+        }
+        case eDirection: {
+            foreach(const InputElement &element, this->getInputElements()[1]){
+                if(!element.geometry.isNull()
+                        && element.geometry->getIsSolved()
+                        && element.geometry->hasDirection()) {
+                    direction = element.geometry->getDirection().getVector();
+                    break;
+                }
+            }
+            break;
+        }
+        case eFirstTwoDummyPoint: {
+            QList<QPointer<Observation> > dummyPoints;
+            foreach(const InputElement &element, this->getInputElements()[InputElementKey::eDummyPoint]){
+                if(!element.observation.isNull()
+                        && element.observation->getIsSolved()) {
+                    dummyPoints.append(element.observation);
+                }
+            }
+            if(dummyPoints.size() >= 2){
+                OiVec diff = dummyPoints.at(1)->getXYZ() - dummyPoints.at(0)->getXYZ();
+                diff.removeLast();
+                diff.normalize();
+                direction = diff;
+            }
+            break;
+        }
+        case eFirstTwoPoints: {
+            OiVec diff = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
+            diff.removeLast();
+            diff.normalize();
+            direction = diff;
+            break;
+        }
+    }
+
     double angle = 0.0; //angle between r and direction
-    OiVec::dot(angle, axis, direction);
-    angle = qAbs(qAcos(angle));
+    if  (!(direction.getAt(0) == 0
+        && direction.getAt(1) == 0
+        && direction.getAt(2) == 0)) {
+        OiVec::dot(angle, axis, direction);
+        angle = qAbs(qAcos(angle));
+    }
+
     if(angle > (PI/2.0)){
         Direction cylinderDirection = cylinder.getDirection();
         cylinderDirection.setVector(axis * -1.0);
