@@ -301,9 +301,9 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
         if(dummyPoints.size() < 2){
             return false;
         }
-        OiVec diff = dummyPoints.at(0)->getXYZ() - dummyPoints.at(1)->getXYZ();
+        OiVec diff = dummyPoints.at(1)->getXYZ() - dummyPoints.at(0)->getXYZ();
         diff.removeLast();
-        diff.normalize();
+
         return approximateCylinder(diff, inputObservations, "first two dummy points");
 
         break;
@@ -314,7 +314,7 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
             //another approximation comes from the first two cylinder points
             //##############################################################
 
-            OiVec diff = inputObservations.at(0)->getXYZ() - inputObservations.at(1)->getXYZ();
+            OiVec diff = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
             diff.removeLast();
 
             return approximateCylinder(diff, inputObservations, "first two cylinder points");
