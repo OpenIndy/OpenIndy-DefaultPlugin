@@ -21,6 +21,7 @@ void BestFitCylinder::init(){
     param1.infinite = true;
     param1.typeOfElement = eObservationElement;
     this->neededElements.append(param1);
+
     NeededElement param2;
     param2.description = "approximation direction.";
     param2.infinite = true;
@@ -28,11 +29,11 @@ void BestFitCylinder::init(){
     this->neededElements.append(param2);
 
     NeededElement param3;
-    param3.description = "Dummy point to indicate cylinder normal.";
+    param3.description = "Dummy points to indicate cylinder normal.";
     param3.infinite = true;
     param3.typeOfElement = eObservationElement;
     param3.key = InputElementKey::eDummyPoint;
-    this->neededElements.append(param2);
+    this->neededElements.append(param3);
 
     //set spplicable for
     this->applicableFor.append(eCylinderFeature);
