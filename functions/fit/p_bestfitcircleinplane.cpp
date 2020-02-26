@@ -27,6 +27,7 @@ void BestFitCircleInPlane::init(){
     param2.description = "Dummy point to indicate circle normal.";
     param2.infinite = true;
     param2.typeOfElement = eObservationElement;
+    param2.key = InputElementKey::eDummyPoint;
     this->neededElements.append(param2);
 
     //set spplicable for
