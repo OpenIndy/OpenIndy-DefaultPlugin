@@ -26,6 +26,9 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testBestFitCylinder1__DummyPoint1();
+    void testBestFitCylinder1__DummyPoint2();
+
     void testBestFitCircleInPlane_DummyPoint1();
     void testBestFitCircleInPlane_DummyPoint2();
     void testBestFitCircleInPlane();
@@ -1060,6 +1063,106 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
 
     delete function.data();
 }
+
+void FunctionTest::testBestFitCylinder1__DummyPoint1()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-59.57 -7.72 17.57\n\
+-34.43 -5.00 18.49\n\
+-59.44 -18.23 5.86\n\
+-58.84 10.00 16.30\n\
+-33.61 11.09 15.63\n\
+-53.82 -4.73 18.56\n\
+-58.87 15.80 10.89\n\
+-41.04 16.85 9.11\n\
+");
+
+
+    addInputObservations(data, function);
+    addInputObservations("0. 0. 0.\n2000. 10. 10.\n", function, InputElementKey::eDummyPoint, 2000);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
+    function->setScalarInputParams(scalarInputParams);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    //  position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(0), (0.9999999383), 0.00001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(1), (0.00019742765), 0.00001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2),  (-0.0002907078214), 0.00001);
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.156, 0.01);
+
+    delete function.data();
+}
+void FunctionTest::testBestFitCylinder1__DummyPoint2()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-59.57 -7.72 17.57\n\
+-34.43 -5.00 18.49\n\
+-59.44 -18.23 5.86\n\
+-58.84 10.00 16.30\n\
+-33.61 11.09 15.63\n\
+-53.82 -4.73 18.56\n\
+-58.87 15.80 10.89\n\
+-41.04 16.85 9.11\n\
+");
+
+
+    addInputObservations(data, function);
+    addInputObservations("0. 0. 0.\n-2000. 10. 10.\n", function, InputElementKey::eDummyPoint, 2000);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
+    function->setScalarInputParams(scalarInputParams);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    //  position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(0), (-0.9999999383), 0.00001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(1), (-0.00019742765), 0.00001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2),  (0.0002907078214), 0.00001);
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.156, 0.01);
+
+    delete function.data();
+}
+
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
