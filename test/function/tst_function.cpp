@@ -50,6 +50,7 @@ private Q_SLOTS:
 private:
     void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
 
+    void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
 };
 
 FunctionTest::FunctionTest()
@@ -89,6 +90,32 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
 
         function->addInputElement(*element, 0);
      }
+}
+
+void FunctionTest::addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = 0){
+    OiVec * p = new OiVec(4);
+    p->setAt(0, x);
+    p->setAt(1, y);
+    p->setAt(2, z);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * a = new OiVec(4);
+    a->setAt(0, i);
+    a->setAt(1, j);
+    a->setAt(2, k);
+    a->setAt(3, 1.0);
+    Direction * axis = new Direction(*a);
+
+    Line * line = new Line(false, *xyz, *axis);
+    line->setIsSolved(true);
+
+    InputElement * element = new InputElement(id);
+    element->typeOfElement = eLineElement;
+    element->line = line;
+    element->geometry = line;
+
+    function->addInputElement(*element, inputElementKey);
 }
 
 void FunctionTest::testRegisterPoint()
