@@ -811,29 +811,7 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
 
     // QDEBUG : FunctionTest::testBestFitCylinder10() position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * a = new OiVec(4);
-    a->setAt(0, 0.9);
-    a->setAt(1, 0);
-    a->setAt(2, 0);
-    a->setAt(3, 1.0);
-    Direction * axis = new Direction(*a);
-
-    Line * line = new Line(false, *xyz, *axis);
-    line->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = eLineElement;
-    element->line = line;
-    element->geometry = line;
-
-    function->addInputElement(*element, 1);
+    addInputLine(0,0,0, 0.9, 0, 0, function, 2000, 1);
 
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
