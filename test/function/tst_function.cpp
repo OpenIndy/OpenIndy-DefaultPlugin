@@ -112,6 +112,7 @@ void FunctionTest::addInputLine(double x, double y, double z, double i, double j
 
     Line * line = new Line(false, *xyz, *axis);
     line->setIsSolved(true);
+    line->setFeatureName(QString("line_%1").arg(id));
 
     InputElement * element = new InputElement(id);
     element->typeOfElement = eLineElement;
