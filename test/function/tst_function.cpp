@@ -5,6 +5,7 @@
 
 #include "p_register.h"
 #include "p_bestfitcylinder.h"
+#include "p_intersectlineline.h"
 #include "featurewrapper.h"
 #include "types.h"
 #include "chooselalib.h"
@@ -23,6 +24,8 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testIntersectLineLine1();
+
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
     void testBestFitCylinderAproximationDirection1();
@@ -824,7 +827,35 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
     delete function.data();
 }
 
+void FunctionTest::testIntersectLineLine1()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
+    QPointer<Function> function = new IntersectLineLine();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> point = new Point(false);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+
+    //ScalarInputParams scalarInputParams;
+    //scalarInputParams.stringParameter.insert("TODO", "TODO");
+    //function->setScalarInputParams(scalarInputParams);
+
+    addInputLine(1., 1., 1., 0.577, 0.577, 0.577, function, 2000, 0);
+    addInputLine(2., 2., 2., 0.577, 0.577, 0.577, function, 2001, 1);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_CYLINDER(point);
+
+
+
+    delete function.data();
+}
 
 QTEST_APPLESS_MAIN(FunctionTest)
 
