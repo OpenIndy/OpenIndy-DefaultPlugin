@@ -40,7 +40,7 @@ private:
     //##############
 
     bool setUpResult(Point &point);
-    bool isIntersection(const QPointer<Line> &line1, const QPointer<Line> &line2);
+    bool isParallel(const QPointer<Line> &line1, const QPointer<Line> &line2);
 
 };
 

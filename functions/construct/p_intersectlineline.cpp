@@ -59,9 +59,8 @@ bool IntersectLineLine::setUpResult(Point &point){
         return false;
     }
 
-    //check if line and plane intersect
-    if(!this->isIntersection(line1, line2)){
-        emit this->sendMessage(QString("No intersection between line %1 and line %2")
+    if(this->isParallel(line1, line2)){
+        emit this->sendMessage(QString("line %1 and line %2 are parallel")
                                .arg(line1->getFeatureName())
                                .arg(line2->getFeatureName()), eWarningMessage);
         return false;
@@ -83,16 +82,16 @@ bool IntersectLineLine::setUpResult(Point &point){
 }
 
 /*!
- * \brief IntersectLineLine::isIntersection
+ * \brief IntersectLineLine::isParallel
  * \param line
  * \param plane
  * \return
  */
-bool IntersectLineLine::isIntersection(const QPointer<Line> &line1, const QPointer<Line> &line2){
+bool IntersectLineLine::isParallel(const QPointer<Line> &line1, const QPointer<Line> &line2){
 
-    //scalar product of the lines's direction vector and the line's normal vector
+    //scalar product of the lines's direction vector
     double dot = 0.0;
     OiVec::dot(dot, line1->getDirection().getVector(), line2->getDirection().getVector());
-    return dot > 0.0001 || dot < -0.0001;
+    return dot > 0.999;
 
 }
