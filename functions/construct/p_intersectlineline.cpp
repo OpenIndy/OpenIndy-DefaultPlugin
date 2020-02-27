@@ -29,6 +29,26 @@ void IntersectLineLine::init(){
     //set spplicable for
     this->applicableFor.append(ePointFeature);
 
+    this->stringParameters.insert("intersection", "at first line");
+    this->stringParameters.insert("intersection", "at second line");
+    this->stringParameters.insert("intersection", "midpoint");
+
+    this->scalarInputParams.isValid = true;
+    this->scalarInputParams.stringParameter.insert("intersection", "at first line"); // default
+}
+
+IntersectionTypes IntersectLineLine::getIntersectionType() {
+    if(this->scalarInputParams.stringParameter.contains("intersection")){
+        if(this->scalarInputParams.stringParameter.value("intersection").compare("at first line") == 0){
+            return IntersectionTypes::eAtFirstLine;
+        } else if(this->scalarInputParams.stringParameter.value("intersection").compare("at second line") == 0){
+            return IntersectionTypes::eAtSecondLine;
+        } else if(this->scalarInputParams.stringParameter.value("intersection").compare("midpoint") == 0){
+            return IntersectionTypes::eMidPoint;
+        }
+    }
+
+    return IntersectionTypes::eAtFirstLine; // default
 }
 
 /*!

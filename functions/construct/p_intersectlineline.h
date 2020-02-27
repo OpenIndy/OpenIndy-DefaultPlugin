@@ -10,6 +10,12 @@
 
 using namespace oi;
 
+enum IntersectionTypes {
+    eAtFirstLine,
+    eAtSecondLine,
+    eMidPoint
+};
+
 /*!
  * \brief The IntersectLineline class
  */
@@ -41,6 +47,7 @@ private:
 
     bool setUpResult(Point &point);
     bool isParallel(const QPointer<Line> &line1, const QPointer<Line> &line2);
+    IntersectionTypes getIntersectionType();
 
 };
 
