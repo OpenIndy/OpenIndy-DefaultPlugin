@@ -24,7 +24,7 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
-    void testIntersectLineLine1();
+    void testIntersectLineLine_parallel();
 
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
@@ -827,7 +827,7 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
     delete function.data();
 }
 
-void FunctionTest::testIntersectLineLine1()
+void FunctionTest::testIntersectLineLine_parallel()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -844,15 +844,11 @@ void FunctionTest::testIntersectLineLine1()
     //scalarInputParams.stringParameter.insert("TODO", "TODO");
     //function->setScalarInputParams(scalarInputParams);
 
-    addInputLine(1., 1., 1., 0.577, 0.577, 0.577, function, 2000, 0);
-    addInputLine(2., 2., 2., 0.577, 0.577, 0.577, function, 2001, 1);
+    addInputLine(1., 1., 1., 0.5772, 0.5772, 0.5772, function, 2000, 0);
+    addInputLine(2., 2., 2., 0.5772, 0.5772, 0.5772, function, 2001, 1);
 
     bool res = function->exec(pointFeature);
-    QVERIFY2(res, "exec");
-
-    DEBUG_CYLINDER(point);
-
-
+    QVERIFY2(!res, "exec");
 
     delete function.data();
 }
