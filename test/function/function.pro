@@ -22,6 +22,7 @@ INCLUDEPATH += \
     $$PWD/../.. \
     $$PWD/../../functions/objectTransformation \
     $$PWD/../../functions/fit \
+    $$PWD/../../functions/construct \
     $$PWD/../../lib/OpenIndy-Core/include/plugin \
     $$PWD/../../lib/OpenIndy-Core/include/util \
     $$PWD/../../lib/OpenIndy-Core/include \
