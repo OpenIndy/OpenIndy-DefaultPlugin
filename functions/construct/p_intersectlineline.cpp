@@ -67,6 +67,32 @@ bool IntersectLineLine::setUpResult(Point &point){
     }
 
     //perform intersection
+    OiVec a = line1->getPosition().getVector();
+    OiVec b = line2->getPosition().getVector();
+    OiVec v = line1->getDirection().getVector();
+    OiVec w = line2->getDirection().getVector();
+
+    OiVec cvw, n1, n2;
+    OiVec::cross(cvw, v, w);
+    OiVec::cross(n1, v, cvw);
+    OiVec::cross(n2, w, cvw);
+
+    double dan1;
+    double dbn1;
+    double dwn1;
+    OiVec::dot(dan1, a, n1);
+    OiVec::dot(dbn1, b, n1);
+    OiVec::dot(dwn1, w, n1);
+
+    double dbn2;
+    double dan2;
+    double dvn2;
+    OiVec::dot(dbn2, b, n2);
+    OiVec::dot(dan2, a, n2);
+    OiVec::dot(dvn2, v, n2);
+
+    OiVec fline1 = (dbn2 - dan2) / dvn2 * v + a;
+    OiVec fline2 = (dan1 - dbn1) / dwn1 * w + b;
 
     // TODO
     OiVec s;
