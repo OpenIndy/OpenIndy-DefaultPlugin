@@ -46,6 +46,7 @@ INCLUDEPATH += $$PWD/../exchange
 
 # source files
 SOURCES += \
+    $$PWD/../functions/construct/p_intersectlineline.cpp \
     $$PWD/../functions/construct/p_intersectlineplane.cpp \
     $$PWD/../functions/construct/p_intersectplaneplane.cpp \
     $$PWD/../functions/construct/p_linefrompoints.cpp \
@@ -76,6 +77,7 @@ SOURCES += \
 
 # header files
 HEADERS += \
+    $$PWD/../functions/construct/p_intersectlineline.h \
     $$PWD/../functions/construct/p_intersectlineplane.h \
     $$PWD/../functions/construct/p_intersectplaneplane.h \
     $$PWD/../functions/construct/p_linefrompoints.h \
