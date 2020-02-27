@@ -96,6 +96,15 @@ bool IntersectLineLine::setUpResult(Point &point){
 
     // TODO
     OiVec s;
+    if(true) { // at line1
+        s = fline1;
+    } else { // at line2
+        s = fline2;
+    }
+    // TODO at between fg & fh
+
+    // TODO show / log distance between fg & fh
+    // TODO show exact intersection: distance -> 0
 
 
     //set result
