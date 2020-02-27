@@ -114,18 +114,22 @@ bool IntersectLineLine::setUpResult(Point &point){
     OiVec fline1 = (dbn2 - dan2) / dvn2 * v + a;
     OiVec fline2 = (dan1 - dbn1) / dwn1 * w + b;
 
-    // TODO
     OiVec s;
-    if(true) { // at line1
-        s = fline1;
-    } else { // at line2
+    switch(getIntersectionType()) {
+    case eAtSecondLine:
         s = fline2;
+        break;
+
+    case eMidPoint:
+        s = (fline1 + fline2)/2.;
+        break;
+
+    case eAtFirstLine: // fall though
+    default:
+        s = fline1;
     }
-    // TODO at between fg & fh
 
     // TODO show / log distance between fg & fh
-    // TODO show exact intersection: distance -> 0
-
 
     //set result
     Position section;
