@@ -60,7 +60,7 @@ bool IntersectLineLine::setUpResult(Point &point){
     }
 
     //check if line and plane intersect
-    if(!this->isIntersection(line2, line2)){
+    if(!this->isIntersection(line1, line2)){
         emit this->sendMessage(QString("No intersection between line %1 and line %2")
                                .arg(line1->getFeatureName())
                                .arg(line2->getFeatureName()), eWarningMessage);
