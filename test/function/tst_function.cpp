@@ -24,6 +24,7 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testRectifyToPoint_Station();
     void testRectifyToPoint_Plane_negative();
     void testRectifyToPoint_Plane_positive();
 
@@ -937,6 +938,65 @@ void FunctionTest::testRectifyToPoint_Plane_positive() {
 
     delete function.data();
 }
+
+void FunctionTest::testRectifyToPoint_Station() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new RectifyToPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    OiVec * p = new OiVec(4);
+    p->setAt(0, 0);
+    p->setAt(1, 0);
+    p->setAt(2, 0);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * d = new OiVec(4);
+    d->setAt(0, 0);
+    d->setAt(1, 0);
+    d->setAt(2, 1.0);
+    d->setAt(3, 1.0);
+    Direction * ijk = new Direction(*d);
+    QPointer<Plane> plane = new Plane(false, *xyz, *ijk);
+
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    const bool sense = true;
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
+    function->setScalarInputParams(scalarInputParams);
+
+
+    OiVec pointPos = OiVec(3);
+    pointPos.setAt(0, 1.);
+    pointPos.setAt(1, 1.);
+    pointPos.setAt(2, -5.);
+    QPointer<Station> station = new Station("STATION01");
+    station->setPosition(Position(pointPos));
+    station->setIsSolved(true);
+
+    InputElement * element = new InputElement(2000);
+    element->typeOfElement = eStationElement;
+    element->station = station;
+    //element->geometry = station;
+
+    function->addInputElement(*element, 0);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), 0.0, 0.0001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), 0.0, 0.0001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (-1.0), 0.0001);
+
+    delete function.data();
+}
+
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
