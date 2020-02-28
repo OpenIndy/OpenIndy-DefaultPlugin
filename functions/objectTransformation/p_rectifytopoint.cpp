@@ -124,21 +124,21 @@ bool RectifyToPoint::setUpResult(Geometry &geometry){
     }
 
     //get the position of the point and the plane and the normal vector
-    OiVec n_plane = geometry.getDirection().getVector();
-    n_plane.normalize();
-    OiVec x_plane = geometry.getPosition().getVector();
+    OiVec n = geometry.getDirection().getVector();
+    n.normalize();
+    OiVec x = geometry.getPosition().getVector();
 
     //calculate the distance of the plane from the origin
     double d;
-    OiVec::dot(d, x_plane, n_plane);
+    OiVec::dot(d, x, n);
     if(d < 0.0){
-        n_plane = -1.0 * n_plane;
+        n = -1.0 * n;
         d = -d;
     }
 
     //calculate the distance of the point position from the plane
     double s;
-    OiVec::dot(s, x_point, n_plane);
+    OiVec::dot(s, p, n);
     s = s - d;
 
     //invert the distance if sense is negative
@@ -146,12 +146,12 @@ bool RectifyToPoint::setUpResult(Geometry &geometry){
 
     //invert the normal vector of the plane if it has the wrong orientation
     if(s < 0.0){
-        n_plane = -1.0 * n_plane;
+        n = -1.0 * n;
     }
 
     //set result
     Direction direction = geometry.getDirection();
-    direction.setVector(n_plane);
+    direction.setVector(n);
     geometry.setDirection(direction);
 
     return true;
