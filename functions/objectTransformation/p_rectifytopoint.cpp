@@ -77,25 +77,41 @@ bool RectifyToPoint::exec(Cylinder &cylinder)
 }
 
 /*!
+ * \brief RectifyToPoint::point
+ * \param point
+ * \return if valid point was found
+ */
+bool RectifyToPoint::point(OiVec &point) {
+
+    // 1. get and check position of rectify geometry if available
+    if(this->inputElements.contains(0) && this->inputElements[0].size() == 1){
+        QPointer<Geometry> rectifyGeometry = this->inputElements[0].at(0).geometry;
+        if(!rectifyGeometry.isNull() && rectifyGeometry->getIsSolved() && rectifyGeometry->hasPosition()){
+            point = rectifyGeometry->getPosition().getVector();
+            return true;
+        }
+    } else {// 2. get and check position of rectify station if available
+        if(this->inputElements.contains(1) && this->inputElements[1].size() == 1) {
+            QPointer<Station> rectifyStation = this->inputElements[1].at(0).station;
+            if(!rectifyStation.isNull() && !rectifyStation->getPosition().isNull() && rectifyStation->getPosition()->hasPosition()) {
+                point = rectifyStation->getPosition()->getPosition().getVector();
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/*!
  * \brief RectifyToPoint::setUpResult
  * \param plane
  * \return
  */
 bool RectifyToPoint::setUpResult(Geometry &geometry){
 
-    //get and check position
-    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
-        return false;
-    }
-
-    OiVec x_point;
-    QPointer<Geometry> rectifyGeometry = this->inputElements[0].at(0).geometry;
-    QPointer<Station> rectifyStation = this->inputElements[0].at(0).station;
-    if(!rectifyGeometry.isNull() && rectifyGeometry->getIsSolved() && rectifyGeometry->hasPosition()){
-        x_point = rectifyGeometry->getPosition().getVector();
-    } else if(!rectifyStation.isNull() && rectifyStation->getIsSolved() && !rectifyStation->getPosition().isNull() && rectifyStation->getPosition()->hasPosition()) {
-        x_point = rectifyStation->getPosition()->getPosition().getVector();
-    } else {
+    OiVec p;
+    if(!point(p)) {
         return false;
     }
 

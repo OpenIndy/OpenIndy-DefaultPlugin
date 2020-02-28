@@ -41,7 +41,7 @@ private:
     //##############
     //helper methods
     //##############
-
+    bool point(OiVec &point);
     bool setUpResult(Geometry &geometry);
 
 };
