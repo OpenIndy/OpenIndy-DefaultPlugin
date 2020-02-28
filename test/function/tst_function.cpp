@@ -24,7 +24,10 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
-    void testRectifyToPoint_Station();
+    void testRectifyToPoint_Circle_negative();
+    void testRectifyToPoint_Line_negative();
+    void testRectifyToPoint_Cylinder_negative();
+    void testRectifyToPoint_Plane_Station();
     void testRectifyToPoint_Plane_negative();
     void testRectifyToPoint_Plane_positive();
 
@@ -939,7 +942,7 @@ void FunctionTest::testRectifyToPoint_Plane_positive() {
     delete function.data();
 }
 
-void FunctionTest::testRectifyToPoint_Station() {
+void FunctionTest::testRectifyToPoint_Plane_Station() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<Function> function = new RectifyToPoint();
@@ -996,6 +999,181 @@ void FunctionTest::testRectifyToPoint_Station() {
 
     delete function.data();
 }
+
+// OI-42
+void FunctionTest::testRectifyToPoint_Circle_negative() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new RectifyToPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    OiVec * p = new OiVec(4);
+    p->setAt(0, 0);
+    p->setAt(1, 0);
+    p->setAt(2, 0);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * d = new OiVec(4);
+    d->setAt(0, 0);
+    d->setAt(1, 0);
+    d->setAt(2, 1.0);
+    d->setAt(3, 1.0);
+    Direction * ijk = new Direction(*d);
+    QPointer<Circle> geometry = new Circle(false, *xyz, *ijk, Radius(10.));
+
+    QPointer<FeatureWrapper> feature = new FeatureWrapper();
+    feature->setCircle(geometry);
+
+    const bool sense = false;
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
+    function->setScalarInputParams(scalarInputParams);
+
+
+    OiVec pointPos = OiVec(3);
+    pointPos.setAt(0, 1.);
+    pointPos.setAt(1, 1.);
+    pointPos.setAt(2, -5.);
+    QPointer<Point> point = new Point(false, Position(pointPos));
+    point->setIsSolved(true);
+
+    InputElement * element = new InputElement(2000);
+    element->typeOfElement = eCircleElement;
+    element->point = point;
+    element->geometry = point;
+
+    function->addInputElement(*element, 0);
+
+    bool res = function->exec(feature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(geometry);
+
+    COMPARE_DOUBLE(geometry->getDirection().getVector().getAt(0), 0.0, 0.0001);
+    COMPARE_DOUBLE(geometry->getDirection().getVector().getAt(1), 0.0, 0.0001);
+    COMPARE_DOUBLE(geometry->getDirection().getVector().getAt(2), (1.0), 0.0001);
+
+    delete function.data();
+}
+
+// OI-42
+void FunctionTest::testRectifyToPoint_Line_negative() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new RectifyToPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    OiVec * p = new OiVec(4);
+    p->setAt(0, 0);
+    p->setAt(1, 0);
+    p->setAt(2, 0);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * d = new OiVec(4);
+    d->setAt(0, 0);
+    d->setAt(1, 0);
+    d->setAt(2, 1.0);
+    d->setAt(3, 1.0);
+    Direction * ijk = new Direction(*d);
+    QPointer<Line> geometry = new Line(false, *xyz, *ijk);
+
+    QPointer<FeatureWrapper> feature = new FeatureWrapper();
+    feature->setLine(geometry);
+
+    const bool sense = false;
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
+    function->setScalarInputParams(scalarInputParams);
+
+
+    OiVec pointPos = OiVec(3);
+    pointPos.setAt(0, 1.);
+    pointPos.setAt(1, 1.);
+    pointPos.setAt(2, -5.);
+    QPointer<Point> point = new Point(false, Position(pointPos));
+    point->setIsSolved(true);
+
+    InputElement * element = new InputElement(2000);
+    element->typeOfElement = eLineElement;
+    element->point = point;
+    element->geometry = point;
+
+    function->addInputElement(*element, 0);
+
+    bool res = function->exec(feature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(geometry);
+
+    COMPARE_DOUBLE(geometry->getDirection().getVector().getAt(0), 0.0, 0.0001);
+    COMPARE_DOUBLE(geometry->getDirection().getVector().getAt(1), 0.0, 0.0001);
+    COMPARE_DOUBLE(geometry->getDirection().getVector().getAt(2), (1.0), 0.0001);
+
+    delete function.data();
+}
+
+// OI-42
+void FunctionTest::testRectifyToPoint_Cylinder_negative() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new RectifyToPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    OiVec * p = new OiVec(4);
+    p->setAt(0, 0);
+    p->setAt(1, 0);
+    p->setAt(2, 0);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * d = new OiVec(4);
+    d->setAt(0, 0);
+    d->setAt(1, 0);
+    d->setAt(2, 1.0);
+    d->setAt(3, 1.0);
+    Direction * ijk = new Direction(*d);
+    QPointer<Cylinder> geometry = new Cylinder(false, *xyz, *ijk, Radius(10.));
+
+    QPointer<FeatureWrapper> feature = new FeatureWrapper();
+    feature->setCylinder(geometry);
+
+    const bool sense = false;
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
+    function->setScalarInputParams(scalarInputParams);
+
+
+    OiVec pointPos = OiVec(3);
+    pointPos.setAt(0, 1.);
+    pointPos.setAt(1, 1.);
+    pointPos.setAt(2, -5.);
+    QPointer<Point> point = new Point(false, Position(pointPos));
+    point->setIsSolved(true);
+
+    InputElement * element = new InputElement(2000);
+    element->typeOfElement = eCylinderElement;
+    element->point = point;
+    element->geometry = point;
+
+    function->addInputElement(*element, 0);
+
+    bool res = function->exec(feature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(geometry);
+
+    COMPARE_DOUBLE(geometry->getDirection().getVector().getAt(0), 0.0, 0.0001);
+    COMPARE_DOUBLE(geometry->getDirection().getVector().getAt(1), 0.0, 0.0001);
+    COMPARE_DOUBLE(geometry->getDirection().getVector().getAt(2), (1.0), 0.0001);
+
+    delete function.data();
+}
+
 
 QTEST_APPLESS_MAIN(FunctionTest)
 
