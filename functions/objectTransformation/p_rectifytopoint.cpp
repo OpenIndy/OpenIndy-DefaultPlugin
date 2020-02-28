@@ -20,6 +20,12 @@ void RectifyToPoint::init(){
     param1.typeOfElement = ePositionElement;
     this->neededElements.append(param1);
 
+    NeededElement param2;
+    param2.description = "Select a station used for the orientation of the target geometry.";
+    param2.infinite = false;
+    param2.typeOfElement = eStationElement;
+    this->neededElements.append(param2);
+
     //set spplicable for
     this->applicableFor.append(ePlaneFeature);
     this->applicableFor.append(eCircleFeature);
