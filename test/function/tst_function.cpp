@@ -986,7 +986,7 @@ void FunctionTest::testRectifyToPoint_Plane_Station() {
     element->station = station;
     //element->geometry = station;
 
-    function->addInputElement(*element, 0);
+    function->addInputElement(*element, 1);
 
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
