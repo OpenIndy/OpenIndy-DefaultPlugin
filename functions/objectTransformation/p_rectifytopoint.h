@@ -42,10 +42,7 @@ private:
     //helper methods
     //##############
 
-    bool setUpResult(Plane &plane);
-    bool setUpResult(Circle &circle);
-    bool setUpResult(Line &line);
-    bool setUpResult(Cylinder &cylinder);
+    bool setUpResult(Geometry &geometry);
 
 };
 
