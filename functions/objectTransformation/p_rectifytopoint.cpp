@@ -81,8 +81,15 @@ bool RectifyToPoint::setUpResult(Plane &plane){
     if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
         return false;
     }
+
+    OiVec x_point;
     QPointer<Geometry> geometry = this->inputElements[0].at(0).geometry;
-    if(geometry.isNull() || !geometry->getIsSolved() || !geometry->hasPosition()){
+    QPointer<Station> station = this->inputElements[0].at(0).station;
+    if(!geometry.isNull() && geometry->getIsSolved() && geometry->hasPosition()){
+        x_point = geometry->getPosition().getVector();
+    } else if(!station.isNull() && station->getIsSolved() && !station->getPosition().isNull() && station->getPosition()->hasPosition()) {
+        x_point = station->getPosition()->getPosition().getVector();
+    } else {
         return false;
     }
 
@@ -98,7 +105,6 @@ bool RectifyToPoint::setUpResult(Plane &plane){
     OiVec n_plane = plane.getDirection().getVector();
     n_plane.normalize();
     OiVec x_plane = plane.getPosition().getVector();
-    OiVec x_point = geometry->getPosition().getVector();
 
     //calculate the distance of the plane from the origin
     double d;
