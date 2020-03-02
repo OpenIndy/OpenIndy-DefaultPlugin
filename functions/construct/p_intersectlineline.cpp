@@ -129,12 +129,16 @@ bool IntersectLineLine::setUpResult(Point &point){
         s = fline1;
     }
 
-    // TODO show / log distance between fg & fh
-
     //set result
     Position section;
     section.setVector(s);
     point.setPoint(section);
+
+    //  show / log distance between fg & fh
+    OiVec delta = fline1 - fline2;
+    double dot;
+    OiVec::dot(dot, delta, delta);
+    point.setDistance(sqrt(dot));
 
     return true;
 
