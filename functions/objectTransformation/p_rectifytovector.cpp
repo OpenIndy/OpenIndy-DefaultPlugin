@@ -20,6 +20,12 @@ void RectifyToVector::init(){
     param1.typeOfElement = eDirectionElement;
     this->neededElements.append(param1);
 
+    NeededElement param2;
+    param2.description = "Select a station used for the orientation of the target geometry.";
+    param2.infinite = false;
+    param2.typeOfElement = eStationElement;
+    this->neededElements.append(param2);
+
     //set spplicable for
     this->applicableFor.append(ePlaneFeature);
     this->applicableFor.append(eCircleFeature);
@@ -69,18 +75,41 @@ bool RectifyToVector::exec(Cylinder &cylinder)
 }
 
 /*!
+ * \brief RectifyToPoint::direction
+ * \param direction
+ * \return if valid direction was found
+ */
+bool RectifyToVector::direction(OiVec &direction) {
+
+    // 1. get and check position of rectify geometry if available
+    if(this->inputElements.contains(0) && this->inputElements[0].size() == 1){
+        QPointer<Geometry> rectifyGeometry = this->inputElements[0].at(0).geometry;
+        if(!rectifyGeometry.isNull() && rectifyGeometry->getIsSolved() && rectifyGeometry->hasDirection()){
+            direction = rectifyGeometry->getDirection().getVector();
+            return true;
+        }
+    } else {// 2. get and check position of rectify station if available
+        if(this->inputElements.contains(1) && this->inputElements[1].size() == 1) {
+            QPointer<Station> rectifyStation = this->inputElements[1].at(0).station;
+            if(!rectifyStation.isNull() && !rectifyStation->getPosition().isNull() && rectifyStation->getPosition()->hasDirection()) {
+                direction = rectifyStation->getPosition()->getDirection().getVector();
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/*!
  * \brief RectifyToVector::setUpResult
  * \param plane
  * \return
  */
-bool RectifyToVector::setUpResult(Plane &plane){
+bool RectifyToVector::setUpResult(Plane &geometry){
 
-    //get and check point
-    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
-        return false;
-    }
-    QPointer<Geometry> geometry = this->inputElements[0].at(0).geometry;
-    if(geometry.isNull() || !geometry->getIsSolved() || !geometry->hasDirection()){
+    OiVec r_reference;
+    if(!direction(r_reference)) {
         return false;
     }
 
@@ -93,28 +122,27 @@ bool RectifyToVector::setUpResult(Plane &plane){
     }
 
     //get the direction to compare
-    OiVec r_reference = geometry->getDirection().getVector();
     r_reference.normalize();
-    OiVec r_plane = plane.getDirection().getVector();
-    r_plane.normalize();
+    OiVec r = geometry.getDirection().getVector();
+    r.normalize();
 
     //calculate the angle between both directions
     double angle = 0.0;
-    OiVec::dot(angle, r_reference, r_plane);
+    OiVec::dot(angle, r_reference, r);
     angle = qAbs(qAcos(angle));
 
     //invert the normal vector if the angle is greater than 90°
     if(angle > PI/2.0){
-        r_plane = -1.0 * r_plane;
+        r = -1.0 * r;
     }
 
     //invert the normal vector if sense is negative
-    r_plane = sense * r_plane;
+    r = sense * r;
 
     //set result
-    Direction direction = plane.getDirection();
-    direction.setVector(r_plane);
-    plane.setPlane(plane.getPosition(), direction);
+    Direction direction = geometry.getDirection();
+    direction.setVector(r);
+    geometry.setDirection(direction);
 
     return true;
 

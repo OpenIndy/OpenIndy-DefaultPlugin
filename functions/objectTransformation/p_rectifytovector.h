@@ -47,6 +47,8 @@ private:
     bool setUpResult(Circle &circle);
     bool setUpResult(Line &line);
     bool setUpResult(Cylinder &cylinder);
+    bool direction(OiVec &direction);
+    //bool setUpResult(Geometry &geometry);
 
 };
 
