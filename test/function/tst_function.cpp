@@ -25,6 +25,8 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testDisableAllObservationsButLastOne_2side_yes();
+
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
     void testBestFitCylinderAproximationDirection1();
@@ -855,10 +857,10 @@ void FunctionTest::testDisableAllObservationsButLastOne_no()
     // line ending: "\n"
     // unit:        [mm]
     QString data("\
-1.0 1.1 1.2\n\
-1.1 1.2 1.3\n\
-1.2 1.3 1.4\n\
-1.3 1.4 1.5\n\
+1.0 1.1 1.2 FS\n\
+1.1 1.2 1.3 FS\n\
+1.2 1.3 1.4 FS\n\
+1.3 1.4 1.5 FS\n\
 ");
 
     addInputObservations(data, function);
@@ -896,10 +898,10 @@ void FunctionTest::testDisableAllObservationsButLastOne_yes()
     // line ending: "\n"
     // unit:        [mm]
     QString data("\
-1.0 1.1 1.2\n\
-1.1 1.2 1.3\n\
-1.2 1.3 1.4\n\
-1.3 1.4 1.5\n\
+1.0 1.1 1.2 FS\n\
+1.1 1.2 1.3 FS\n\
+1.2 1.3 1.4 FS\n\
+1.3 1.4 1.5 FS\n\
 ");
 
     addInputObservations(data, function);
@@ -912,6 +914,49 @@ void FunctionTest::testDisableAllObservationsButLastOne_yes()
     COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.3, 0.01);
     COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.4, 0.01);
     COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.5, 0.01);
+
+    delete function.data();
+}
+
+// OI-573
+void FunctionTest::testDisableAllObservationsButLastOne_2side_yes()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("disable all observations but last one", "yes");
+    function->setScalarInputParams(scalarInputParams);
+
+    QPointer<Point> point = new Point(false);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1.0 1.1 1.2 FS\n\
+1.02 1.1 1.2 BS\n\
+1.1 1.2 1.3 FS\n\
+1.12 1.2 1.3 BS\n\
+1.2 1.3 1.4 FS\n\
+1.22 1.32 1.42 BS\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.21, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.31, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.41, 0.01);
 
     delete function.data();
 }
