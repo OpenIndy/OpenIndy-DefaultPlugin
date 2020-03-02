@@ -82,10 +82,20 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
         vec->setAt(2, xyz.at(2).toDouble());
         vec->setAt(3, 1.0);
 
-        // vecList.append(vec);
+        ReadingCartesian * readingCartesian = new ReadingCartesian();
+//        readingCartesian->xyz.setAt(0, xyz.at(0).toDouble());
+//        readingCartesian->xyz.setAt(1, xyz.at(1).toDouble());
+//        readingCartesian->xyz.setAt(2, xyz.at(2).toDouble());
+        readingCartesian->isValid = true;
 
         Observation * observation = new Observation(*vec, id, true);
         observation->setIsSolved(true);
+
+        Reading * reading = new Reading(*readingCartesian);
+        if(xyz.size() > 3) {
+            reading->setSensorFace(xyz.at(3).compare("FS") == 0 ? SensorFaces::eFrontSide : SensorFaces::eBackSide);
+        }
+        reading->setObservation(observation);
 
         InputElement * element = new InputElement(id);
         element->typeOfElement = eObservationElement;
