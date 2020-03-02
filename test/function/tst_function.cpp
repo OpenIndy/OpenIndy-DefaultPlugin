@@ -13,7 +13,7 @@
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
 #define DEBUG_CYLINDER(cylinder) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(cylinder->getPosition().getVector()) << ", direction=" << _OI_VEC(cylinder->getDirection().getVector()) << ", radius=" << cylinder->getRadius().getRadius() << ", stdev=" << cylinder->getStatistic().getStdev();
-#define DEBUG_POINT(point) qDebug() << "position=" << _OI_VEC(point->getPosition().getVector());
+#define DEBUG_POINT(point) qDebug() << "position=" << _OI_VEC(point->getPosition().getVector()) << "distance=" << point->getDistance();
 
 using namespace oi;
 
@@ -1034,6 +1034,7 @@ void FunctionTest::testIntersectLineLine_intersect2_atsecondline()
     QVERIFY2(res, "exec");
 
     DEBUG_POINT(point);
+    COMPARE_DOUBLE(point->getDistance(), 0.7071, 0.0001);
 
     COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 2., 0.0001);
     COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.5, 0.0001);
