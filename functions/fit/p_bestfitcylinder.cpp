@@ -21,16 +21,25 @@ void BestFitCylinder::init(){
     param1.infinite = true;
     param1.typeOfElement = eObservationElement;
     this->neededElements.append(param1);
+
     NeededElement param2;
     param2.description = "approximation direction.";
     param2.infinite = true;
     param2.typeOfElement = eDirectionElement;
     this->neededElements.append(param2);
 
+    NeededElement param3;
+    param3.description = "Dummy points to indicate cylinder normal.";
+    param3.infinite = true;
+    param3.typeOfElement = eObservationElement;
+    param3.key = InputElementKey::eDummyPoint;
+    this->neededElements.append(param3);
+
     //set spplicable for
     this->applicableFor.append(eCylinderFeature);
 
     this->stringParameters.insert("approximation", "first two points");
+    this->stringParameters.insert("approximation", "first two dummy points");
     this->stringParameters.insert("approximation", "direction");
     this->stringParameters.insert("approximation", "guess axis");
 
@@ -71,6 +80,10 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
             approximationType = eDirection;
         } else if(this->scalarInputParams.stringParameter.value("approximation").compare("guess axis") == 0){
             approximationType = eGuessAxis;
+        } else if(this->scalarInputParams.stringParameter.value("approximation").compare("first two dummy points") == 0){
+            approximationType = eFirstTwoDummyPoint;
+        } else if(this->scalarInputParams.stringParameter.value("approximation").compare("first two points") == 0){
+            approximationType = eFirstTwoPoints;
         }
     }
 
@@ -165,16 +178,56 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     axis.normalize();
     cylinderAxis.setVector(axis);
 
-    //check that the direction vector is defined by the first two observations
-    OiVec pos1 = inputObservations.at(0)->getXYZ();
-    pos1.removeLast();
-    OiVec pos2 = inputObservations.at(1)->getXYZ();
-    pos2.removeLast();
-    OiVec direction = pos2 - pos1;
-    direction.normalize();
+
+    OiVec direction(3);
+    switch(approximationType) {
+        case eGuessAxis: {
+            break;
+        }
+        case eDirection: {
+            foreach(const InputElement &element, this->getInputElements()[1]){
+                if(!element.geometry.isNull()
+                        && element.geometry->getIsSolved()
+                        && element.geometry->hasDirection()) {
+                    direction = element.geometry->getDirection().getVector();
+                    break;
+                }
+            }
+            break;
+        }
+        case eFirstTwoDummyPoint: {
+            QList<QPointer<Observation> > dummyPoints;
+            foreach(const InputElement &element, this->getInputElements()[InputElementKey::eDummyPoint]){
+                if(!element.observation.isNull()
+                        && element.observation->getIsSolved()) {
+                    dummyPoints.append(element.observation);
+                }
+            }
+            if(dummyPoints.size() >= 2){
+                OiVec diff = dummyPoints.at(1)->getXYZ() - dummyPoints.at(0)->getXYZ();
+                diff.removeLast();
+                diff.normalize();
+                direction = diff;
+            }
+            break;
+        }
+        case eFirstTwoPoints: {
+            OiVec diff = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
+            diff.removeLast();
+            diff.normalize();
+            direction = diff;
+            break;
+        }
+    }
+
     double angle = 0.0; //angle between r and direction
-    OiVec::dot(angle, axis, direction);
-    angle = qAbs(qAcos(angle));
+    if  (!(direction.getAt(0) == 0
+        && direction.getAt(1) == 0
+        && direction.getAt(2) == 0)) {
+        OiVec::dot(angle, axis, direction);
+        angle = qAbs(qAcos(angle));
+    }
+
     if(angle > (PI/2.0)){
         Direction cylinderDirection = cylinder.getDirection();
         cylinderDirection.setVector(axis * -1.0);
@@ -278,13 +331,31 @@ bool BestFitCylinder::approximateCylinder(Cylinder &cylinder, const QList<QPoint
 
             break;
         }
+    case eFirstTwoDummyPoint: {
+        QList<QPointer<Observation> > dummyPoints;
+        foreach(const InputElement &element, this->getInputElements()[InputElementKey::eDummyPoint]){
+            if(!element.observation.isNull()
+                    && element.observation->getIsSolved()) {
+                dummyPoints.append(element.observation);
+            }
+        }
+        if(dummyPoints.size() < 2){
+            return false;
+        }
+        OiVec diff = dummyPoints.at(1)->getXYZ() - dummyPoints.at(0)->getXYZ();
+        diff.removeLast();
+
+        return approximateCylinder(diff, inputObservations, "first two dummy points");
+
+        break;
+    }
         case eFirstTwoPoints: {
         default:
             //##############################################################
             //another approximation comes from the first two cylinder points
             //##############################################################
 
-            OiVec diff = inputObservations.at(0)->getXYZ() - inputObservations.at(1)->getXYZ();
+            OiVec diff = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
             diff.removeLast();
 
             return approximateCylinder(diff, inputObservations, "first two cylinder points");
