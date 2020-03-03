@@ -91,8 +91,8 @@ bool RectifyToVector::direction(OiVec &direction) {
     } else {// 2. get and check position of rectify station if available
         if(this->inputElements.contains(1) && this->inputElements[1].size() == 1) {
             QPointer<Station> rectifyStation = this->inputElements[1].at(0).station;
-            if(!rectifyStation.isNull() && !rectifyStation->getPosition().isNull() && rectifyStation->getPosition()->hasDirection()) {
-                direction = rectifyStation->getPosition()->getDirection().getVector();
+            if(!rectifyStation.isNull())  {
+                direction = rectifyStation->getDirection().getVector();
                 return true;
             }
         }
