@@ -1686,20 +1686,7 @@ void FunctionTest::testRectifyToPoint_Plane_negative() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, 1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Plane> plane = new Plane(false, *xyz, *ijk);
+    QPointer<Plane> plane = createPlane(0, 0, 0, 0, 0, 1.);
 
     QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
     planeFeature->setPlane(plane);
@@ -1730,20 +1717,7 @@ void FunctionTest::testRectifyToPoint_Plane_positive() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, 1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Plane> plane = new Plane(false, *xyz, *ijk);
+    QPointer<Plane> plane = createPlane(0, 0, 0, 0, 0, 1.);
 
     QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
     planeFeature->setPlane(plane);
@@ -1774,20 +1748,7 @@ void FunctionTest::testRectifyToPoint_Plane_Station() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, 1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Plane> plane = new Plane(false, *xyz, *ijk);
+    QPointer<Plane> plane = createPlane(0, 0, 0, 0, 0, 1.);
 
     QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
     planeFeature->setPlane(plane);
@@ -1967,20 +1928,7 @@ void FunctionTest::testRectifyToVector_PlaneToPlane_negative() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, 1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Plane> plane = new Plane(false, *xyz, *ijk);
+    QPointer<Plane> plane = createPlane(0, 0, 0, 0, 0, 1.);
 
     QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
     planeFeature->setPlane(plane);
@@ -2010,20 +1958,7 @@ void FunctionTest::testRectifyToVector_PlaneToStation() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, -1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Plane> feature = new Plane(false, *xyz, *ijk);
+    QPointer<Plane> feature = createPlane(0, 0, 0, 0, 0, -1.);
 
     QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
     featureWrapper->setPlane(feature);
@@ -2188,20 +2123,7 @@ void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, 1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Plane> feature = new Plane(false, *xyz, *ijk);
+    QPointer<Plane> feature = createPlane(0, 0, 0, 0, 0, 1.);
 
     QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
     featureWrapper->setPlane(feature);
