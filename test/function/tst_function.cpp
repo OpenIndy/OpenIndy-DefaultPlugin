@@ -448,26 +448,7 @@ void FunctionTest::testRegisterCircle()
     QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
     circleFeature->setCircle(circle);
 
-
-    OiVec planePos = OiVec(3);
-    planePos.setAt(0, 1374.9964);
-    planePos.setAt(1, 1624.9982);
-    planePos.setAt(2, 1024.7504);
-    Position planePosition(planePos);
-
-    OiVec planeDir = OiVec(3);
-    planeDir.setAt(0, 0.100818);
-    planeDir.setAt(1, -0.097854);
-    planeDir.setAt(2, 0.990081);
-    Direction planeDirection(planeDir);
-
-    QPointer<Plane> plane = new Plane(false, planePosition, planeDirection);
-    plane->setIsSolved(true);
-
-    InputElement element(1234); // dummy id
-    element.typeOfElement = ePlaneElement;
-    element.plane = plane;
-    function->addInputElement(element, 0);
+    addInputPlane(1374.9964, 1624.9982, 1024.7504, 0.100818, -0.097854, 0.990081, function);
 
     bool res = function->exec(circleFeature);
     QVERIFY2(res, "exec");
@@ -477,7 +458,6 @@ void FunctionTest::testRegisterCircle()
     QCOMPARE(xyz.getAt(1), 500.72684743888169);
     QCOMPARE(xyz.getAt(2), 992.62548819327355);
 
-    delete plane.data();
     delete circle.data();
     delete circleFeature.data();
     delete function.data();
