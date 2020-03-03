@@ -99,6 +99,7 @@ private:
 
     void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputStation(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
+    void addInputCoordinateSystem(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
 };
 
 FunctionTest::FunctionTest()
@@ -197,11 +198,39 @@ void FunctionTest::addInputStation(double x, double y, double z, double i, doubl
     station->setIsSolved(true);
 
     InputElement * element = new InputElement(id);
-    element->typeOfElement = eLineElement;
+    element->typeOfElement = eStationElement;
     element->station = station;
 
     function->addInputElement(*element, inputElementKey);
 }
+
+void FunctionTest::addInputCoordinateSystem(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = 0){
+    OiVec * p = new OiVec(4);
+    p->setAt(0, x);
+    p->setAt(1, y);
+    p->setAt(2, z);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * a = new OiVec(4);
+    a->setAt(0, i);
+    a->setAt(1, j);
+    a->setAt(2, k);
+    a->setAt(3, 1.0);
+    Direction * ijk = new Direction(*a);
+
+    QPointer<CoordinateSystem> coordianteSystem = new CoordinateSystem("system");
+    coordianteSystem->setOrigin(*xyz);
+    coordianteSystem->setDirection(*ijk);
+    coordianteSystem->setIsSolved(true);
+
+    InputElement * element = new InputElement(id);
+    element->typeOfElement = eCoordinateSystemElement;
+    element->coordSystem = coordianteSystem;
+
+    function->addInputElement(*element, inputElementKey);
+}
+
 void FunctionTest::testRegisterPoint()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
