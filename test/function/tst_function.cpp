@@ -8,10 +8,12 @@
 #include "featurewrapper.h"
 #include "types.h"
 #include "chooselalib.h"
+#include "p_bestfitpoint.h"
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
 #define DEBUG_CYLINDER(cylinder) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(cylinder->getPosition().getVector()) << ", direction=" << _OI_VEC(cylinder->getDirection().getVector()) << ", radius=" << cylinder->getRadius().getRadius() << ", stdev=" << cylinder->getStatistic().getStdev();
+#define DEBUG_POINT(point) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(point->getPosition().getVector()) << ", direction=" << _OI_VEC(point->getDirection().getVector()) << ", stdev=" << point->getStatistic().getStdev();
 
 using namespace oi;
 
@@ -23,6 +25,8 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testDisableAllObservationsButLastOne_2side_yes();
+
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
     void testBestFitCylinderAproximationDirection1();
@@ -47,8 +51,11 @@ private Q_SLOTS:
 
     void testVRadial();
 
+    void testDisableAllObservationsButLastOne_no();
+    void testDisableAllObservationsButLastOne_yes();
+
 private:
-    void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
+    void addInputObservations(QString data, QPointer<Function> function);
 
 };
 
@@ -60,7 +67,7 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
     qDebug() << msg;
 }
 
-void FunctionTest::addInputObservations(QString data, QPointer<Function> function, double conversionFactor) {
+void FunctionTest::addInputObservations(QString data, QPointer<Function> function) {
     QTextStream stream(data.toUtf8());
     int id=1000;
     while(!stream.atEnd()) {
@@ -72,15 +79,25 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
         }
 
         OiVec * vec = new OiVec(4);
-        vec->setAt(0, xyz.at(0).toDouble() * conversionFactor);
-        vec->setAt(1, xyz.at(1).toDouble() * conversionFactor);
-        vec->setAt(2, xyz.at(2).toDouble() * conversionFactor);
+        vec->setAt(0, xyz.at(0).toDouble());
+        vec->setAt(1, xyz.at(1).toDouble());
+        vec->setAt(2, xyz.at(2).toDouble());
         vec->setAt(3, 1.0);
 
-        // vecList.append(vec);
+        ReadingCartesian * readingCartesian = new ReadingCartesian();
+//        readingCartesian->xyz.setAt(0, xyz.at(0).toDouble());
+//        readingCartesian->xyz.setAt(1, xyz.at(1).toDouble());
+//        readingCartesian->xyz.setAt(2, xyz.at(2).toDouble());
+        readingCartesian->isValid = true;
 
         Observation * observation = new Observation(*vec, id, true);
         observation->setIsSolved(true);
+
+        Reading * reading = new Reading(*readingCartesian);
+        if(xyz.size() > 3) {
+            reading->setSensorFace(xyz.at(3).compare("FS") == 0 ? SensorFaces::eFrontSide : SensorFaces::eBackSide);
+        }
+        reading->setObservation(observation);
 
         InputElement * element = new InputElement(id);
         element->typeOfElement = eObservationElement;
@@ -819,7 +836,130 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
     delete function.data();
 }
 
+// OI-573
+void FunctionTest::testDisableAllObservationsButLastOne_no()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("disable all observations but last one", "no");
+    function->setScalarInputParams(scalarInputParams);
+
+    QPointer<Point> point = new Point(false);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1.0 1.1 1.2 FS\n\
+1.1 1.2 1.3 FS\n\
+1.2 1.3 1.4 FS\n\
+1.3 1.4 1.5 FS\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.15, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.25, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.35, 0.01);
+
+    delete function.data();
+}
+
+// OI-573
+void FunctionTest::testDisableAllObservationsButLastOne_yes()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("disable all observations but last one", "yes");
+    function->setScalarInputParams(scalarInputParams);
+
+    QPointer<Point> point = new Point(false);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1.0 1.1 1.2 FS\n\
+1.1 1.2 1.3 FS\n\
+1.2 1.3 1.4 FS\n\
+1.3 1.4 1.5 FS\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.3, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.4, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.5, 0.01);
+
+    delete function.data();
+}
+
+// OI-573
+void FunctionTest::testDisableAllObservationsButLastOne_2side_yes()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("disable all observations but last one", "yes");
+    function->setScalarInputParams(scalarInputParams);
+
+    QPointer<Point> point = new Point(false);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1.0 1.1 1.2 FS\n\
+1.02 1.1 1.2 BS\n\
+1.1 1.2 1.3 FS\n\
+1.12 1.2 1.3 BS\n\
+1.2 1.3 1.4 FS\n\
+1.22 1.32 1.42 BS\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.21, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.31, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.41, 0.01);
+
+    delete function.data();
+}
 
 QTEST_APPLESS_MAIN(FunctionTest)
 
