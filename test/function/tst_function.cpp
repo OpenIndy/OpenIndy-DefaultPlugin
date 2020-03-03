@@ -1891,20 +1891,7 @@ void FunctionTest::testRectifyToPoint_Cylinder_negative() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, 1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Cylinder> geometry = new Cylinder(false, *xyz, *ijk, Radius(10.));
+    QPointer<Cylinder> geometry = createCylinder(0, 0, 0, 0, 0, 1., 10.);
 
     QPointer<FeatureWrapper> feature = new FeatureWrapper();
     feature->setCylinder(geometry);
@@ -1914,20 +1901,7 @@ void FunctionTest::testRectifyToPoint_Cylinder_negative() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec pointPos = OiVec(3);
-    pointPos.setAt(0, 1.);
-    pointPos.setAt(1, 1.);
-    pointPos.setAt(2, -5.);
-    QPointer<Point> point = new Point(false, Position(pointPos));
-    point->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = eCylinderElement;
-    element->point = point;
-    element->geometry = point;
-
-    function->addInputElement(*element, 0);
+    addInputPoint(1., 1., -5., function);
 
     bool res = function->exec(feature);
     QVERIFY2(res, "exec");
@@ -2099,20 +2073,7 @@ void FunctionTest::testRectifyToVector_CylinderToStation() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, -1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Cylinder> feature = new Cylinder(false, *xyz, *ijk, Radius(10.));
+    QPointer<Cylinder> feature = createCylinder(0, 0, 0, 0, 0, -1., 10.);
 
     QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
     featureWrapper->setCylinder(feature);
