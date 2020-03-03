@@ -6,6 +6,7 @@
 #include "p_register.h"
 #include "p_bestfitcylinder.h"
 #include "p_rectifytopoint.h"
+#include "p_rectifytovector.h"
 #include "featurewrapper.h"
 #include "types.h"
 #include "chooselalib.h"
@@ -24,8 +25,11 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
-    void testRectifyToVector_Station();
-    void testRectifyToVector_Plane_negative();
+    void testRectifyToVector_CircleToStation();
+    void testRectifyToVector_LineToStation();
+    void testRectifyToVector_CylinderToStation();
+    void testRectifyToVector_PlaneToStation();
+    void testRectifyToVector_PlaneToPlane_negative();
 
     void testRectifyToPoint_Circle_negative();
     void testRectifyToPoint_Line_negative();
@@ -1178,10 +1182,10 @@ void FunctionTest::testRectifyToPoint_Cylinder_negative() {
 }
 
 // OI-42
-void FunctionTest::testRectifyToVector_Plane_negative() {
+void FunctionTest::testRectifyToVector_PlaneToPlane_negative() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
-    QPointer<Function> function = new RectifyToPoint();
+    QPointer<Function> function = new RectifyToVector();
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
@@ -1217,9 +1221,9 @@ void FunctionTest::testRectifyToVector_Plane_negative() {
     Position * gxyz = new Position(*gp);
 
     OiVec * gd = new OiVec(4);
-    gd->setAt(0, 0);
-    gd->setAt(1, 0);
-    gd->setAt(2, -1.0);
+    gd->setAt(0, -0.001042);
+    gd->setAt(1, 0.000211);
+    gd->setAt(2, 0.999999);
     gd->setAt(3, 1.0);
     Direction * gijk = new Direction(*gd);
     QPointer<Plane> geometry = new  Plane(false, *gxyz, *gijk);
@@ -1243,10 +1247,10 @@ void FunctionTest::testRectifyToVector_Plane_negative() {
 
     delete function.data();
 }
-void FunctionTest::testRectifyToVector_Station() {
+void FunctionTest::testRectifyToVector_PlaneToStation() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
-    QPointer<Function> function = new RectifyToPoint();
+    QPointer<Function> function = new RectifyToVector();
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
@@ -1260,13 +1264,13 @@ void FunctionTest::testRectifyToVector_Station() {
     OiVec * d = new OiVec(4);
     d->setAt(0, 0);
     d->setAt(1, 0);
-    d->setAt(2, 1.0);
+    d->setAt(2, -1.0);
     d->setAt(3, 1.0);
     Direction * ijk = new Direction(*d);
-    QPointer<Plane> plane = new Plane(false, *xyz, *ijk);
+    QPointer<Plane> feature = new Plane(false, *xyz, *ijk);
 
-    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
-    planeFeature->setPlane(plane);
+    QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
+    featureWrapper->setPlane(feature);
 
     const bool sense = false;
     ScalarInputParams scalarInputParams;
@@ -1282,33 +1286,236 @@ void FunctionTest::testRectifyToVector_Station() {
     Position * gxyz = new Position(*gp);
 
     OiVec * gd = new OiVec(4);
-    gd->setAt(0, 0);
-    gd->setAt(1, 0);
-    gd->setAt(2, -1.0);
+    gd->setAt(0, -0.001042);
+    gd->setAt(1, 0.000211);
+    gd->setAt(2, 0.999999);
     gd->setAt(3, 1.0);
     Direction * gijk = new Direction(*gd);
     QPointer<Station> station = new Station("STATION01");
-    station->setPosition(Position(gxyz));
-    // station->setDirection(Position(gxyz));
+    station->setPosition(*gxyz);
+    station->setDirection(*gijk);
     station->setIsSolved(true);
 
     InputElement * element = new InputElement(2000);
     element->typeOfElement = eStationElement;
     element->station = station;
 
-    function->addInputElement(*element, 2);
+    function->addInputElement(*element, 1);
 
-    bool res = function->exec(planeFeature);
+    bool res = function->exec(featureWrapper);
     QVERIFY2(res, "exec");
 
-    DEBUG_PLANE(plane);
+    DEBUG_PLANE(feature);
 
-    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), 0.0, 0.0001);
-    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), 0.0, 0.0001);
-    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (-1.0), 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), 0.0, 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), 0.0, 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (-1.0), 0.0001);
 
     delete function.data();
 }
+
+
+void FunctionTest::testRectifyToVector_CircleToStation() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new RectifyToVector();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    OiVec * p = new OiVec(4);
+    p->setAt(0, 0);
+    p->setAt(1, 0);
+    p->setAt(2, 0);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * d = new OiVec(4);
+    d->setAt(0, 0);
+    d->setAt(1, 0);
+    d->setAt(2, -1.0);
+    d->setAt(3, 1.0);
+    Direction * ijk = new Direction(*d);
+    QPointer<Circle> feature = new Circle(false, *xyz, *ijk, Radius(10.));
+
+    QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
+    featureWrapper->setCircle(feature);
+
+    const bool sense = false;
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
+    function->setScalarInputParams(scalarInputParams);
+
+
+    OiVec * gp = new OiVec(4);
+    gp->setAt(0, 0);
+    gp->setAt(1, 0);
+    gp->setAt(2, 0);
+    gp->setAt(3, 1.0);
+    Position * gxyz = new Position(*gp);
+
+    OiVec * gd = new OiVec(4);
+    gd->setAt(0, -0.001042);
+    gd->setAt(1, 0.000211);
+    gd->setAt(2, 0.999999);
+    gd->setAt(3, 1.0);
+    Direction * gijk = new Direction(*gd);
+    QPointer<Station> station = new Station("STATION01");
+    station->setPosition(*gxyz);
+    station->setDirection(*gijk);
+    station->setIsSolved(true);
+
+    InputElement * element = new InputElement(2000);
+    element->typeOfElement = eStationElement;
+    element->station = station;
+
+    function->addInputElement(*element, 1);
+
+    bool res = function->exec(featureWrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(feature);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), 0.0, 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), 0.0, 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (-1.0), 0.0001);
+
+    delete function.data();
+}
+
+void FunctionTest::testRectifyToVector_LineToStation() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new RectifyToVector();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    OiVec * p = new OiVec(4);
+    p->setAt(0, 0);
+    p->setAt(1, 0);
+    p->setAt(2, 0);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * d = new OiVec(4);
+    d->setAt(0, 0);
+    d->setAt(1, 0);
+    d->setAt(2, -1.0);
+    d->setAt(3, 1.0);
+    Direction * ijk = new Direction(*d);
+    QPointer<Line> feature = new Line(false, *xyz, *ijk);
+
+    QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
+    featureWrapper->setLine(feature);
+
+    const bool sense = false;
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
+    function->setScalarInputParams(scalarInputParams);
+
+
+    OiVec * gp = new OiVec(4);
+    gp->setAt(0, 0);
+    gp->setAt(1, 0);
+    gp->setAt(2, 0);
+    gp->setAt(3, 1.0);
+    Position * gxyz = new Position(*gp);
+
+    OiVec * gd = new OiVec(4);
+    gd->setAt(0, -0.001042);
+    gd->setAt(1, 0.000211);
+    gd->setAt(2, 0.999999);
+    gd->setAt(3, 1.0);
+    Direction * gijk = new Direction(*gd);
+    QPointer<Station> station = new Station("STATION01");
+    station->setPosition(*gxyz);
+    station->setDirection(*gijk);
+    station->setIsSolved(true);
+
+    InputElement * element = new InputElement(2000);
+    element->typeOfElement = eStationElement;
+    element->station = station;
+
+    function->addInputElement(*element, 1);
+
+    bool res = function->exec(featureWrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(feature);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), 0.0, 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), 0.0, 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (-1.0), 0.0001);
+
+    delete function.data();
+}
+
+void FunctionTest::testRectifyToVector_CylinderToStation() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new RectifyToVector();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    OiVec * p = new OiVec(4);
+    p->setAt(0, 0);
+    p->setAt(1, 0);
+    p->setAt(2, 0);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * d = new OiVec(4);
+    d->setAt(0, 0);
+    d->setAt(1, 0);
+    d->setAt(2, -1.0);
+    d->setAt(3, 1.0);
+    Direction * ijk = new Direction(*d);
+    QPointer<Cylinder> feature = new Cylinder(false, *xyz, *ijk, Radius(10.));
+
+    QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
+    featureWrapper->setCylinder(feature);
+
+    const bool sense = false;
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
+    function->setScalarInputParams(scalarInputParams);
+
+
+    OiVec * gp = new OiVec(4);
+    gp->setAt(0, 0);
+    gp->setAt(1, 0);
+    gp->setAt(2, 0);
+    gp->setAt(3, 1.0);
+    Position * gxyz = new Position(*gp);
+
+    OiVec * gd = new OiVec(4);
+    gd->setAt(0, -0.001042);
+    gd->setAt(1, 0.000211);
+    gd->setAt(2, 0.999999);
+    gd->setAt(3, 1.0);
+    Direction * gijk = new Direction(*gd);
+    QPointer<Station> station = new Station("STATION01");
+    station->setPosition(*gxyz);
+    station->setDirection(*gijk);
+    station->setIsSolved(true);
+
+    InputElement * element = new InputElement(2000);
+    element->typeOfElement = eStationElement;
+    element->station = station;
+
+    function->addInputElement(*element, 1);
+
+    bool res = function->exec(featureWrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(feature);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), 0.0, 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), 0.0, 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (-1.0), 0.0001);
+
+    delete function.data();
+}
+
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
