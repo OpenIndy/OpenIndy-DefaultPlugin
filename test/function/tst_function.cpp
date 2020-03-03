@@ -9,11 +9,15 @@
 #include "featurewrapper.h"
 #include "types.h"
 #include "chooselalib.h"
+#include "p_bestfitplane.h"
+#include "p_bestfitpoint.h"
+#include "p_bestfitcircleinplane.h"
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
 #define DEBUG_CYLINDER(cylinder) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(cylinder->getPosition().getVector()) << ", direction=" << _OI_VEC(cylinder->getDirection().getVector()) << ", radius=" << cylinder->getRadius().getRadius() << ", stdev=" << cylinder->getStatistic().getStdev();
-#define DEBUG_POINT(point) qDebug() << "position=" << _OI_VEC(point->getPosition().getVector()) << "distance=" << point->getDistance();
+#define DEBUG_PLANE(plane) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(plane->getPosition().getVector()) << ", direction=" << _OI_VEC(plane->getDirection().getVector()) << ", stdev=" << plane->getStatistic().getStdev();
+#define DEBUG_POINT(point) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(point->getPosition().getVector()) << ", direction=" << _OI_VEC(point->getDirection().getVector()) << ", stdev=" << point->getStatistic().getStdev();
 
 using namespace oi;
 
@@ -33,7 +37,17 @@ private Q_SLOTS:
     void testIntersectLineLine_intersect1_midpoint();
     void testIntersectLineLine_parallel();
 
-    void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
+    void testDisableAllObservationsButLastOne_2side_yes();
+
+    void testBestFitCylinder1__DummyPoint1();
+    void testBestFitCylinder1__DummyPoint2();
+
+    void testBestFitCircleInPlane_DummyPoint1();
+    void testBestFitCircleInPlane_DummyPoint2();
+    void testBestFitCircleInPlane();
+
+    void testBestFitPlane_DummyPoint1();
+    void testBestFitPlane_DummyPoint2();
 
     void testBestFitCylinderAproximationDirection1();
 
@@ -57,8 +71,15 @@ private Q_SLOTS:
 
     void testVRadial();
 
+    void testDisableAllObservationsButLastOne_no();
+    void testDisableAllObservationsButLastOne_yes();
+
+    void testBestFitPlane();
+
+    void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
+
 private:
-    void addInputObservations(QString data, QPointer<Function> function, double conversionFactor = 1.0 / 1.0);
+    void addInputObservations(QString data, QPointer<Function> function, int position, int id);
 
     void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
 };
@@ -71,9 +92,8 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
     qDebug() << msg;
 }
 
-void FunctionTest::addInputObservations(QString data, QPointer<Function> function, double conversionFactor) {
+void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int position = InputElementKey::eDefault, int id = 1000) {
     QTextStream stream(data.toUtf8());
-    int id=1000;
     while(!stream.atEnd()) {
         id++;
 
@@ -83,22 +103,32 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
         }
 
         OiVec * vec = new OiVec(4);
-        vec->setAt(0, xyz.at(0).toDouble() * conversionFactor);
-        vec->setAt(1, xyz.at(1).toDouble() * conversionFactor);
-        vec->setAt(2, xyz.at(2).toDouble() * conversionFactor);
+        vec->setAt(0, xyz.at(0).toDouble());
+        vec->setAt(1, xyz.at(1).toDouble());
+        vec->setAt(2, xyz.at(2).toDouble());
         vec->setAt(3, 1.0);
 
-        // vecList.append(vec);
+        ReadingCartesian * readingCartesian = new ReadingCartesian();
+//        readingCartesian->xyz.setAt(0, xyz.at(0).toDouble());
+//        readingCartesian->xyz.setAt(1, xyz.at(1).toDouble());
+//        readingCartesian->xyz.setAt(2, xyz.at(2).toDouble());
+        readingCartesian->isValid = true;
 
         Observation * observation = new Observation(*vec, id, true);
         observation->setIsSolved(true);
+
+        Reading * reading = new Reading(*readingCartesian);
+        if(xyz.size() > 3) {
+            reading->setSensorFace(xyz.at(3).compare("FS") == 0 ? SensorFaces::eFrontSide : SensorFaces::eBackSide);
+        }
+        reading->setObservation(observation);
 
         InputElement * element = new InputElement(id);
         element->typeOfElement = eObservationElement;
         element->observation = observation;
 
 
-        function->addInputElement(*element, 0);
+        function->addInputElement(*element, position);
      }
 }
 
@@ -827,10 +857,470 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
+    // QDEBUG : FunctionTest::testBestFitCylinderAproximationDirection1() position= -49.95613858 , 0.002538946657 , 0.003555186993 , direction= 0.9999999383 , 0.0001974276497 , -0.0002907078213 , radius= 19.15680458 , stdev= 0.03371845401
     DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(0), (-0.9999999383), 0.000001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(1), (-0.0001974276497), 0.000001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2), (0.0002907078213), 0.000001);
 
     COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
     COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
+
+    delete function.data();
+}
+
+// OI-573
+void FunctionTest::testDisableAllObservationsButLastOne_no()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("disable all observations but last one", "no");
+    function->setScalarInputParams(scalarInputParams);
+
+    QPointer<Point> point = new Point(false);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1.0 1.1 1.2 FS\n\
+1.1 1.2 1.3 FS\n\
+1.2 1.3 1.4 FS\n\
+1.3 1.4 1.5 FS\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.15, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.25, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.35, 0.01);
+
+    delete function.data();
+}
+
+// OI-573
+void FunctionTest::testDisableAllObservationsButLastOne_yes()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("disable all observations but last one", "yes");
+    function->setScalarInputParams(scalarInputParams);
+
+    QPointer<Point> point = new Point(false);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1.0 1.1 1.2 FS\n\
+1.1 1.2 1.3 FS\n\
+1.2 1.3 1.4 FS\n\
+1.3 1.4 1.5 FS\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.3, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.4, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.5, 0.01);
+
+    delete function.data();
+}
+
+// OI-573
+void FunctionTest::testDisableAllObservationsButLastOne_2side_yes()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("disable all observations but last one", "yes");
+    function->setScalarInputParams(scalarInputParams);
+
+    QPointer<Point> point = new Point(false);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1.0 1.1 1.2 FS\n\
+1.02 1.1 1.2 BS\n\
+1.1 1.2 1.3 FS\n\
+1.12 1.2 1.3 BS\n\
+1.2 1.3 1.4 FS\n\
+1.22 1.32 1.42 BS\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.21, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.31, 0.01);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.41, 0.01);
+
+    delete function.data();
+}
+
+// OI-577: old behavior
+void FunctionTest::testBestFitPlane()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(planeFeature);
+
+
+    // QDEBUG : FunctionTest::testBestFitPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 3.654760904e-10
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+// OI-557
+void FunctionTest::testBestFitPlane_DummyPoint1() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 -10\n", function, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+// OI-557
+void FunctionTest::testBestFitPlane_DummyPoint2() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 10\n", function, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+
+// OI-577: old behavior
+void FunctionTest::testBestFitCircleInPlane()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(circleFeature);
+
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 10\n", function, InputElementKey::eDummyPoint);
+    bool res = function->exec(circleFeature);
+
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 -10\n", function, InputElementKey::eDummyPoint);
+    bool res = function->exec(circleFeature);
+
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCylinder1__DummyPoint1()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-59.57 -7.72 17.57\n\
+-34.43 -5.00 18.49\n\
+-59.44 -18.23 5.86\n\
+-58.84 10.00 16.30\n\
+-33.61 11.09 15.63\n\
+-53.82 -4.73 18.56\n\
+-58.87 15.80 10.89\n\
+-41.04 16.85 9.11\n\
+");
+
+
+    addInputObservations(data, function);
+    addInputObservations("0. 0. 0.\n2000. 10. 10.\n", function, InputElementKey::eDummyPoint, 2000);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
+    function->setScalarInputParams(scalarInputParams);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    //  position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(0), (0.9999999383), 0.00001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(1), (0.00019742765), 0.00001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2),  (-0.0002907078214), 0.00001);
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.156, 0.01);
+
+    delete function.data();
+}
+void FunctionTest::testBestFitCylinder1__DummyPoint2()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-59.57 -7.72 17.57\n\
+-34.43 -5.00 18.49\n\
+-59.44 -18.23 5.86\n\
+-58.84 10.00 16.30\n\
+-33.61 11.09 15.63\n\
+-53.82 -4.73 18.56\n\
+-58.87 15.80 10.89\n\
+-41.04 16.85 9.11\n\
+");
+
+
+    addInputObservations(data, function);
+    addInputObservations("2000. 0. 0.\n0. 10. 10.\n", function, InputElementKey::eDummyPoint, 2000);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
+    function->setScalarInputParams(scalarInputParams);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    //  position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(0), (-0.9999999383), 0.00001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(1), (-0.00019742765), 0.00001);
+    COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(2),  (0.0002907078214), 0.00001);
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.156, 0.01);
 
     delete function.data();
 }
