@@ -20,6 +20,7 @@
 #define DEBUG_CYLINDER(cylinder) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(cylinder->getPosition().getVector()) << ", direction=" << _OI_VEC(cylinder->getDirection().getVector()) << ", radius=" << cylinder->getRadius().getRadius() << ", stdev=" << cylinder->getStatistic().getStdev();
 #define DEBUG_PLANE(plane) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(plane->getPosition().getVector()) << ", direction=" << _OI_VEC(plane->getDirection().getVector()) << ", stdev=" << plane->getStatistic().getStdev();
 #define DEBUG_POINT(point) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(point->getPosition().getVector()) << ", direction=" << _OI_VEC(point->getDirection().getVector()) << ", stdev=" << point->getStatistic().getStdev();
+
 using namespace oi;
 
 class FunctionTest : public QObject
@@ -371,25 +372,7 @@ void FunctionTest::testRegisterPoint()
     QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
     pointFeature->setPoint(point);
 
-    OiVec planePos = OiVec(3);
-    planePos.setAt(0, 1374.9964);
-    planePos.setAt(1, 1624.9982);
-    planePos.setAt(2, 1024.7504);
-    Position planePosition(planePos);
-
-    OiVec planeDir = OiVec(3);
-    planeDir.setAt(0, 0.100818);
-    planeDir.setAt(1, -0.097854);
-    planeDir.setAt(2, 0.990081);
-    Direction planeDirection(planeDir);
-
-    QPointer<Plane> plane = new Plane(false, planePosition, planeDirection);
-    plane->setIsSolved(true);
-
-    InputElement element(1234); // dummy id
-    element.typeOfElement = ePlaneElement;
-    element.plane = plane;
-    function->addInputElement(element, 0);
+    addInputPlane(1374.9964, 1624.9982, 1024.7504, 0.100818, -0.097854, 0.990081, function);
 
     bool res = function->exec(pointFeature);
     QVERIFY2(res, "exec");
@@ -399,7 +382,6 @@ void FunctionTest::testRegisterPoint()
     QCOMPARE(xyz.getAt(1), 2184.0666108152623);
     QCOMPARE(xyz.getAt(2), 1137.5033860957583);
 
-    delete plane.data();
     delete point.data();
     delete pointFeature.data();
     delete function.data();
@@ -421,25 +403,7 @@ void FunctionTest::testRegisterSphere()
     QPointer<FeatureWrapper> sphereFeature = new FeatureWrapper();
     sphereFeature->setSphere(sphere);
 
-    OiVec planePos = OiVec(3);
-    planePos.setAt(0, 1374.9964);
-    planePos.setAt(1, 1624.9982);
-    planePos.setAt(2, 1024.7504);
-    Position planePosition(planePos);
-
-    OiVec planeDir = OiVec(3);
-    planeDir.setAt(0, 0.100818);
-    planeDir.setAt(1, -0.097854);
-    planeDir.setAt(2, 0.990081);
-    Direction planeDirection(planeDir);
-
-    QPointer<Plane> plane = new Plane(false, planePosition, planeDirection);
-    plane->setIsSolved(true);
-
-    InputElement element(1234); // dummy id
-    element.typeOfElement = ePlaneElement;
-    element.plane = plane;
-    function->addInputElement(element, 0);
+    addInputPlane(1374.9964, 1624.9982, 1024.7504, 0.100818, -0.097854, 0.990081, function);
 
     bool res = function->exec(sphereFeature);
     QVERIFY2(res, "exec");
@@ -449,7 +413,6 @@ void FunctionTest::testRegisterSphere()
     QCOMPARE(xyz.getAt(1), -124.73615424728945);
     QCOMPARE(xyz.getAt(2), 983.91537298026219);
 
-    delete plane.data();
     delete sphere.data();
     delete sphereFeature.data();
     delete function.data();
@@ -1839,20 +1802,7 @@ void FunctionTest::testRectifyToPoint_Circle_negative() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, 1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Circle> geometry = new Circle(false, *xyz, *ijk, Radius(10.));
+    QPointer<Circle> geometry = createCircle(0, 0, 0, 0, 0, 1., 10.);
 
     QPointer<FeatureWrapper> feature = new FeatureWrapper();
     feature->setCircle(geometry);
@@ -1884,20 +1834,7 @@ void FunctionTest::testRectifyToPoint_Line_negative() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, 1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Line> geometry = new Line(false, *xyz, *ijk);
+    QPointer<Line> geometry = createLine(0, 0, 0, 0, 0, 1.);
 
     QPointer<FeatureWrapper> feature = new FeatureWrapper();
     feature->setLine(geometry);
@@ -2023,20 +1960,7 @@ void FunctionTest::testRectifyToVector_CircleToStation() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, -1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Circle> feature = new Circle(false, *xyz, *ijk, Radius(10.));
+    QPointer<Circle> feature = createCircle(0, 0, 0, 0, 0, -1., 10.);
 
     QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
     featureWrapper->setCircle(feature);
@@ -2067,20 +1991,7 @@ void FunctionTest::testRectifyToVector_LineToStation() {
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * d = new OiVec(4);
-    d->setAt(0, 0);
-    d->setAt(1, 0);
-    d->setAt(2, -1.0);
-    d->setAt(3, 1.0);
-    Direction * ijk = new Direction(*d);
-    QPointer<Line> feature = new Line(false, *xyz, *ijk);
+    QPointer<Line> feature = createLine(0, 0, 0, 0, 0, -1.);
 
     QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
     featureWrapper->setLine(feature);
