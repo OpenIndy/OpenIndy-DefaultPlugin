@@ -1991,29 +1991,7 @@ void FunctionTest::testRectifyToVector_PlaneToPlane_negative() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec * gp = new OiVec(4);
-    gp->setAt(0, 0);
-    gp->setAt(1, 0);
-    gp->setAt(2, 0);
-    gp->setAt(3, 1.0);
-    Position * gxyz = new Position(*gp);
-
-    OiVec * gd = new OiVec(4);
-    gd->setAt(0, -0.001042);
-    gd->setAt(1, 0.000211);
-    gd->setAt(2, 0.999999);
-    gd->setAt(3, 1.0);
-    Direction * gijk = new Direction(*gd);
-    QPointer<Plane> geometry = new  Plane(false, *gxyz, *gijk);
-    geometry->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = ePlaneElement;
-    element->plane = geometry;
-    element->geometry = geometry;
-
-    function->addInputElement(*element, 0);
+    addInputStation(0, 0, 0, -0.001042, 0.000211, 0.999999, function, 3000, 1);
 
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
@@ -2056,30 +2034,7 @@ void FunctionTest::testRectifyToVector_PlaneToStation() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec * gp = new OiVec(4);
-    gp->setAt(0, 0);
-    gp->setAt(1, 0);
-    gp->setAt(2, 0);
-    gp->setAt(3, 1.0);
-    Position * gxyz = new Position(*gp);
-
-    OiVec * gd = new OiVec(4);
-    gd->setAt(0, -0.001042);
-    gd->setAt(1, 0.000211);
-    gd->setAt(2, 0.999999);
-    gd->setAt(3, 1.0);
-    Direction * gijk = new Direction(*gd);
-    QPointer<Station> station = new Station("STATION01");
-    station->setPosition(*gxyz);
-    station->setDirection(*gijk);
-    station->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = eStationElement;
-    element->station = station;
-
-    function->addInputElement(*element, 1);
+    addInputStation(0, 0, 0, -0.001042, 0.000211, 0.999999, function, 3000, 1);
 
     bool res = function->exec(featureWrapper);
     QVERIFY2(res, "exec");
@@ -2124,30 +2079,7 @@ void FunctionTest::testRectifyToVector_CircleToStation() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec * gp = new OiVec(4);
-    gp->setAt(0, 0);
-    gp->setAt(1, 0);
-    gp->setAt(2, 0);
-    gp->setAt(3, 1.0);
-    Position * gxyz = new Position(*gp);
-
-    OiVec * gd = new OiVec(4);
-    gd->setAt(0, -0.001042);
-    gd->setAt(1, 0.000211);
-    gd->setAt(2, 0.999999);
-    gd->setAt(3, 1.0);
-    Direction * gijk = new Direction(*gd);
-    QPointer<Station> station = new Station("STATION01");
-    station->setPosition(*gxyz);
-    station->setDirection(*gijk);
-    station->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = eStationElement;
-    element->station = station;
-
-    function->addInputElement(*element, 1);
+    addInputStation(0, 0, 0, -0.001042, 0.000211, 0.999999, function, 3000, 1);
 
     bool res = function->exec(featureWrapper);
     QVERIFY2(res, "exec");
@@ -2191,30 +2123,7 @@ void FunctionTest::testRectifyToVector_LineToStation() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec * gp = new OiVec(4);
-    gp->setAt(0, 0);
-    gp->setAt(1, 0);
-    gp->setAt(2, 0);
-    gp->setAt(3, 1.0);
-    Position * gxyz = new Position(*gp);
-
-    OiVec * gd = new OiVec(4);
-    gd->setAt(0, -0.001042);
-    gd->setAt(1, 0.000211);
-    gd->setAt(2, 0.999999);
-    gd->setAt(3, 1.0);
-    Direction * gijk = new Direction(*gd);
-    QPointer<Station> station = new Station("STATION01");
-    station->setPosition(*gxyz);
-    station->setDirection(*gijk);
-    station->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = eStationElement;
-    element->station = station;
-
-    function->addInputElement(*element, 1);
+    addInputStation(0, 0, 0, -0.001042, 0.000211, 0.999999, function, 3000, 1);
 
     bool res = function->exec(featureWrapper);
     QVERIFY2(res, "exec");
@@ -2258,30 +2167,7 @@ void FunctionTest::testRectifyToVector_CylinderToStation() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec * gp = new OiVec(4);
-    gp->setAt(0, 0);
-    gp->setAt(1, 0);
-    gp->setAt(2, 0);
-    gp->setAt(3, 1.0);
-    Position * gxyz = new Position(*gp);
-
-    OiVec * gd = new OiVec(4);
-    gd->setAt(0, -0.001042);
-    gd->setAt(1, 0.000211);
-    gd->setAt(2, 0.999999);
-    gd->setAt(3, 1.0);
-    Direction * gijk = new Direction(*gd);
-    QPointer<Station> station = new Station("STATION01");
-    station->setPosition(*gxyz);
-    station->setDirection(*gijk);
-    station->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = eStationElement;
-    element->station = station;
-
-    function->addInputElement(*element, 1);
+    addInputStation(0, 0, 0, -0.001042, 0.000211, 0.999999, function, 3000, 1);
 
     bool res = function->exec(featureWrapper);
     QVERIFY2(res, "exec");
