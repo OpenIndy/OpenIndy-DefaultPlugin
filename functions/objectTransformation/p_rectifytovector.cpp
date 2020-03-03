@@ -26,6 +26,12 @@ void RectifyToVector::init(){
     param2.typeOfElement = eStationElement;
     this->neededElements.append(param2);
 
+    NeededElement param3;
+    param3.description = "Select a coordinate system used for the orientation of the target geometry.";
+    param3.infinite = false;
+    param3.typeOfElement = eCoordinateSystemElement;
+    this->neededElements.append(param3);
+
     //set spplicable for
     this->applicableFor.append(ePlaneFeature);
     this->applicableFor.append(eCircleFeature);
@@ -88,13 +94,19 @@ bool RectifyToVector::direction(OiVec &direction) {
             direction = rectifyGeometry->getDirection().getVector();
             return true;
         }
-    } else {// 2. get and check position of rectify station if available
-        if(this->inputElements.contains(1) && this->inputElements[1].size() == 1) {
-            QPointer<Station> rectifyStation = this->inputElements[1].at(0).station;
-            if(!rectifyStation.isNull())  {
-                direction = rectifyStation->getDirection().getVector();
-                return true;
-            }
+    } else if(this->inputElements.contains(1) && this->inputElements[1].size() == 1) {
+        // 2. get and check position of rectify station if available
+        QPointer<Station> rectifyStation = this->inputElements[1].at(0).station;
+        if(!rectifyStation.isNull())  {
+            direction = rectifyStation->getDirection().getVector();
+            return true;
+        }
+    } else if(this->inputElements.contains(2) && this->inputElements[2].size() == 1) {
+        // 3. get and check position of rectify station if available
+        QPointer<CoordinateSystem> rectifyCoordinateSystem = this->inputElements[2].at(0).coordSystem;
+        if(!rectifyCoordinateSystem.isNull())  {
+            direction = rectifyCoordinateSystem->getDirection().getVector();
+            return true;
         }
     }
 
