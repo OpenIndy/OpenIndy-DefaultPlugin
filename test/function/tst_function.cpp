@@ -103,6 +103,8 @@ private:
     void addInputPoint(double x, double y, double z, QPointer<Function> function, int id, int inputElementKey);
 
     QPointer<Plane> createPlane(double x, double y, double z, double i, double j, double k);
+    QPointer<Cylinder> createCylinder(double x, double y, double z, double i, double j, double k, double r);
+
 };
 
 FunctionTest::FunctionTest()
@@ -249,6 +251,7 @@ void FunctionTest::addInputPoint(double x, double y, double z, QPointer<Function
 
     function->addInputElement(*element, inputElementKey);
 }
+
 QPointer<Plane> FunctionTest::createPlane(double x, double y, double z, double i, double j, double k) {
     OiVec * p = new OiVec(4);
     p->setAt(0, x);
@@ -264,6 +267,24 @@ QPointer<Plane> FunctionTest::createPlane(double x, double y, double z, double i
     d->setAt(3, 1.0);
     Direction * ijk = new Direction(*d);
     QPointer<Plane> feature = new Plane(false, *xyz, *ijk);
+    return feature;
+}
+
+QPointer<Cylinder> FunctionTest::createCylinder(double x, double y, double z, double i, double j, double k, double r) {
+    OiVec * p = new OiVec(4);
+    p->setAt(0, x);
+    p->setAt(1, y);
+    p->setAt(2, z);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * d = new OiVec(4);
+    d->setAt(0, i);
+    d->setAt(1, j);
+    d->setAt(2, k);
+    d->setAt(3, 1.0);
+    Direction * ijk = new Direction(*d);
+    QPointer<Cylinder> feature = new Cylinder(false, *xyz, *ijk, Radius(r));
     return feature;
 }
 
