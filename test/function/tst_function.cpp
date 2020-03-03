@@ -5,6 +5,7 @@
 
 #include "p_register.h"
 #include "p_bestfitcylinder.h"
+#include "p_intersectlineline.h"
 #include "featurewrapper.h"
 #include "types.h"
 #include "chooselalib.h"
@@ -28,6 +29,14 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testIntersectLineLine_intersect2_atfirstline();
+    void testIntersectLineLine_intersect2_atsecondline();
+    void testIntersectLineLine_intersect2_midpoint();
+    void testIntersectLineLine_intersect1_atfirstline();
+    void testIntersectLineLine_intersect1_atsecondline();
+    void testIntersectLineLine_intersect1_midpoint();
+    void testIntersectLineLine_parallel();
+
     void testDisableAllObservationsButLastOne_2side_yes();
 
     void testBestFitCylinder1__DummyPoint1();
@@ -72,6 +81,7 @@ private Q_SLOTS:
 private:
     void addInputObservations(QString data, QPointer<Function> function, int position, int id);
 
+    void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
 };
 
 FunctionTest::FunctionTest()
@@ -120,6 +130,33 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
 
         function->addInputElement(*element, position);
      }
+}
+
+void FunctionTest::addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = 0){
+    OiVec * p = new OiVec(4);
+    p->setAt(0, x);
+    p->setAt(1, y);
+    p->setAt(2, z);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * a = new OiVec(4);
+    a->setAt(0, i);
+    a->setAt(1, j);
+    a->setAt(2, k);
+    a->setAt(3, 1.0);
+    Direction * axis = new Direction(*a);
+
+    Line * line = new Line(false, *xyz, *axis);
+    line->setIsSolved(true);
+    line->setFeatureName(QString("line_%1").arg(id));
+
+    InputElement * element = new InputElement(id);
+    element->typeOfElement = eLineElement;
+    element->line = line;
+    element->geometry = line;
+
+    function->addInputElement(*element, inputElementKey);
 }
 
 void FunctionTest::testRegisterPoint()
@@ -815,29 +852,7 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
 
     // QDEBUG : FunctionTest::testBestFitCylinder10() position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
 
-    OiVec * p = new OiVec(4);
-    p->setAt(0, 0);
-    p->setAt(1, 0);
-    p->setAt(2, 0);
-    p->setAt(3, 1.0);
-    Position * xyz = new Position(*p);
-
-    OiVec * a = new OiVec(4);
-    a->setAt(0, -0.9);
-    a->setAt(1, 0);
-    a->setAt(2, 0);
-    a->setAt(3, 1.0);
-    Direction * axis = new Direction(*a);
-
-    Line * line = new Line(false, *xyz, *axis);
-    line->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = eLineElement;
-    element->line = line;
-    element->geometry = line;
-
-    function->addInputElement(*element, 1);
+    addInputLine(0,0,0, 0.9, 0, 0, function, 2000, 1);
 
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
@@ -1310,6 +1325,250 @@ void FunctionTest::testBestFitCylinder1__DummyPoint2()
     delete function.data();
 }
 
+void FunctionTest::testIntersectLineLine_parallel()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new IntersectLineLine();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> point = new Point(false);
+    OiVec posv;
+    Position pos(posv);
+    point->setPoint(pos);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+
+    //ScalarInputParams scalarInputParams;
+    //scalarInputParams.stringParameter.insert("TODO", "TODO");
+    //function->setScalarInputParams(scalarInputParams);
+
+    addInputLine(1., 1., 1., 0.5772, 0.5772, 0.5772, function, 2000, 0);
+    addInputLine(2., 2., 2., 0.5772, 0.5772, 0.5772, function, 2001, 1);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(!res, "exec");
+
+    delete function.data();
+}
+void FunctionTest::testIntersectLineLine_intersect1_atfirstline()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new IntersectLineLine();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> point = new Point(false);
+    OiVec posv;
+    Position pos(posv);
+    point->setPoint(pos);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("intersection", "at first line");
+    function->setScalarInputParams(scalarInputParams);
+
+    addInputLine(1., 1., 1., 0.5772, 0.5772, 0.5772, function, 2000, 0);
+    addInputLine(2., 2., 2., 0.0, 1., 0.0, function, 2001, 1);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 2, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 2, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 2, 0.0001);
+
+    delete function.data();
+
+}
+
+void FunctionTest::testIntersectLineLine_intersect1_atsecondline()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new IntersectLineLine();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> point = new Point(false);
+    OiVec posv;
+    Position pos(posv);
+    point->setPoint(pos);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("intersection", "at second line");
+    function->setScalarInputParams(scalarInputParams);
+
+    addInputLine(1., 1., 1., 0.5772, 0.5772, 0.5772, function, 2000, 0);
+    addInputLine(2., 2., 2., 0.0, 1., 0.0, function, 2001, 1);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 2, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 2, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 2, 0.0001);
+
+    delete function.data();
+
+}
+
+void FunctionTest::testIntersectLineLine_intersect1_midpoint()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new IntersectLineLine();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> point = new Point(false);
+    OiVec posv;
+    Position pos(posv);
+    point->setPoint(pos);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("intersection", "midpoint");
+    function->setScalarInputParams(scalarInputParams);
+
+    addInputLine(1., 1., 1., 0.5772, 0.5772, 0.5772, function, 2000, 0);
+    addInputLine(2., 2., 2., 0.0, 1., 0.0, function, 2001, 1);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 2, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 2, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 2, 0.0001);
+
+    delete function.data();
+
+}
+
+void FunctionTest::testIntersectLineLine_intersect2_atfirstline()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new IntersectLineLine();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> point = new Point(false);
+    OiVec posv;
+    Position pos(posv);
+    point->setPoint(pos);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("intersection", "at first line");
+    function->setScalarInputParams(scalarInputParams);
+
+    addInputLine(1., 1., 1., 0.5773, 0.5773, 0.5773, function, 2000, 0);
+    addInputLine(2., 2., 1., 0.0, 1., 0.0, function, 2001, 1);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.5, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.5, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.5, 0.0001);
+
+    delete function.data();
+
+}
+
+void FunctionTest::testIntersectLineLine_intersect2_atsecondline()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new IntersectLineLine();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> point = new Point(false);
+    OiVec posv;
+    Position pos(posv);
+    point->setPoint(pos);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("intersection", "at second line");
+    function->setScalarInputParams(scalarInputParams);
+
+    addInputLine(1., 1., 1., 0.5773, 0.5773, 0.5773, function, 2000, 0);
+    addInputLine(2., 2., 1., 0.0, 1., 0.0, function, 2001, 1);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+    COMPARE_DOUBLE(point->getDistance(), 0.7071, 0.0001);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 2., 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.5, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1., 0.0001);
+
+    delete function.data();
+
+}
+
+void FunctionTest::testIntersectLineLine_intersect2_midpoint()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new IntersectLineLine();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> point = new Point(false);
+    OiVec posv;
+    Position pos(posv);
+    point->setPoint(pos);
+    QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
+    pointFeature->setPoint(point);
+
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("intersection", "midpoint");
+    function->setScalarInputParams(scalarInputParams);
+
+    addInputLine(1., 1., 1., 0.5773, 0.5773, 0.5773, function, 2000, 0);
+    addInputLine(2., 2., 1., 0.0, 1., 0.0, function, 2001, 1);
+
+    bool res = function->exec(pointFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(point);
+
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(0), 1.75, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(1), 1.5, 0.0001);
+    COMPARE_DOUBLE(point->getPosition().getVector().getAt(2), 1.25, 0.0001);
+
+    delete function.data();
+
+}
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"

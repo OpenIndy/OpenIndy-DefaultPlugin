@@ -34,6 +34,7 @@
 #include "p_pointfrompoints.h"
 #include "p_linefrompoints.h"
 #include "p_planefrompoints.h"
+#include "p_intersectlineline.h"
 #include "p_intersectlineplane.h"
 #include "p_intersectplaneplane.h"
 #include "p_spherefrompoints.h"
