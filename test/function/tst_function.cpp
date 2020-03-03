@@ -1690,20 +1690,7 @@ void FunctionTest::testRectifyToPoint_Plane_negative() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec pointPos = OiVec(3);
-    pointPos.setAt(0, 1.);
-    pointPos.setAt(1, 1.);
-    pointPos.setAt(2, -5.);
-    QPointer<Point> point = new Point(false, Position(pointPos));
-    point->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = ePointElement;
-    element->point = point;
-    element->geometry = point;
-
-    function->addInputElement(*element, 0);
+    addInputPoint(1., 1., -5., function);
 
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
@@ -1747,20 +1734,7 @@ void FunctionTest::testRectifyToPoint_Plane_positive() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec pointPos = OiVec(3);
-    pointPos.setAt(0, 1.);
-    pointPos.setAt(1, 1.);
-    pointPos.setAt(2, -5.);
-    QPointer<Point> point = new Point(false, Position(pointPos));
-    point->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = ePointElement;
-    element->point = point;
-    element->geometry = point;
-
-    function->addInputElement(*element, 0);
+    addInputPoint(1., 1., -5., function);
 
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
@@ -1804,21 +1778,7 @@ void FunctionTest::testRectifyToPoint_Plane_Station() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec pointPos = OiVec(3);
-    pointPos.setAt(0, 1.);
-    pointPos.setAt(1, 1.);
-    pointPos.setAt(2, -5.);
-    QPointer<Station> station = new Station("STATION01");
-    station->setPosition(Position(pointPos));
-    station->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = eStationElement;
-    element->station = station;
-    //element->geometry = station;
-
-    function->addInputElement(*element, 1);
+    addInputPoint(1., 1., -5., function);
 
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
@@ -1863,20 +1823,7 @@ void FunctionTest::testRectifyToPoint_Circle_negative() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec pointPos = OiVec(3);
-    pointPos.setAt(0, 1.);
-    pointPos.setAt(1, 1.);
-    pointPos.setAt(2, -5.);
-    QPointer<Point> point = new Point(false, Position(pointPos));
-    point->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = eCircleElement;
-    element->point = point;
-    element->geometry = point;
-
-    function->addInputElement(*element, 0);
+    addInputPoint(1., 1., -5., function);
 
     bool res = function->exec(feature);
     QVERIFY2(res, "exec");
@@ -1921,20 +1868,7 @@ void FunctionTest::testRectifyToPoint_Line_negative() {
     scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
     function->setScalarInputParams(scalarInputParams);
 
-
-    OiVec pointPos = OiVec(3);
-    pointPos.setAt(0, 1.);
-    pointPos.setAt(1, 1.);
-    pointPos.setAt(2, -5.);
-    QPointer<Point> point = new Point(false, Position(pointPos));
-    point->setIsSolved(true);
-
-    InputElement * element = new InputElement(2000);
-    element->typeOfElement = eLineElement;
-    element->point = point;
-    element->geometry = point;
-
-    function->addInputElement(*element, 0);
+    addInputPoint(1., 1., -5., function);
 
     bool res = function->exec(feature);
     QVERIFY2(res, "exec");
