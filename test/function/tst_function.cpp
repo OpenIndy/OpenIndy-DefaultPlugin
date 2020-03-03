@@ -104,6 +104,7 @@ private:
 
     QPointer<Plane> createPlane(double x, double y, double z, double i, double j, double k);
     QPointer<Cylinder> createCylinder(double x, double y, double z, double i, double j, double k, double r);
+    QPointer<Circle> createCircle(double x, double y, double z, double i, double j, double k, double r);
 
 };
 
@@ -285,6 +286,24 @@ QPointer<Cylinder> FunctionTest::createCylinder(double x, double y, double z, do
     d->setAt(3, 1.0);
     Direction * ijk = new Direction(*d);
     QPointer<Cylinder> feature = new Cylinder(false, *xyz, *ijk, Radius(r));
+    return feature;
+}
+
+QPointer<Circle> FunctionTest::createCircle(double x, double y, double z, double i, double j, double k, double r) {
+    OiVec * p = new OiVec(4);
+    p->setAt(0, x);
+    p->setAt(1, y);
+    p->setAt(2, z);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * d = new OiVec(4);
+    d->setAt(0, i);
+    d->setAt(1, j);
+    d->setAt(2, k);
+    d->setAt(3, 1.0);
+    Direction * ijk = new Direction(*d);
+    QPointer<Circle> feature = new Circle(false, *xyz, *ijk, Radius(r));
     return feature;
 }
 
