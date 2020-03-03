@@ -852,7 +852,7 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
 
     // QDEBUG : FunctionTest::testBestFitCylinder10() position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
 
-    addInputLine(0,0,0, 0.9, 0, 0, function, 2000, 1);
+    addInputLine(0,0,0, -0.9, 0, 0, function, 2000, 1);
 
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
