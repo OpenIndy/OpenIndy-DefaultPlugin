@@ -101,6 +101,7 @@ private:
     void addInputStation(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputCoordinateSystem(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputPoint(double x, double y, double z, QPointer<Function> function, int id, int inputElementKey);
+    void addInputPlane(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
 
     QPointer<Plane> createPlane(double x, double y, double z, double i, double j, double k);
     QPointer<Cylinder> createCylinder(double x, double y, double z, double i, double j, double k, double r);
@@ -169,9 +170,9 @@ void FunctionTest::addInputLine(double x, double y, double z, double i, double j
     a->setAt(1, j);
     a->setAt(2, k);
     a->setAt(3, 1.0);
-    Direction * axis = new Direction(*a);
+    Direction * ijk = new Direction(*a);
 
-    Line * line = new Line(false, *xyz, *axis);
+    Line * line = new Line(false, *xyz, *ijk);
     line->setIsSolved(true);
     line->setFeatureName(QString("line_%1").arg(id));
 
@@ -198,7 +199,7 @@ void FunctionTest::addInputStation(double x, double y, double z, double i, doubl
     a->setAt(3, 1.0);
     Direction * ijk = new Direction(*a);
 
-    QPointer<Station> station = new Station("STATION01");
+    QPointer<Station> station = new Station(QString("station_%1").arg(id));
     station->setPosition(*xyz);
     station->setDirection(*ijk);
     station->setIsSolved(true);
@@ -225,7 +226,8 @@ void FunctionTest::addInputCoordinateSystem(double x, double y, double z, double
     a->setAt(3, 1.0);
     Direction * ijk = new Direction(*a);
 
-    QPointer<CoordinateSystem> coordianteSystem = new CoordinateSystem("system");
+    QPointer<CoordinateSystem> coordianteSystem = new CoordinateSystem();
+    coordianteSystem->setFeatureName(QString("system_%1").arg(id));
     coordianteSystem->setOrigin(*xyz);
     coordianteSystem->setDirection(*ijk);
     coordianteSystem->setIsSolved(true);
@@ -242,13 +244,41 @@ void FunctionTest::addInputPoint(double x, double y, double z, QPointer<Function
     pointPos.setAt(0, 1.);
     pointPos.setAt(1, 1.);
     pointPos.setAt(2, -5.);
-    QPointer<Point> point = new Point(false, Position(pointPos));
-    point->setIsSolved(true);
+    QPointer<Point> feature = new Point(false, Position(pointPos));
+    feature->setIsSolved(true);
+    feature->setFeatureName(QString("point_%1").arg(id));
 
     InputElement * element = new InputElement(id);
     element->typeOfElement = eLineElement;
-    element->point = point;
-    element->geometry = point;
+    element->point = feature;
+    element->geometry = feature;
+
+    function->addInputElement(*element, inputElementKey);
+}
+
+void FunctionTest::addInputPlane(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = 0){
+    OiVec * p = new OiVec(4);
+    p->setAt(0, x);
+    p->setAt(1, y);
+    p->setAt(2, z);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * a = new OiVec(4);
+    a->setAt(0, i);
+    a->setAt(1, j);
+    a->setAt(2, k);
+    a->setAt(3, 1.0);
+    Direction * ijk = new Direction(*a);
+
+    Plane * feature = new Plane(false, *xyz, *ijk);
+    feature->setIsSolved(true);
+    feature->setFeatureName(QString("plane_%1").arg(id));
+
+    InputElement * element = new InputElement(id);
+    element->typeOfElement = eLineElement;
+    element->plane = feature;
+    element->geometry = feature;
 
     function->addInputElement(*element, inputElementKey);
 }
@@ -413,21 +443,11 @@ void FunctionTest::testRegisterCircle()
     QPointer<Function> function = new Register();
     function->init();
 
+    QPointer<Circle> circle = createCircle(600.0108, 499.9982, 999.9979, 0.000010, 0.000007, -1.000000, 781.0312);
 
-    OiVec circlePos = OiVec(3);
-    circlePos.setAt(0, 600.0108);
-    circlePos.setAt(1, 499.9982);
-    circlePos.setAt(2, 999.9979);
-
-    OiVec circleDir = OiVec(3);
-    circleDir.setAt(0, 0.000010);
-    circleDir.setAt(1, 0.000007);
-    circleDir.setAt(2, -1.000000);
-
-    Radius radius(781.0312);
-    QPointer<Circle> circle = new Circle(false, Position(circlePos), Direction(circleDir), radius);
     QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
     circleFeature->setCircle(circle);
+
 
     OiVec planePos = OiVec(3);
     planePos.setAt(0, 1374.9964);
