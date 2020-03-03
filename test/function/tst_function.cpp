@@ -100,6 +100,7 @@ private:
     void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputStation(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputCoordinateSystem(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
+    void addInputPoint(double x, double y, double z, QPointer<Function> function, int id, int inputElementKey);
 };
 
 FunctionTest::FunctionTest()
@@ -227,6 +228,22 @@ void FunctionTest::addInputCoordinateSystem(double x, double y, double z, double
     InputElement * element = new InputElement(id);
     element->typeOfElement = eCoordinateSystemElement;
     element->coordSystem = coordianteSystem;
+
+    function->addInputElement(*element, inputElementKey);
+}
+
+void FunctionTest::addInputPoint(double x, double y, double z, QPointer<Function> function, int id = 2000, int inputElementKey = 0) {
+    OiVec pointPos = OiVec(3);
+    pointPos.setAt(0, 1.);
+    pointPos.setAt(1, 1.);
+    pointPos.setAt(2, -5.);
+    QPointer<Point> point = new Point(false, Position(pointPos));
+    point->setIsSolved(true);
+
+    InputElement * element = new InputElement(id);
+    element->typeOfElement = eLineElement;
+    element->point = point;
+    element->geometry = point;
 
     function->addInputElement(*element, inputElementKey);
 }
