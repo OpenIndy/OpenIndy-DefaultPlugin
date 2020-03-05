@@ -37,6 +37,10 @@ void RectifyToVector::init(){
     this->applicableFor.append(eCircleFeature);
 
     //set string parameter
+    this->stringParameters.insert("rectify to station / coordinate system", "xAxis");
+    this->stringParameters.insert("rectify to station / coordinate system", "yAxis");
+    this->stringParameters.insert("rectify to station / coordinate system", "zAxis");
+
     this->stringParameters.insert("sense", "negative");
     this->stringParameters.insert("sense", "positive");
 
@@ -98,19 +102,52 @@ bool RectifyToVector::direction(OiVec &direction) {
         // 2. get and check position of rectify station if available
         QPointer<Station> rectifyStation = this->inputElements[1].at(0).station;
         if(!rectifyStation.isNull())  {
-            direction = rectifyStation->getDirection().getVector();
-            return true;
+            switch(axis()) {
+            case eXAxis:
+                direction = rectifyStation->getXAxis().getVector();
+                return true;
+            case eYAxis:
+                direction = rectifyStation->getYAxis().getVector();
+                return true;
+            case eZAxis:
+                direction = rectifyStation->getZAxis().getVector();
+                return true;
+            }
+
         }
     } else if(this->inputElements.contains(2) && this->inputElements[2].size() == 1) {
         // 3. get and check position of rectify station if available
         QPointer<CoordinateSystem> rectifyCoordinateSystem = this->inputElements[2].at(0).coordSystem;
         if(!rectifyCoordinateSystem.isNull())  {
-            direction = rectifyCoordinateSystem->getDirection().getVector();
-            return true;
+            switch(axis()) {
+            case eXAxis:
+                direction = rectifyCoordinateSystem->getXAxis().getVector();
+                return true;
+            case eYAxis:
+                direction = rectifyCoordinateSystem->getYAxis().getVector();
+                return true;
+            case eZAxis:
+                direction = rectifyCoordinateSystem->getZAxis().getVector();
+                return true;
+            }
+
         }
     }
 
     return false;
+}
+
+Axis RectifyToVector::axis() {
+    if(this->scalarInputParams.stringParameter.contains("rectify to station / coordinate system")){
+        if(this->scalarInputParams.stringParameter.value("rectify to station / coordinate system").compare("xAxis") == 0){
+            return Axis::eXAxis;
+        } else if(this->scalarInputParams.stringParameter.value("rectify to station / coordinate system").compare("yAxis") == 0){
+            return Axis::eYAxis;
+        } else if(this->scalarInputParams.stringParameter.value("rectify to station / coordinate system").compare("zAxis") == 0){
+            return Axis::eZAxis;
+        }
+    }
+    return Axis::eZAxis;
 }
 
 /*!
