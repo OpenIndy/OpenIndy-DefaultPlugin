@@ -31,7 +31,9 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
-    void testRectifyToVector_PlaneToCoodinateSystem();
+    void testRectifyToVector_PlaneToCoodinateSystem_yAxis();
+    void testRectifyToVector_PlaneToCoodinateSystem_xAxis();
+    void testRectifyToVector_PlaneToCoodinateSystem_zAxis();
 
     void testRectifyToVector_CircleToStation();
     void testRectifyToVector_LineToStation();
@@ -2059,7 +2061,7 @@ void FunctionTest::testRectifyToVector_CylinderToStation() {
 }
 
 // OI-527
-void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem() {
+void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem_zAxis() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<Function> function = new RectifyToVector();
@@ -2090,6 +2092,107 @@ void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem() {
     delete function.data();
 }
 
+// OI-527
+void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem_xAxis() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new RectifyToVector();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> feature = createPlane(0, 0, 0, 1, 0, 0);
+
+    QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
+    featureWrapper->setPlane(feature);
+
+    const bool sense = false;
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
+    scalarInputParams.stringParameter.insert("rectify to station / coordinate system", "xAxis");
+    function->setScalarInputParams(scalarInputParams);
+
+    OiMat trafo(4, 4);
+    trafo.setAt(0, 0, 0.9998379552);
+    trafo.setAt(0, 1, -0.0101018638);
+    trafo.setAt(0, 2, -0.0010422656);
+    trafo.setAt(0, 3, 18.4149563832);
+    trafo.setAt(1, 0, 0.0101020893);
+    trafo.setAt(1, 1, 0.9998384738);
+    trafo.setAt(1, 2, 0.0002113152);
+    trafo.setAt(1, 3, 0.0007839294);
+    trafo.setAt(2, 0, 0.0010400775);
+    trafo.setAt(2, 1, -0.0002218345);
+    trafo.setAt(2, 2, 0.9998889637);
+    trafo.setAt(2, 3, -2.1009030443);
+    trafo.setAt(3, 0, 0.);
+    trafo.setAt(3, 1, 0.);
+    trafo.setAt(3, 2, 0.);
+    trafo.setAt(3, 3, 1.);
+
+    addInputCoordinateSystem(trafo, function, 2000, 2);
+
+    bool res = function->exec(featureWrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(feature);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (-1.0), 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (0.0), 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (0.0), 0.0001);
+
+    delete function.data();
+}
+
+// OI-527
+void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem_yAxis() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new RectifyToVector();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> feature = createPlane(0, 0, 0, 0, 1, 0);
+
+    QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
+    featureWrapper->setPlane(feature);
+
+    const bool sense = false;
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("sense", sense ? "positive" : "negative");
+    scalarInputParams.stringParameter.insert("rectify to station / coordinate system", "yAxis");
+    function->setScalarInputParams(scalarInputParams);
+
+    OiMat trafo(4, 4);
+    trafo.setAt(0, 0, 0.9998379552);
+    trafo.setAt(0, 1, -0.0101018638);
+    trafo.setAt(0, 2, -0.0010422656);
+    trafo.setAt(0, 3, 18.4149563832);
+    trafo.setAt(1, 0, 0.0101020893);
+    trafo.setAt(1, 1, 0.9998384738);
+    trafo.setAt(1, 2, 0.0002113152);
+    trafo.setAt(1, 3, 0.0007839294);
+    trafo.setAt(2, 0, 0.0010400775);
+    trafo.setAt(2, 1, -0.0002218345);
+    trafo.setAt(2, 2, 0.9998889637);
+    trafo.setAt(2, 3, -2.1009030443);
+    trafo.setAt(3, 0, 0.);
+    trafo.setAt(3, 1, 0.);
+    trafo.setAt(3, 2, 0.);
+    trafo.setAt(3, 3, 1.);
+
+    addInputCoordinateSystem(trafo, function, 2000, 2);
+
+    bool res = function->exec(featureWrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(feature);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.0), 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (-1.0), 0.0001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (0.0), 0.0001);
+
+    delete function.data();
+}
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
