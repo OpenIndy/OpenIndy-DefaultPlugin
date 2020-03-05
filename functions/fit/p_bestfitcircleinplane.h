@@ -51,6 +51,7 @@ private:
     //##############
 
     bool setUpResult(Circle &circle);
+    bool bestFitCircleInPlane(Circle &circle, QList<IdPoint> points, QList<IdPoint> usablePoints);
 
 };
 

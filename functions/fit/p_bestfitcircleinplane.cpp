@@ -83,6 +83,10 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         }
     }
 
+    return bestFitCircleInPlane(circle, points, usablePoints);
+}
+
+bool BestFitCircleInPlane::bestFitCircleInPlane(Circle &circle, QList<IdPoint> points, QList<IdPoint> usablePoints) {
     //calculate centroid
     OiVec centroid(4);
     foreach(const IdPoint &point, points){
