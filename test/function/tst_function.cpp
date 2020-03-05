@@ -14,6 +14,7 @@
 #include "p_bestfitplane.h"
 #include "p_bestfitpoint.h"
 #include "p_bestfitcircleinplane.h"
+#include "p_bestfitcircleinplanefrompoints.h"
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
@@ -2226,7 +2227,7 @@ void FunctionTest::testCircleInPlaneFromPoints()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
-    QPointer<Function> function = new BestFitCircleInPlane();
+    QPointer<Function> function = new BestFitCircleInPlaneFromPoints();
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
