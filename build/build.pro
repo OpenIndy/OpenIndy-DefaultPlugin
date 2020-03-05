@@ -73,7 +73,8 @@ SOURCES += \
     $$PWD/../functions/objectTransformation/p_rectifytovector.cpp \
     $$PWD/../functions/fit/p_bestfitcylinder.cpp \
     $$PWD/../functions/fit/p_bestfitcircleinplane.cpp \
-    $$PWD/../functions/fit/p_bestfitsphere.cpp
+    $$PWD/../functions/fit/p_bestfitsphere.cpp \
+    $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.cpp \
 
 # header files
 HEADERS += \
@@ -103,7 +104,8 @@ HEADERS += \
     $$PWD/../functions/objectTransformation/p_rectifytovector.h \
     $$PWD/../functions/fit/p_bestfitcylinder.h \
     $$PWD/../functions/fit/p_bestfitcircleinplane.h \
-    $$PWD/../functions/fit/p_bestfitsphere.h
+    $$PWD/../functions/fit/p_bestfitsphere.h \
+    $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.h
 
 # other files
 OTHER_FILES += $$PWD/../metaInfo.json
