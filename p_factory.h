@@ -29,6 +29,7 @@
 //#include "p_bestfitcircle.h"
 #include "p_bestfitsphere.h"
 #include "p_bestfitcircleinplane.h"
+#include "p_bestfitcircleinplanefrompoints.h"
 #include "p_bestfitcylinder.h"
 
 #include "p_pointfrompoints.h"
