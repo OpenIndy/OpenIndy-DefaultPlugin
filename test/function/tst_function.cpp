@@ -98,13 +98,14 @@ private Q_SLOTS:
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
-    void addInputObservations(QString data, QPointer<Function> function, int position, int id);
+    void addInputObservations(QString data, QPointer<Function> function, int id, int inputElementKey);
 
     void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputStation(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputCoordinateSystem(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputCoordinateSystem(OiMat trafo, QPointer<Function> function, int id, int inputElementKey);
     void addInputPoint(double x, double y, double z, QPointer<Function> function, int id, int inputElementKey);
+    void addInputPoints(QString data, QPointer<Function> function, int id, int inputElementKey);
     void addInputPlane(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
 
     QPointer<Plane> createPlane(double x, double y, double z, double i, double j, double k);
@@ -122,7 +123,7 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
     qDebug() << msg;
 }
 
-void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int position = InputElementKey::eDefault, int id = 1000) {
+void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int id = 1000, int inputElementKey = InputElementKey::eDefault) {
     QTextStream stream(data.toUtf8());
     while(!stream.atEnd()) {
         id++;
@@ -158,11 +159,39 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
         element->observation = observation;
 
 
-        function->addInputElement(*element, position);
+        function->addInputElement(*element, inputElementKey);
      }
 }
 
-void FunctionTest::addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = 0){
+void FunctionTest::addInputPoints(QString data, QPointer<Function> function, int id = 1000, int inputElementKey = InputElementKey::eDefault) {
+    QTextStream stream(data.toUtf8());
+    while(!stream.atEnd()) {
+        id++;
+
+        QStringList xyz = stream.readLine().split(" ");
+        if(xyz.size() == 0) {
+            continue;
+        }
+
+        OiVec * vec = new OiVec(4);
+        vec->setAt(0, xyz.at(0).toDouble());
+        vec->setAt(1, xyz.at(1).toDouble());
+        vec->setAt(2, xyz.at(2).toDouble());
+        QPointer<Point> feature = new Point(false, Position(vec));
+        feature->setIsSolved(true);
+        feature->setFeatureName(QString("point_%1").arg(id));
+
+        InputElement * element = new InputElement(id);
+        element->typeOfElement = eLineElement;
+        element->point = feature;
+        element->geometry = feature;
+
+        function->addInputElement(*element, inputElementKey);
+
+     }
+}
+
+void FunctionTest::addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = InputElementKey::eDefault){
     OiVec * p = new OiVec(4);
     p->setAt(0, x);
     p->setAt(1, y);
@@ -189,7 +218,7 @@ void FunctionTest::addInputLine(double x, double y, double z, double i, double j
     function->addInputElement(*element, inputElementKey);
 }
 
-void FunctionTest::addInputStation(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = 0){
+void FunctionTest::addInputStation(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = InputElementKey::eDefault){
     OiVec * p = new OiVec(4);
     p->setAt(0, x);
     p->setAt(1, y);
@@ -215,7 +244,7 @@ void FunctionTest::addInputStation(double x, double y, double z, double i, doubl
     function->addInputElement(*element, inputElementKey);
 }
 
-void FunctionTest::addInputCoordinateSystem(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = 0){
+void FunctionTest::addInputCoordinateSystem(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = InputElementKey::eDefault){
     OiVec * p = new OiVec(4);
     p->setAt(0, x);
     p->setAt(1, y);
@@ -242,7 +271,7 @@ void FunctionTest::addInputCoordinateSystem(double x, double y, double z, double
     function->addInputElement(*element, inputElementKey);
 }
 
-void FunctionTest::addInputCoordinateSystem(OiMat trafo, QPointer<Function> function, int id = 2000, int inputElementKey = 0){
+void FunctionTest::addInputCoordinateSystem(OiMat trafo, QPointer<Function> function, int id = 2000, int inputElementKey = InputElementKey::eDefault){
     QPointer<CoordinateSystem> coordianteSystem = new CoordinateSystem();
     coordianteSystem->setFeatureName(QString("system_%1").arg(id));
     coordianteSystem->transformOriginAndAxis(trafo);
@@ -255,7 +284,7 @@ void FunctionTest::addInputCoordinateSystem(OiMat trafo, QPointer<Function> func
     function->addInputElement(*element, inputElementKey);
 }
 
-void FunctionTest::addInputPoint(double x, double y, double z, QPointer<Function> function, int id = 2000, int inputElementKey = 0) {
+void FunctionTest::addInputPoint(double x, double y, double z, QPointer<Function> function, int id = 2000, int inputElementKey = InputElementKey::eDefault) {
     OiVec pointPos = OiVec(3);
     pointPos.setAt(0, 1.);
     pointPos.setAt(1, 1.);
@@ -272,7 +301,7 @@ void FunctionTest::addInputPoint(double x, double y, double z, QPointer<Function
     function->addInputElement(*element, inputElementKey);
 }
 
-void FunctionTest::addInputPlane(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = 0){
+void FunctionTest::addInputPlane(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id = 2000, int inputElementKey = InputElementKey::eDefault){
     OiVec * p = new OiVec(4);
     p->setAt(0, x);
     p->setAt(1, y);
@@ -1201,7 +1230,7 @@ void FunctionTest::testBestFitPlane_DummyPoint1() {
 ");
 
     addInputObservations(data, function);
-    addInputObservations("0.0 0.0 -10\n", function, InputElementKey::eDummyPoint);
+    addInputObservations("0.0 0.0 -10\n", function, 3000, InputElementKey::eDummyPoint);
 
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
@@ -1239,7 +1268,7 @@ void FunctionTest::testBestFitPlane_DummyPoint2() {
 ");
 
     addInputObservations(data, function);
-    addInputObservations("0.0 0.0 10\n", function, InputElementKey::eDummyPoint);
+    addInputObservations("0.0 0.0 10\n", function, 3000, InputElementKey::eDummyPoint);
 
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
@@ -1317,7 +1346,7 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
 ");
 
     addInputObservations(data, function);
-    addInputObservations("0.0 0.0 10\n", function, InputElementKey::eDummyPoint);
+    addInputObservations("0.0 0.0 10\n", function, 3000, InputElementKey::eDummyPoint);
     bool res = function->exec(circleFeature);
 
 
@@ -1355,7 +1384,7 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
 ");
 
     addInputObservations(data, function);
-    addInputObservations("0.0 0.0 -10\n", function, InputElementKey::eDummyPoint);
+    addInputObservations("0.0 0.0 -10\n", function, 3000, InputElementKey::eDummyPoint);
     bool res = function->exec(circleFeature);
 
 
@@ -1400,7 +1429,7 @@ void FunctionTest::testBestFitCylinder1__DummyPoint1()
 
 
     addInputObservations(data, function);
-    addInputObservations("0. 0. 0.\n2000. 10. 10.\n", function, InputElementKey::eDummyPoint, 2000);
+    addInputObservations("0. 0. 0.\n2000. 10. 10.\n", function, 2000, InputElementKey::eDummyPoint);
 
     ScalarInputParams scalarInputParams;
     scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
@@ -1449,7 +1478,7 @@ void FunctionTest::testBestFitCylinder1__DummyPoint2()
 
 
     addInputObservations(data, function);
-    addInputObservations("2000. 0. 0.\n0. 10. 10.\n", function, InputElementKey::eDummyPoint, 2000);
+    addInputObservations("2000. 0. 0.\n0. 10. 10.\n", function, 2000, InputElementKey::eDummyPoint);
 
     ScalarInputParams scalarInputParams;
     scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
