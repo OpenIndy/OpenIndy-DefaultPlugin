@@ -175,16 +175,12 @@ void FunctionTest::addInputPoints(QString data, QPointer<Function> function, int
             continue;
         }
 
-        OiVec * vec = new OiVec(4);
-        vec->setAt(0, xyz.at(0).toDouble());
-        vec->setAt(1, xyz.at(1).toDouble());
-        vec->setAt(2, xyz.at(2).toDouble());
-        QPointer<Point> feature = new Point(false, Position(vec));
+        QPointer<Point> feature = new Point(false, Position( xyz.at(0).toDouble(),  xyz.at(1).toDouble(),  xyz.at(2).toDouble()));
         feature->setIsSolved(true);
         feature->setFeatureName(QString("point_%1").arg(id));
 
         InputElement * element = new InputElement(id);
-        element->typeOfElement = eLineElement;
+        element->typeOfElement = ePointElement;
         element->point = feature;
         element->geometry = feature;
 
