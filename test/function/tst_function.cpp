@@ -31,6 +31,8 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testCircleInPlaneFromPoints();
+
     void testRectifyToVector_PlaneToCoodinateSystem_yAxis();
     void testRectifyToVector_PlaneToCoodinateSystem_xAxis();
     void testRectifyToVector_PlaneToCoodinateSystem_zAxis();
@@ -2219,6 +2221,45 @@ void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem_yAxis() {
     COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.0), 0.0001);
     COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (-1.0), 0.0001);
     COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (0.0), 0.0001);
+
+    delete function.data();
+}
+
+// OI-636
+void FunctionTest::testCircleInPlaneFromPoints()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputPoints(data, function);
+
+    bool res = function->exec(circleFeature);
+
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
 
     delete function.data();
 }
