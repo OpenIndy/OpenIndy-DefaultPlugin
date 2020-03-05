@@ -41,11 +41,8 @@ private:
     //##############
     //helper methods
     //##############
-
-    bool setUpResult(Plane &plane);
-    bool setUpResult(Circle &circle);
-    bool setUpResult(Line &line);
-    bool setUpResult(Cylinder &cylinder);
+    bool point(OiVec &point);
+    bool setUpResult(Geometry &geometry);
 
 };
 
