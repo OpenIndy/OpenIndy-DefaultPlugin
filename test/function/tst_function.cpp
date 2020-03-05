@@ -101,6 +101,7 @@ private:
     void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputStation(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputCoordinateSystem(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
+    void addInputCoordinateSystem(OiMat trafo, QPointer<Function> function, int id, int inputElementKey);
     void addInputPoint(double x, double y, double z, QPointer<Function> function, int id, int inputElementKey);
     void addInputPlane(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
 
@@ -230,6 +231,19 @@ void FunctionTest::addInputCoordinateSystem(double x, double y, double z, double
     QPointer<CoordinateSystem> coordianteSystem = new CoordinateSystem();
     coordianteSystem->setFeatureName(QString("system_%1").arg(id));
     coordianteSystem->setCoordinateSystem(*xyz, Direction(0,0,0), Direction(0,0,0), *ijk);
+    coordianteSystem->setIsSolved(true);
+
+    InputElement * element = new InputElement(id);
+    element->typeOfElement = eCoordinateSystemElement;
+    element->coordSystem = coordianteSystem;
+
+    function->addInputElement(*element, inputElementKey);
+}
+
+void FunctionTest::addInputCoordinateSystem(OiMat trafo, QPointer<Function> function, int id = 2000, int inputElementKey = 0){
+    QPointer<CoordinateSystem> coordianteSystem = new CoordinateSystem();
+    coordianteSystem->setFeatureName(QString("system_%1").arg(id));
+    coordianteSystem->transformOriginAndAxis(trafo);
     coordianteSystem->setIsSolved(true);
 
     InputElement * element = new InputElement(id);
