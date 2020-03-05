@@ -12,6 +12,15 @@
 using namespace oi;
 using namespace std;
 
+
+struct IdPoint {
+    int id;
+    OiVec xyz;
+};
+inline bool operator==(const IdPoint& p1, const IdPoint& p2){
+    return p1.id == p2.id;
+}
+
 /*!
  * \brief The BestFitCircleInPlane class
  */

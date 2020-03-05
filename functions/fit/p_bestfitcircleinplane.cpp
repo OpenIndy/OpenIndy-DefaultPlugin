@@ -57,28 +57,46 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         emit this->sendMessage(QString("Not enough valid observations to fit the circle %1").arg(circle.getFeatureName()), eWarningMessage);
         return false;
     }
-    QList<QPointer<Observation> > allUsableObservations;
-    QList<QPointer<Observation> > inputObservations;
-    filterObservations(allUsableObservations, inputObservations);
-    if(inputObservations.size() < 3){
-        emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(circle.getFeatureName()), eWarningMessage);
-        return false;
+
+    QList<IdPoint> usablePoints;
+    QList<IdPoint> points;
+    {
+        QList<QPointer<Observation> > allUsableObservations;
+        QList<QPointer<Observation> > inputObservations;
+        filterObservations(allUsableObservations, inputObservations);
+        if(inputObservations.size() < 3){
+            emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(circle.getFeatureName()), eWarningMessage);
+            return false;
+        }
+
+        foreach(const QPointer<Observation> &obs, allUsableObservations) {
+            IdPoint point;
+            point.id = obs->getId();
+            point.xyz = obs->getXYZ();
+            usablePoints.append(point);
+        }
+        foreach(const QPointer<Observation> &obs, inputObservations) {
+            IdPoint point;
+            point.id = obs->getId();
+            point.xyz = obs->getXYZ();
+            points.append(point);
+        }
     }
 
     //calculate centroid
     OiVec centroid(4);
-    foreach(const QPointer<Observation> &obs, inputObservations){
-        centroid = centroid + obs->getXYZ();
+    foreach(const IdPoint &point, points){
+        centroid = centroid + point.xyz;
     }
-    centroid = centroid * (1.0/inputObservations.size());
+    centroid = centroid * (1.0/points.size());
     centroid.removeLast();
 
     //principle component analysis
-    OiMat a(inputObservations.size(), 3);
-    for(int i = 0; i < inputObservations.size(); i++){
-        a.setAt(i, 0, inputObservations.at(i)->getXYZ().getAt(0) - centroid.getAt(0));
-        a.setAt(i, 1, inputObservations.at(i)->getXYZ().getAt(1) - centroid.getAt(1));
-        a.setAt(i, 2, inputObservations.at(i)->getXYZ().getAt(2) - centroid.getAt(2));
+    OiMat a(points.size(), 3);
+    for(int i = 0; i < points.size(); i++){
+        a.setAt(i, 0, points.at(i).xyz.getAt(0) - centroid.getAt(0));
+        a.setAt(i, 1, points.at(i).xyz.getAt(1) - centroid.getAt(1));
+        a.setAt(i, 2, points.at(i).xyz.getAt(2) - centroid.getAt(2));
     }
     OiMat ata = a.t() * a;
     OiMat u(3,3);
@@ -100,9 +118,9 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
     n.normalize();
 
     //check that the normal vector of the plane is defined by the first three points A, B and C (cross product)
-    OiVec ab = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
+    OiVec ab = points.at(1).xyz - points.at(0).xyz;
     ab.removeLast();
-    OiVec ac = inputObservations.at(2)->getXYZ() - inputObservations.at(0)->getXYZ();
+    OiVec ac = points.at(2).xyz - points.at(0).xyz;
     ac.removeLast();
     OiVec direction(3);
     OiVec::cross(direction, ab, ac);
@@ -110,7 +128,7 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
 
     if(this->inputElements.contains(InputElementKey::eDummyPoint) && this->inputElements[InputElementKey::eDummyPoint].size() > 0) {
         // computing circle normale by dummy point
-        OiVec dummyPoint = inputElements[InputElementKey::eDummyPoint][0].observation->getXYZ();
+        OiVec dummyPoint = inputElements[InputElementKey::eDummyPoint][0].observation->getXYZ(); // TODO Point
         dummyPoint.removeLast();
         double dot;
         OiVec::dot(dot, dummyPoint - centroid, centroid);
@@ -149,25 +167,24 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
     //calculate centroid reduced coordinates in 2D space
     QList<OiVec> centroidReducedCoordinates;
     QList<OiVec> allCentroidReducedCoordinates;
-    OiVec xyz(4);
-    foreach(const QPointer<Observation> &observation, allUsableObservations){
-        xyz = observation->getXYZ();
+
+    foreach(const IdPoint point, usablePoints){
+        OiVec xyz(4);
+        xyz = point.xyz;
         xyz.removeLast(); //remove the homogeneous item
         xyz = t * xyz;
         xyz.removeLast();
         OiVec reduced = xyz - centroid2D;
         allCentroidReducedCoordinates.append(reduced);
-        if(inputObservations.contains(observation)) {
+        if(points.contains(point)) {
             centroidReducedCoordinates.append(reduced);
         }
-        xyz.add(1.0); //add two items so xyz is of size 4 again
-        xyz.add(1.0);
     }
 
     //calculate best fit circle in 2D space
-    OiVec A1(inputObservations.size());
-    OiMat A2(inputObservations.size(), 3);
-    for(int i = 0; i < inputObservations.size(); i++){
+    OiVec A1(points.size());
+    OiMat A2(points.size(), 3);
+    for(int i = 0; i < points.size(); i++){
         A1.setAt(i, centroidReducedCoordinates.at(i).getAt(0)*centroidReducedCoordinates.at(i).getAt(0)
                  + centroidReducedCoordinates.at(i).getAt(1)*centroidReducedCoordinates.at(i).getAt(1));
 
@@ -196,7 +213,7 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
     OiVec circleDistances;
     OiVec allCircleDistances;
     int i=0;
-    foreach(const QPointer<Observation> &observation, allUsableObservations){
+    foreach(const IdPoint &point, usablePoints){
         OiVec reduced = allCentroidReducedCoordinates[i++];
         OiVec diff(2);
         diff.setAt(0, reduced.getAt(0) + centroid2D.getAt(0) - xm.getAt(0));
@@ -208,7 +225,7 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         distance = qAbs(distance - radius);
 
         allCircleDistances.add(distance);
-        if(inputObservations.contains(observation)) {
+        if(points.contains(point)) {
             circleDistances.add(distance);
         }
     }
@@ -218,8 +235,8 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
     xm = t_inv * xm;
 
     //calculate 3D residuals for each observation
-    for(int i = 0; i < allUsableObservations.size(); i++){
-        const QPointer<Observation> &observation = allUsableObservations[i];
+    for(int i = 0; i < usablePoints.size(); i++){
+        const IdPoint point = usablePoints[i];
         OiVec reduced = allCentroidReducedCoordinates[i];
 
         OiVec v_circle(3);
@@ -235,15 +252,15 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         v_circle = t_inv * v_circle;
 
         //calculate residual vector of plane fit
-        double distance = n.getAt(0) * observation->getXYZ().getAt(0) + n.getAt(1) * observation->getXYZ().getAt(1)
-                + n.getAt(2) * observation->getXYZ().getAt(2) - dOrigin;
+        double distance = n.getAt(0) * point.xyz.getAt(0) + n.getAt(1) * point.xyz.getAt(1)
+                + n.getAt(2) * point.xyz.getAt(2) - dOrigin;
         v_plane = distance * n;
 
         //calculate the at all residual vector
         v_all = v_circle + v_plane;
 
         //set up display residual
-        addDisplayResidual(observation->getId(), v_all.getAt(0), v_all.getAt(1), v_all.getAt(2),
+        addDisplayResidual(point.id, v_all.getAt(0), v_all.getAt(1), v_all.getAt(2),
                            qSqrt(v_all.getAt(0) * v_all.getAt(0)
                                 + v_all.getAt(1) * v_all.getAt(1)
                                 + v_all.getAt(2) * v_all.getAt(2)));
