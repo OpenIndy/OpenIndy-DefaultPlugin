@@ -202,8 +202,7 @@ void FunctionTest::addInputStation(double x, double y, double z, double i, doubl
     Direction * ijk = new Direction(*a);
 
     QPointer<Station> station = new Station(QString("station_%1").arg(id));
-    station->setPosition(*xyz);
-    station->setDirection(*ijk);
+    station->setCoordinateSystem(*xyz, Direction(0,0,0), Direction(0,0,0), *ijk);
     station->setIsSolved(true);
 
     InputElement * element = new InputElement(id);
@@ -230,8 +229,7 @@ void FunctionTest::addInputCoordinateSystem(double x, double y, double z, double
 
     QPointer<CoordinateSystem> coordianteSystem = new CoordinateSystem();
     coordianteSystem->setFeatureName(QString("system_%1").arg(id));
-    coordianteSystem->setOrigin(*xyz);
-    coordianteSystem->setDirection(*ijk);
+    coordianteSystem->setCoordinateSystem(*xyz, Direction(0,0,0), Direction(0,0,0), *ijk);
     coordianteSystem->setIsSolved(true);
 
     InputElement * element = new InputElement(id);
