@@ -72,6 +72,7 @@ SOURCES += \
     $$PWD/../functions/objectTransformation/p_shift.cpp \
     $$PWD/../functions/objectTransformation/p_rectifytovector.cpp \
     $$PWD/../functions/fit/p_bestfitcylinder.cpp \
+    $$PWD/../functions/fit/p_bestfitcylinderfrompoints.cpp \
     $$PWD/../functions/fit/p_bestfitcircleinplane.cpp \
     $$PWD/../functions/fit/p_bestfitsphere.cpp \
     $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.cpp \
@@ -103,6 +104,7 @@ HEADERS += \
     $$PWD/../functions/objectTransformation/p_shift.h \
     $$PWD/../functions/objectTransformation/p_rectifytovector.h \
     $$PWD/../functions/fit/p_bestfitcylinder.h \
+    $$PWD/../functions/fit/p_bestfitcylinderfrompoints.h \
     $$PWD/../functions/fit/p_bestfitcircleinplane.h \
     $$PWD/../functions/fit/p_bestfitsphere.h \
     $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.h
