@@ -15,29 +15,6 @@
 
 using namespace oi;
 
-class CylinderApproximation{
-public:
-    double approxRadius;
-    double approxXm;
-    double approxYm;
-    double approxAlpha;
-    double approxBeta;
-    double stdev;
-    QString comment;
-
-    operator QString() const {
-        return QString("comment=%1, stdev=%2, approxXm=%3, approxYm=%4, approxAlpha=%5, approxBeta=%6, approxRadius=%7")
-                    .arg(comment).arg(stdev).arg(approxXm).arg(approxYm).arg(approxAlpha).arg(approxBeta).arg(approxRadius);
-    }
-};
-
-enum ApproximationTypes{
-    eFirstTwoPoints = 0,
-    eDirection,
-    eGuessAxis,
-    eFirstTwoDummyPoint
-};
-
 /*!
  * \brief The BestFitCylinder class
  */
