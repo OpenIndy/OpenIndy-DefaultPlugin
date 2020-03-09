@@ -106,7 +106,7 @@ private Q_SLOTS:
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
-    void addInputObservations(QString data, QPointer<Function> function, int id, int inputElementKey);
+    void addInputObservations(QString data, QPointer<Function> function, int id, int inputElementKey, bool shouldBeUsed);
 
     void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputStation(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
@@ -131,7 +131,7 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
     qDebug() << msg;
 }
 
-void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int id = 1000, int inputElementKey = InputElementKey::eDefault) {
+void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int id = 1000, int inputElementKey = InputElementKey::eDefault, bool shouldBeUsed = true) {
     QTextStream stream(data.toUtf8());
     while(!stream.atEnd()) {
         id++;
@@ -165,6 +165,7 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
         InputElement * element = new InputElement(id);
         element->typeOfElement = eObservationElement;
         element->observation = observation;
+        element->shouldBeUsed = shouldBeUsed;
 
 
         function->addInputElement(*element, inputElementKey);
