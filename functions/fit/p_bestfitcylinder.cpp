@@ -54,7 +54,7 @@ void BestFitCylinder::init(){
  */
 bool BestFitCylinder::exec(Cylinder &cylinder){
     this->statistic.reset();
-    return this->setUpResult(cylinder);
+    return BestFitCylinder::setUpResult(cylinder);
 }
 
 /*!
@@ -90,6 +90,11 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
             points.append(point);
         }
     }
+
+    return bestFitCylinder(cylinder, points, usablePoints);
+}
+
+bool BestFitCylinder::bestFitCylinder(Cylinder &cylinder, QList<IdPoint> points, QList<IdPoint> usablePoints) {
 
     ApproximationTypes approximationType = eFirstTwoPoints; // default
     if(this->scalarInputParams.stringParameter.contains("approximation")){

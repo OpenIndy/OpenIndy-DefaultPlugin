@@ -38,6 +38,9 @@ protected:
 
     bool exec(Cylinder &cylinder);
 
+protected:
+    bool bestFitCylinder(Cylinder &cylinder, QList<IdPoint> points, QList<IdPoint> usablePoints);
+
 private:
 
     //##############
