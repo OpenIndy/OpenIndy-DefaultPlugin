@@ -166,6 +166,10 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
         reducedInputObservations[i].xyz = Rall * reducedInputObservations[i].xyz;
         reducedInputObservations[i].xyz.setAt(3, 1.0);
     }
+    for (int i=0; i<allReducedInputObservations.size(); i++) {
+        allReducedInputObservations[i].xyz = Rall * allReducedInputObservations[i].xyz;
+        allReducedInputObservations[i].xyz.setAt(3, 1.0);
+    }
 
     bestApproximation.approxAlpha = 0.0;
     bestApproximation.approxBeta = 0.0;
