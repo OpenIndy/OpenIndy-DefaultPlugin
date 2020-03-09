@@ -176,7 +176,7 @@ void FunctionTest::addInputPoints(QString data, QPointer<Function> function, int
             continue;
         }
 
-        QPointer<Point> feature = new Point(false, Position( xyz.at(0).toDouble(),  xyz.at(1).toDouble(),  xyz.at(2).toDouble()));
+        QPointer<Point> feature = new Point(id, false, Position( xyz.at(0).toDouble(),  xyz.at(1).toDouble(),  xyz.at(2).toDouble()));
         feature->setIsSolved(true);
         feature->setFeatureName(QString("point_%1").arg(id));
 
