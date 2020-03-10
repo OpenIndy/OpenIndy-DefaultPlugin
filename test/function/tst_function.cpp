@@ -33,6 +33,8 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testBestFitPlane_residuals();
+    void testBestFitPoint_residuals();
 
     void testVRadial();
     void testVRadial2();
@@ -2380,6 +2382,93 @@ void FunctionTest::testCircleInPlaneFromPoints()
 
     delete function.data();
 }
+
+// OI-508
+void FunctionTest::testBestFitPoint_residuals()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> feature = new Point(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPoint(feature);
+
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+999.9912 1999.9865 2999.9741\n\
+999.9942 1999.9931 2999.9893\n\
+1001.9972 2000.9946 3000.9907\n\
+");
+
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getStatistic().getStdev(), 1.42, 0.01);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), ( 0.825), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), ( 0.814), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), ( 1.639), 0.001);
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitPlane_residuals()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1000.0014 1000.0030 1001.0031\n\
+1999.9994 2000.0043 998.0100\n\
+999.9965 1999.9965 1099.9985\n\
+1499.9884 1499.9889 999.9898\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("2000.0007 999.9968 1002.0012", function, 3000, InputElementKey::eDefault, false);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (0.100818), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (-0.097854), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (0.990081), 0.000001);
+
+    COMPARE_DOUBLE(plane->getStatistic().getStdev(), 0.39, 0.01);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), ( -  0.1595), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), ( -  0.1595), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (    0.0000), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("v", -1), (    0.3191), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("v", -1), (  101.6470), 0.001); // shouldInUse == false
+
+    delete function.data();
+}
+
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
