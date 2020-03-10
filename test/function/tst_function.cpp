@@ -2543,6 +2543,7 @@ void FunctionTest::testBestFitCircleInPlane_residuals()
     addInputObservations(data, function);
     addInputObservations("1100.0093 1100.0075 1000.0071", function, 3000, InputElementKey::eDefault, false);
     addInputObservations("400. 400. 1000.1", function, 3001, InputElementKey::eDefault, false);
+    addInputObservations("900. 900. 1000.1", function, 3002, InputElementKey::eDefault, false);
 
     bool res = function->exec(wrapper);
     QVERIFY2(res, "exec");
@@ -2563,7 +2564,10 @@ void FunctionTest::testBestFitCircleInPlane_residuals()
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (    0.0025), 0.001);
 
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("v", -1), (  141.4381), 0.001); // shouldInUse == false
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("v", -1), (  565.684), 0.001); // shouldInUse == false
+
+    // - sign
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("v", -1), (  565.684), 0.001);  // shouldInUse == false
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3002).corrections.value("v", -1), (  141.4381), 0.001); // shouldInUse == false
 
     QFAIL("TODO");
 
