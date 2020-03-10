@@ -83,5 +83,5 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         }
     }
 
-    return bestFitCircleInPlane(circle, points, usablePoints);
+    return bestFitCircleInPlane(this, circle, points, usablePoints);
 }
