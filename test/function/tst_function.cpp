@@ -17,7 +17,7 @@
 #include "p_bestfitcircleinplane.h"
 #include "p_bestfitcircleinplanefrompoints.h"
 
-#define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
+#define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY2(std::abs(actual-expected)< threshold, QString("actual: %1, expected: %2").arg(actual).arg(expected).toLatin1().data());
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
 #define DEBUG_CYLINDER(cylinder) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(cylinder->getPosition().getVector()) << ", direction=" << _OI_VEC(cylinder->getDirection().getVector()) << ", radius=" << cylinder->getRadius().getRadius() << ", stdev=" << cylinder->getStatistic().getStdev();
 #define DEBUG_PLANE(plane) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(plane->getPosition().getVector()) << ", direction=" << _OI_VEC(plane->getDirection().getVector()) << ", stdev=" << plane->getStatistic().getStdev();
