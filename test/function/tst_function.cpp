@@ -549,6 +549,7 @@ void FunctionTest::testVRadial()
     delete function.data();
 }
 
+// OI-637
 void FunctionTest::testVRadial2()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
