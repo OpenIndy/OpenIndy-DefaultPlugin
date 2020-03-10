@@ -16,12 +16,14 @@
 #include "p_bestfitpoint.h"
 #include "p_bestfitcircleinplane.h"
 #include "p_bestfitcircleinplanefrompoints.h"
+#include "p_bestfitline.h"
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY2(std::abs(actual-expected)< threshold, QString("actual: %1, expected: %2").arg(actual).arg(expected).toLatin1().data());
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
 #define DEBUG_CYLINDER(cylinder) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(cylinder->getPosition().getVector()) << ", direction=" << _OI_VEC(cylinder->getDirection().getVector()) << ", radius=" << cylinder->getRadius().getRadius() << ", stdev=" << cylinder->getStatistic().getStdev();
-#define DEBUG_PLANE(plane) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(plane->getPosition().getVector()) << ", direction=" << _OI_VEC(plane->getDirection().getVector()) << ", stdev=" << plane->getStatistic().getStdev();
-#define DEBUG_POINT(point) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(point->getPosition().getVector()) << ", direction=" << _OI_VEC(point->getDirection().getVector()) << ", stdev=" << point->getStatistic().getStdev();
+#define DEBUG_PLANE(feature) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
+#define DEBUG_POINT(feature) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
+#define DEBUG_LINE(feature)  qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
 
 using namespace oi;
 
@@ -33,6 +35,8 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testBestFitCircleInPlane_residuals();
+    void testBestFitLine_residuals();
     void testBestFitPlane_residuals();
     void testBestFitPoint_residuals();
 
@@ -2431,9 +2435,9 @@ void FunctionTest::testBestFitPlane_residuals()
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
-    QPointer<Plane> plane = new Plane(false);
-    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
-    planeFeature->setPlane(plane);
+    QPointer<Plane> feature = new Plane(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPlane(feature);
 
     // colum delim: " "
     // line ending: "\n"
@@ -2464,6 +2468,103 @@ void FunctionTest::testBestFitPlane_residuals()
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), (    0.0000), 0.001);
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (    0.3191), 0.001);
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("v", -1), (  101.6470), 0.001); // shouldInUse == false
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitLine_residuals()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitLine();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Line> feature = new Line(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setLine(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+999.9916 999.9958 999.9917\n\
+2000.0015 2000.0008 999.9970\n\
+3000.0270 3000.0247 1000.0083\n\
+4999.9732 4999.9797 1000.0041\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("3899.9642 4099.9690 999.9721", function, 3000, InputElementKey::eDefault, false);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_LINE(feature);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.707106), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (0.707107), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (0.000002), 0.000001);
+
+    COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.0069, 0.001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("v", -1), (    0.0040), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), (    0.0017), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), (    0.0079), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (    0.0039), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("v", -1), (  141.4227), 0.001); // shouldInUse == false
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCircleInPlane_residuals()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> feature = new Circle(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setCircle(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+999.9962 999.9970 999.9958\n\
+-0.0001 999.9971 999.9975\n\
+-0.0002 0.0017 999.9884\n\
+-0.0002 999.9924 999.9938\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("1100.0093 1100.0075 1000.0071", function, 3000, InputElementKey::eDefault, false);
+    addInputObservations("400. 400. 1000.1", function, 3001, InputElementKey::eDefault, false);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    // position= 499.99915 , 499.9982 , 999.9921 , direction= -1.499801648e-07 , -7.25006333e-06 , 1 , stdev= 0.002300006535
+    DEBUG_PLANE(feature);
+    // 499.9991	499.9982	999.9921	0.0023	4/5	FastPoint	BestFitCircleInPlane		-0.000000	-0.000007	1.000000	707.1038
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.0), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (-0.000007), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (1.), 0.000001);
+
+    COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.0023, 0.001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("v", -1), (    0.0000), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), (    0.0025), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), (    0.0000), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (    0.0025), 0.001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("v", -1), (  141.4381), 0.001); // shouldInUse == false
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("v", -1), (  565.684), 0.001); // shouldInUse == false
+
+    QFAIL("TODO");
 
     delete function.data();
 }
