@@ -1311,7 +1311,7 @@ void FunctionTest::testBestFitPlane()
     addInputObservations(data, function);
 
     bool res = function->exec(planeFeature);
-
+    QVERIFY2(res, "exec");
 
     // QDEBUG : FunctionTest::testBestFitPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 3.654760904e-10
     DEBUG_PLANE(plane);
@@ -1427,7 +1427,7 @@ void FunctionTest::testBestFitCircleInPlane()
     addInputObservations(data, function);
 
     bool res = function->exec(circleFeature);
-
+    QVERIFY2(res, "exec");
 
     // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
@@ -1464,8 +1464,9 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
 
     addInputObservations(data, function);
     addInputObservations("0.0 0.0 10\n", function, 3000, InputElementKey::eDummyPoint);
-    bool res = function->exec(circleFeature);
 
+    bool res = function->exec(circleFeature);
+    QVERIFY2(res, "exec");
 
     // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
@@ -1502,8 +1503,9 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
 
     addInputObservations(data, function);
     addInputObservations("0.0 0.0 -10\n", function, 3000, InputElementKey::eDummyPoint);
-    bool res = function->exec(circleFeature);
 
+    bool res = function->exec(circleFeature);
+    QVERIFY2(res, "exec");
 
     // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
@@ -2366,7 +2368,7 @@ void FunctionTest::testCircleInPlaneFromPoints()
     addInputPoints(data, function);
 
     bool res = function->exec(circleFeature);
-
+    QVERIFY2(res, "exec");
 
     // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
