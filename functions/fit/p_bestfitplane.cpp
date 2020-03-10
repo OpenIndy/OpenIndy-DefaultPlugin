@@ -99,6 +99,31 @@ bool BestFitPlane::setUpResult(Plane &plane){
     u.getCol(n, eigenIndex);
     n.normalize();
 
+    OiVec direction(3);
+    if(this->inputElements.contains(InputElementKey::eDummyPoint) && this->inputElements[InputElementKey::eDummyPoint].size() > 0) {
+        // computing plane normale by dummy point
+        OiVec dummyPoint = inputElements[InputElementKey::eDummyPoint][0].observation->getXYZ();
+        dummyPoint.removeLast();
+        double dot;
+        OiVec::dot(dot, dummyPoint - centroid, centroid);
+        direction = - dot * dummyPoint;
+        direction.normalize();
+    } else {
+        //check that the normal vector of the plane is defined by the first three points A, B and C (cross product)
+        OiVec ab = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
+        ab.removeLast();
+        OiVec ac = inputObservations.at(2)->getXYZ() - inputObservations.at(0)->getXYZ();
+        ac.removeLast();
+        OiVec::cross(direction, ab, ac);
+        direction.normalize();
+    }
+    double angle = 0.0; //angle between n and direction
+    OiVec::dot(angle, n, direction);
+    angle = qAbs(qAcos(angle));
+    if(angle > (PI/2.0)){
+        n = n * -1.0;
+    }
+
     //calculate smallest distance of the plane from the origin
     double dOrigin = n.getAt(0) * centroid.getAt(0) + n.getAt(1) * centroid.getAt(1) + n.getAt(2) * centroid.getAt(2);
 
@@ -115,33 +140,6 @@ bool BestFitPlane::setUpResult(Plane &plane){
         addDisplayResidual(observation->getId(), v_plane.getAt(0), v_plane.getAt(1), v_plane.getAt(2), distance);
 
     }
-
-
-    //check that the normal vector of the plane is defined by the first three points A, B and C (cross product)
-    OiVec ab = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
-    ab.removeLast();
-    OiVec ac = inputObservations.at(2)->getXYZ() - inputObservations.at(0)->getXYZ();
-    ac.removeLast();
-    OiVec direction(3);
-    OiVec::cross(direction, ab, ac);
-    direction.normalize();
-
-    if(this->inputElements.contains(InputElementKey::eDummyPoint) && this->inputElements[InputElementKey::eDummyPoint].size() > 0) {
-        // computing plane normale by dummy point
-        OiVec dummyPoint = inputElements[InputElementKey::eDummyPoint][0].observation->getXYZ();
-        dummyPoint.removeLast();
-        double dot;
-        OiVec::dot(dot, dummyPoint - centroid, centroid);
-        direction = - dot * dummyPoint;
-        direction.normalize();
-    }
-    double angle = 0.0; //angle between n and direction
-    OiVec::dot(angle, n, direction);
-    angle = qAbs(qAcos(angle));
-    if(angle > (PI/2.0)){
-        n = n * -1.0;
-    }
-
 
     //set result
     Position planePosition;
