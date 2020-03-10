@@ -3,15 +3,8 @@
 
 #include <QObject>
 #include <QPointer>
-#include <QtMath>
-#include <string>
-#include <limits>
-#include <math.h>
-#include <random>
 
 #include "fitfunction.h"
-#include "oivec.h"
-#include "oimat.h"
 #include "p_bestfitcylinder.h"
 
 using namespace oi;
@@ -19,7 +12,7 @@ using namespace oi;
 /*!
  * \brief The BestFitCylinderFromPoints class
  */
-class BestFitCylinderFromPoints : public BestFitCylinder
+class BestFitCylinderFromPoints : public FitFunction, public BestFitCylinderUtil
 {  
     Q_OBJECT
 

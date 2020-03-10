@@ -100,5 +100,5 @@ bool BestFitCylinderFromPoints::setUpResult(Cylinder &cylinder){
         }
     }
 
-    return bestFitCylinder(cylinder, points, usablePoints);
+    return bestFitCylinder(this, cylinder, points, usablePoints);
 }
