@@ -136,8 +136,6 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
 void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int id = 1000, int inputElementKey = InputElementKey::eDefault, bool shouldBeUsed = true) {
     QTextStream stream(data.toUtf8());
     while(!stream.atEnd()) {
-        id++;
-
         QStringList xyz = stream.readLine().split(" ");
         if(xyz.size() == 0) {
             continue;
@@ -171,14 +169,14 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
 
 
         function->addInputElement(*element, inputElementKey);
+
+        id++;
      }
 }
 
 void FunctionTest::addInputPoints(QString data, QPointer<Function> function, int id = 1000, int inputElementKey = InputElementKey::eDefault) {
     QTextStream stream(data.toUtf8());
     while(!stream.atEnd()) {
-        id++;
-
         QStringList xyz = stream.readLine().split(" ");
         if(xyz.size() == 0) {
             continue;
@@ -195,6 +193,7 @@ void FunctionTest::addInputPoints(QString data, QPointer<Function> function, int
 
         function->addInputElement(*element, inputElementKey);
 
+        id++;
      }
 }
 
@@ -537,14 +536,14 @@ void FunctionTest::testVRadial()
     COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
     COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
 
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1),   0.026, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (-0.037), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1),   0.010, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.003), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("vr", -1),   0.026, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.037), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1),   0.010, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1), (-0.003), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1),   0.030, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1), (-0.012), 0.001);
 
     COMPARE_DOUBLE(function->getStatistic().getFormError(), 0.067, 0.001);
 
@@ -593,14 +592,14 @@ void FunctionTest::testVRadial2()
     COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
     COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
 
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1),   0.026, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (-0.037), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1),   0.010, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.003), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("vr", -1),   0.026, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.037), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1),   0.010, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1), (-0.003), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1),   0.030, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1), (-0.012), 0.001);
 
     COMPARE_DOUBLE(function->getStatistic().getFormError(), 0.067, 0.001);
 
@@ -647,16 +646,16 @@ void FunctionTest::testVRadial3() {
     COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
     COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
 
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1),   0.026, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (-0.037), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1),   0.010, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.003), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("vr", -1),   0.026, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.037), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1),   0.010, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1), (-0.003), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1),   0.030, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1), (-0.012), 0.001);
 
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(5001).corrections.value("vr", -1), (140.563), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(5000).corrections.value("vr", -1), (140.563), 0.001);
 
     COMPARE_DOUBLE(function->getStatistic().getFormError(), 0.067, 0.001);
 
@@ -2417,9 +2416,9 @@ void FunctionTest::testBestFitPoint_residuals()
 
     COMPARE_DOUBLE(feature->getStatistic().getStdev(), 1.42, 0.01);
 
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), ( 0.825), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), ( 0.814), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), ( 1.639), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("v", -1), ( 0.825), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), ( 0.814), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), ( 1.639), 0.001);
 
     delete function.data();
 }
@@ -2449,22 +2448,22 @@ void FunctionTest::testBestFitPlane_residuals()
     addInputObservations(data, function);
     addInputObservations("2000.0007 999.9968 1002.0012", function, 3000, InputElementKey::eDefault, false);
 
-    bool res = function->exec(planeFeature);
+    bool res = function->exec(wrapper);
     QVERIFY2(res, "exec");
 
-    DEBUG_PLANE(plane);
+    DEBUG_PLANE(feature);
 
-    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (0.100818), 0.000001);
-    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (-0.097854), 0.000001);
-    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (0.990081), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.100818), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (-0.097854), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (0.990081), 0.000001);
 
-    COMPARE_DOUBLE(plane->getStatistic().getStdev(), 0.39, 0.01);
+    COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.39, 0.01);
 
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("v", -1), ( -  0.1595), 0.001);
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), ( -  0.1595), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), ( -  0.1595), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (    0.0000), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("v", -1), (    0.3191), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("v", -1), (  101.6470), 0.001); // shouldInUse == false
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), (    0.0000), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (    0.3191), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("v", -1), (  101.6470), 0.001); // shouldInUse == false
 
     delete function.data();
 }
