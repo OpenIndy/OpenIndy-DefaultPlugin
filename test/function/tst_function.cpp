@@ -2561,15 +2561,13 @@ void FunctionTest::testBestFitCircleInPlane_residuals()
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("v", -1), (    0.0000), 0.001);
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), (    0.0025), 0.001);
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), (    0.0000), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (    0.0025), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (   -0.0025), 0.001);
 
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("v", -1), (  141.4381), 0.001); // shouldInUse == false
 
     // - sign
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("v", -1), (  565.684), 0.001);  // shouldInUse == false
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3002).corrections.value("v", -1), (  141.4381), 0.001); // shouldInUse == false
-
-    QFAIL("TODO");
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("v", -1), (  -565.684), 0.001);  // shouldInUse == false
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3002).corrections.value("v", -1), (  -141.4171), 0.001); // shouldInUse == false
 
     delete function.data();
 }
