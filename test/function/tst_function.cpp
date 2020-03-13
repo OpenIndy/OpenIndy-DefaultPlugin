@@ -18,6 +18,7 @@
 #include "p_bestfitcircleinplanefrompoints.h"
 #include "p_bestfitline.h"
 #include "p_bestfitsphere.h"
+#include "p_pointfrompoints.h"
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY2(std::abs(actual-expected)< threshold, QString("actual: %1, expected: %2").arg(actual).arg(expected).toLatin1().data());
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
@@ -38,6 +39,9 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testPointFromPoints_point();
+    void testPointFromPoints_circle();
+
     void testBestFitSphere_residuals();
     void testBestFitCircleInPlane_residuals2();
     void testBestFitCircleInPlane_residuals();
@@ -2817,6 +2821,63 @@ void FunctionTest::testBestFitSphere_residuals()
     delete function.data();
 }
 
+
+void FunctionTest::testPointFromPoints_point()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new PointFromPoints();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> feature = new Point(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPoint(feature);
+
+    addInputPoint(1000.6609, 2000.3247, 3000.3180, function);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (1000.6609), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), (2000.3247), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (3000.3180), 0.0001);
+
+    delete function.data();
+}
+
+void FunctionTest::testPointFromPoints_circle()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new PointFromPoints();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> feature = new Point(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPoint(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (1000.6609), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), (2000.3247), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (3000.3180), 0.0001);
+
+    delete function.data();
+}
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
