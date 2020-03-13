@@ -2748,10 +2748,7 @@ void FunctionTest::testBestFitSphere_residuals()
 
     COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.0017, 0.001);
 
-    foreach(Residual r, function->getStatistic().getDisplayResiduals()) {
-        //qDebug()<< r.elementId << ": " << r.corrections;
-        qDebug() << QString("COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(%1).corrections.value(\"vr\", -1), (%2), 0.00001);").arg(r.elementId).arg(r.corrections.value(("vr")));
-    }
+
 //QDEBUG : FunctionTest::testBestFitSphere_residuals() 1000 :  QMap(("v", 0.004422)("vx", -4.32221e-05)("vy", -0.00046997)("vz", -0.00442179))
 //QDEBUG : FunctionTest::testBestFitSphere_residuals() 1001 :  QMap(("v", 3.62772e-05)("vx", -3.0068e-06)("vy", -2.47065e-06)("vz", -3.61524e-05))
 //QDEBUG : FunctionTest::testBestFitSphere_residuals() 1002 :  QMap(("v", 0.0025312)("vx", -0.0002547)("vy", 2.68612e-05)("vz", -0.00251835))
