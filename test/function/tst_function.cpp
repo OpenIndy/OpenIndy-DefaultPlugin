@@ -126,6 +126,7 @@ private:
     void addInputPoint(double x, double y, double z, QPointer<Function> function, int id, int inputElementKey);
     void addInputPoints(QString data, QPointer<Function> function, int id, int inputElementKey);
     void addInputPlane(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
+    void addInputCircle(double x, double y, double z, double i, double j, double k, double radius, QPointer<Function> function, int id, int inputElementKey);
 
     QPointer<Plane> createPlane(double x, double y, double z, double i, double j, double k);
     QPointer<Cylinder> createCylinder(double x, double y, double z, double i, double j, double k, double r);
@@ -301,16 +302,46 @@ void FunctionTest::addInputCoordinateSystem(OiMat trafo, QPointer<Function> func
 
 void FunctionTest::addInputPoint(double x, double y, double z, QPointer<Function> function, int id = 2000, int inputElementKey = InputElementKey::eDefault) {
     OiVec pointPos = OiVec(3);
-    pointPos.setAt(0, 1.);
-    pointPos.setAt(1, 1.);
-    pointPos.setAt(2, -5.);
+    pointPos.setAt(0, x);
+    pointPos.setAt(1, y);
+    pointPos.setAt(2, z);
     QPointer<Point> feature = new Point(false, Position(pointPos));
     feature->setIsSolved(true);
     feature->setFeatureName(QString("point_%1").arg(id));
 
     InputElement * element = new InputElement(id);
-    element->typeOfElement = eLineElement;
+    element->typeOfElement = ePointElement;
     element->point = feature;
+    element->geometry = feature;
+
+    function->addInputElement(*element, inputElementKey);
+}
+
+void FunctionTest::addInputCircle(double x, double y, double z, double i, double j, double k, double radius, QPointer<Function> function, int id = 2000, int inputElementKey = InputElementKey::eDefault){
+    OiVec * p = new OiVec(4);
+    p->setAt(0, x);
+    p->setAt(1, y);
+    p->setAt(2, z);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * a = new OiVec(4);
+    a->setAt(0, i);
+    a->setAt(1, j);
+    a->setAt(2, k);
+    a->setAt(3, 1.0);
+    Direction * ijk = new Direction(*a);
+
+    Radius *r = new Radius();
+    r->setRadius(radius);
+
+    Circle * feature = new Circle(false, *xyz, *ijk, *r);
+    feature->setIsSolved(true);
+    feature->setFeatureName(QString("circle_%1").arg(id));
+
+    InputElement * element = new InputElement(id);
+    element->typeOfElement = eCircleElement;
+    element->circle = feature;
     element->geometry = feature;
 
     function->addInputElement(*element, inputElementKey);
