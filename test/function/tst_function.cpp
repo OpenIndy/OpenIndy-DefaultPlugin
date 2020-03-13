@@ -40,7 +40,7 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
-    void testFunctions();
+    void testPointFromPoints_Register();
 
     void testPointFromPoints_point();
     void testPointFromPoints_circle();
@@ -2879,7 +2879,7 @@ void FunctionTest::testPointFromPoints_circle()
     delete function.data();
 }
 
-void FunctionTest::testFunctions() {
+void FunctionTest::testPointFromPoints_Register() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<Point> feature = new Point(false);
@@ -2903,16 +2903,17 @@ void FunctionTest::testFunctions() {
     // unit:        [mm]
     addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function1);
 
-    feature->recalc();
-    //bool res = function->exec(wrapper);
-    //QVERIFY2(res, "exec");
+    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function2);
 
-    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "recalc");
+
+    // QDEBUG : FunctionTest::testFunctions() position= 710.7908481 , 2281.722941 , 153.1470537 , direction= 0 , 0 , 0 , stdev= nan
     DEBUG_POINT(feature);
 
-    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (1000.6609), 0.0001);
-    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), (2000.3247), 0.0001);
-    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (3000.3180), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
 
 }
 
