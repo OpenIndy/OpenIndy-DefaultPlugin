@@ -18,7 +18,7 @@ void PointFromPoints::init(){
     NeededElement param1;
     param1.description = "Select at least one points to calculate the best fit point.";
     param1.infinite = true;
-    param1.typeOfElement = ePointElement;
+    param1.typeOfElement = ePositionElement;
     this->neededElements.append(param1);
 
     //set spplicable for
