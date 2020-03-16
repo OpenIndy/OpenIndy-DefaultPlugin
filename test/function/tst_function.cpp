@@ -2931,6 +2931,34 @@ QPointer<Function> FunctionTest::createFunction(QString name) {
     return function;
 }
 
+class ConfiguredFunction : public Function {
+    friend class Feature;
+    Q_OBJECT
+
+public:
+    ConfiguredFunction(QObject *parent = 0): Function(parent) {
+
+    }
+
+    void init() {
+
+    }
+
+    QList<QString> functionNames() {
+        QList<QString> list;
+        list.append("PointFromPoints");
+        list.append("Register");
+        return list;
+    }
+
+    void addFunction(QPointer<Function> function) {
+        functions.append(function);
+    }
+
+private:
+    QList<QPointer<Function> > functions; // TODO or Map?
+};
+
 void FunctionTest::testPointFromPoints_Register2() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
