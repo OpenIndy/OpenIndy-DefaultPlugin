@@ -20,6 +20,7 @@
 #include "p_bestfitsphere.h"
 #include "p_pointfrompoints.h"
 #include "p_register.h"
+#include "p_factory.h"
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY2(std::abs(actual-expected)< threshold, QString("actual: %1, expected: %2").arg(actual).arg(expected).toLatin1().data());
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
@@ -40,6 +41,7 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testPointFromPoints_Register2();
     void testPointFromPoints_Register();
 
     void testPointFromPoints_point();
@@ -2917,6 +2919,45 @@ void FunctionTest::testPointFromPoints_Register() {
 
 }
 
+void FunctionTest::testPointFromPoints_Register2() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    OiTemplatePlugin plugin;
+
+    QPointer<Point> feature = new Point(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPoint(feature);
+
+    QPointer<Function> function1 = plugin.createFunction("PointFromPoints");
+    function1->init();
+    QObject::connect(function1.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+    feature->addFunction(function1);
+
+    QPointer<Function> function2 = plugin.createFunction("Register");
+    function2->init();
+    QObject::connect(function2.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+    feature->addFunction(function2);
+
+    QVERIFY2(feature->getDisplayFunctions().compare("PointFromPoints, Register")==0, "getDisplayFunctions");
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function1);
+
+    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function2);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "recalc");
+
+    // QDEBUG : FunctionTest::testFunctions() position= 710.7908481 , 2281.722941 , 153.1470537 , direction= 0 , 0 , 0 , stdev= nan
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
+
+}
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
