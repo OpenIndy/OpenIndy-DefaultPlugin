@@ -2935,7 +2935,7 @@ QPointer<Function> FunctionTest::createFunction(QString name) {
 struct InputElementMapping {
     int functionIndex;
     int srcInputElementIndex;
-    int dstsrcInputElementIndex;
+    int dstInputElementIndex;
 };
 struct ConfiguredFunctionConfig {
     QString name;
@@ -2971,7 +2971,7 @@ public:
 
             foreach(InputElementMapping mapping, this->config.inputElementsMapping.values(functionIndex)) {
                 foreach(InputElement inputElement, this->inputElements.value(mapping.srcInputElementIndex)) {
-                    functions[mapping.functionIndex]->addInputElement(inputElement, mapping.dstsrcInputElementIndex);
+                    functions[mapping.functionIndex]->addInputElement(inputElement, mapping.dstInputElementIndex);
                 }
             }
 
@@ -3007,13 +3007,13 @@ void FunctionTest::testPointFromPoints_Register2() {
     InputElementMapping m1;
     m1.functionIndex = 0;
     m1.srcInputElementIndex = 0;
-    m1.dstsrcInputElementIndex = 0;
+    m1.dstInputElementIndex = 0;
     config.inputElementsMapping.insert(m1.functionIndex, m1);
 
     InputElementMapping m2;
     m2.functionIndex = 1;
     m2.srcInputElementIndex = 1;
-    m2.dstsrcInputElementIndex = 0;
+    m2.dstInputElementIndex = 0;
     config.inputElementsMapping.insert(m2.functionIndex, m2);
 
     QList<QPointer<Function> > functions;
