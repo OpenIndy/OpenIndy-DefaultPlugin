@@ -3264,7 +3264,7 @@ void FunctionTest::testPointFromPoints_Register2() {
     addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2000, 1);
 
     feature->addFunction(function);
-    QVERIFY2(feature->getDisplayFunctions().compare("MyTestFunction")==0, "getDisplayFunctions");
+    QVERIFY2(feature->getDisplayFunctions().compare("RegisterPositionToPlane")==0, "getDisplayFunctions");
 
     feature->recalc();
     QVERIFY2(feature->getIsSolved(), "recalc");
