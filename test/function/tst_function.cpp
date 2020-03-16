@@ -2951,27 +2951,44 @@ class ConfiguredFunction : public Function {
     Q_OBJECT
 
 public:
-    ConfiguredFunction(QObject *parent = 0): Function(parent) {
-
+    ConfiguredFunction(ConfiguredFunctionConfig config, QList<QPointer<Function> > functions, QObject *parent = 0): Function(parent), functions(functions), config(config) {
     }
 
-    void init() {
-
+    void init() override {
+        this->metaData.name = this->config.name;
+        this->applicableFor = this->config.applicableFor;
     }
 
-    QList<QString> functionNames() {
-        QList<QString> list;
-        list.append("PointFromPoints");
-        list.append("Register");
-        return list;
+    bool exec(const QPointer<FeatureWrapper> &feature) {
+
+        //execute all functions in the specified order
+        for(int functionIndex = 0; functionIndex < this->functions.size(); functionIndex++){
+
+            // break if the function pointer is not valid
+            if(functions[functionIndex].isNull()){
+                return false;
+            }
+
+            foreach(InputElementMapping mapping, this->config.inputElementsMapping.values(functionIndex)) {
+                foreach(InputElement inputElement, this->inputElements.value(mapping.srcInputElementIndex)) {
+                    functions[mapping.functionIndex]->addInputElement(inputElement, mapping.dstsrcInputElementIndex);
+                }
+            }
+
+            // try to solve the current function
+            if(!functions[functionIndex]->exec(feature)){
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    void addFunction(QPointer<Function> function) {
-        functions.append(function);
-    }
 
 private:
-    QList<QPointer<Function> > functions; // TODO or Map?
+    ConfiguredFunctionConfig config;
+
+    QList<QPointer<Function> > functions;
 };
 
 void FunctionTest::testPointFromPoints_Register2() {
