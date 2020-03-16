@@ -2957,6 +2957,7 @@ public:
     void init() override {
         this->metaData.name = this->config.name;
         this->applicableFor = this->config.applicableFor;
+        this->neededElements = this->config.neededElements;
     }
 
     bool exec(const QPointer<FeatureWrapper> &feature) {
