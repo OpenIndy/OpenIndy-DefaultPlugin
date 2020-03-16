@@ -1,7 +1,7 @@
 {
     "functions" : [
         {
-            "name": "MyTestFunction",
+            "name": "RegisterPositionToPlane",
             "applicableFor" : [ "Point" ],
 
             "neededElements": [
