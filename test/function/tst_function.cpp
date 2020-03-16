@@ -3022,14 +3022,20 @@ void FunctionTest::testPointFromPoints_Register2() {
         functions.append(f);
     }
 
-    QVERIFY2(feature->getDisplayFunctions().compare("PointFromPoints, Register")==0, "getDisplayFunctions");
+    QPointer<Function> function = new ConfiguredFunction(config, functions);
+    function->init();
+
+
 
     // colum delim: " "
     // line ending: "\n"
     // unit:        [mm]
-    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function1);
+    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
 
-    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function2);
+    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2000, 1);
+
+    feature->addFunction(function);
+    QVERIFY2(feature->getDisplayFunctions().compare("MyTestFunction")==0, "getDisplayFunctions");
 
     feature->recalc();
     QVERIFY2(feature->getIsSolved(), "recalc");
