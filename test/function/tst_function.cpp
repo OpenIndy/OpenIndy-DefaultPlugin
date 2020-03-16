@@ -2931,6 +2931,21 @@ QPointer<Function> FunctionTest::createFunction(QString name) {
     return function;
 }
 
+
+struct InputElementMapping {
+    int functionIndex;
+    int srcInputElementIndex;
+    int dstsrcInputElementIndex;
+};
+struct ConfiguredFunctionConfig {
+    QString name;
+    QList<QString> functionNames;
+    QMultiMap<int, InputElementMapping> inputElementsMapping;
+    QList<NeededElement> neededElements;
+    QList<FeatureTypes> applicableFor;
+
+};
+
 class ConfiguredFunction : public Function {
     friend class Feature;
     Q_OBJECT
