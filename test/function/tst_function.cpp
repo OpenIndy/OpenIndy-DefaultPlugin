@@ -126,6 +126,8 @@ private Q_SLOTS:
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
+    QPointer<Function> createFunction(QString name);
+
     void addInputObservations(QString data, QPointer<Function> function, int id, int inputElementKey, bool shouldBeUsed);
 
     void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
@@ -2919,23 +2921,27 @@ void FunctionTest::testPointFromPoints_Register() {
 
 }
 
+QPointer<Function> FunctionTest::createFunction(QString name) {
+    OiTemplatePlugin plugin;
+
+    QPointer<Function> function = plugin.createFunction(name);
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    return function;
+}
+
 void FunctionTest::testPointFromPoints_Register2() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
-
-    OiTemplatePlugin plugin;
 
     QPointer<Point> feature = new Point(false);
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setPoint(feature);
 
-    QPointer<Function> function1 = plugin.createFunction("PointFromPoints");
-    function1->init();
-    QObject::connect(function1.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+    QPointer<Function> function1 = createFunction("PointFromPoints");
     feature->addFunction(function1);
 
-    QPointer<Function> function2 = plugin.createFunction("Register");
-    function2->init();
-    QObject::connect(function2.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+    QPointer<Function> function2 = createFunction("Register");
     feature->addFunction(function2);
 
     QVERIFY2(feature->getDisplayFunctions().compare("PointFromPoints, Register")==0, "getDisplayFunctions");
