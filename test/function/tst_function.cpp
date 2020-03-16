@@ -3242,47 +3242,19 @@ void FunctionTest::testPointFromPoints_Register2() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setPoint(feature);
 
-    ConfiguredFunctionConfig config;
-    config.name = "MyTestFunction";
-    config.functionNames.append("PointFromPoints");
-    config.functionNames.append("Register");
-    config.applicableFor.append(ePointFeature);
-
-    InputElementMapping m1;
-    m1.functionIndex = 0;
-    m1.srcInputElementIndex = 0;
-    m1.dstInputElementIndex = 0;
-    config.inputElementsMapping.insert(m1.functionIndex, m1);
-
-    InputElementMapping m2;
-    m2.functionIndex = 1;
-    m2.srcInputElementIndex = 1;
-    m2.dstInputElementIndex = 0;
-    config.inputElementsMapping.insert(m2.functionIndex, m2);
-
-
-    NeededElement param1;
-    param1.description = "Select at least one points to calculate the best fit point.";
-    param1.infinite = true;
-    param1.typeOfElement = ePositionElement;
-    config.neededElements.append(param1);
-
-    NeededElement param2;
-    param2.description = "Select a plane in which the target geometry is to be projected.";
-    param2.infinite = false;
-    param2.typeOfElement = ePlaneElement;
-    config.neededElements.append(param2);
-
-    QList<QPointer<Function> > functions;
-    foreach(QString name, config.functionNames) {
-        QPointer<Function> f = createFunction(name);
-        functions.append(f);
+    FunctionConfigParser parser;
+    QPointer<Function> function;
+    foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson("functionConfig.json")) {
+        QList<QPointer<Function> > functions;
+        foreach(QString name, config.functionNames) {
+            QPointer<Function> f = createFunction(name);
+            functions.append(f);
+        }
+        function = new ConfiguredFunction(config, functions);
+        function->init();
     }
 
-    QPointer<Function> function = new ConfiguredFunction(config, functions);
-    function->init();
-
-
+    QVERIFY2(!function.isNull(), "function is null");
 
     // colum delim: " "
     // line ending: "\n"
