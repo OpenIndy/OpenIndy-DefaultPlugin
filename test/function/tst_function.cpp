@@ -3017,6 +3017,19 @@ void FunctionTest::testPointFromPoints_Register2() {
     m2.dstInputElementIndex = 0;
     config.inputElementsMapping.insert(m2.functionIndex, m2);
 
+
+    NeededElement param1;
+    param1.description = "Select at least one points to calculate the best fit point.";
+    param1.infinite = true;
+    param1.typeOfElement = ePositionElement;
+    config.neededElements.append(param1);
+
+    NeededElement param2;
+    param2.description = "Select a plane in which the target geometry is to be projected.";
+    param2.infinite = false;
+    param2.typeOfElement = ePlaneElement;
+    config.neededElements.append(param2);
+
     QList<QPointer<Function> > functions;
     foreach(QString name, config.functionNames) {
         QPointer<Function> f = createFunction(name);
