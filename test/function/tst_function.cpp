@@ -2966,11 +2966,13 @@ void FunctionTest::testPointFromPoints_Register2() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setPoint(feature);
 
-    QPointer<Function> function1 = createFunction("PointFromPoints");
-    feature->addFunction(function1);
+    QPointer<ConfiguredFunction> configuredFunction = new ConfiguredFunction();
+    QPointer<Function> function = configuredFunction;
 
-    QPointer<Function> function2 = createFunction("Register");
-    feature->addFunction(function2);
+    foreach(QString name, configuredFunction->functionNames()) {
+        QPointer<Function> f = createFunction(name);
+        configuredFunction->addFunction(f);
+    }
 
     QVERIFY2(feature->getDisplayFunctions().compare("PointFromPoints, Register")==0, "getDisplayFunctions");
 
