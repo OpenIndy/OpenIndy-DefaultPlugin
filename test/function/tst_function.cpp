@@ -65,6 +65,31 @@ struct ConfiguredFunctionConfig {
         }
         return false;
     }
+
+    QList<QString> getFunctionNames() {
+        switch(version) {
+        case 1:
+            return functionNames;
+        case 2:
+            QList<QString> list;
+
+            collectFunctionNames(parameter, list);
+            return list;
+        }
+
+        throw logic_error("illegal version");
+
+    }
+
+    void collectFunctionNames(QList<CFCParameter> &parameter, QList<QString> &names) {
+        foreach(CFCParameter p, parameter) {
+            if(!isNeededElement(p.name)) {
+                names.append(p.name);
+            }
+            collectFunctionNames(p.parameter, names);
+        }
+    }
+
 };
 
 class DistanceBetweenTwoPoints : public ConstructFunction
@@ -3317,18 +3342,24 @@ QPointer<Function> FunctionTest::createFunction(QString functionName, QString co
     if(!config.isEmpty() && function.isNull()) {
         FunctionConfigParser parser;
         foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson(config)) {
-            switch(config.version) {
-            case 1:
-                if(config.name.compare(functionName) == 0) {
-                    QList<QPointer<Function> > functions;
-                    foreach(QString name, config.functionNames) {
-                        QPointer<Function> f = createFunction(name);
-                        functions.append(f);
-                    }
+            if(config.name.compare(functionName) == 0) {
+                QList<QPointer<Function> > functions;
+                foreach(QString name, config.getFunctionNames()) {
+                    QPointer<Function> f = createFunction(name);
+                    functions.append(f);
+                }
+
+                switch(config.version) {
+                case 1:
                     function = new ConfiguredFunction(config, functions);
                     break;
+                case 2:
+                    function = new ConfiguredFunction2(config, functions);
+                    break;
                 }
-            case 2:
+            }
+
+            if(!function.isNull()) {
                 break;
             }
 
