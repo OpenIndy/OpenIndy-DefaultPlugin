@@ -141,12 +141,56 @@ public:
     void init() override {
         this->metaData.name = this->config.name;
         this->applicableFor = this->config.applicableFor;
-        for(int i=0; i<this->config.neededElements.size(); i++) {
-            this->neededElements.append(config.neededElements[i].second);
-        }
+        this->neededElements = config.getNeededElements();
     }
 
-    bool exec(const QPointer<FeatureWrapper> &feature) {
+    bool exec(const QPointer<FeatureWrapper> &feature) override {
+
+        //execute all functions in the specified order
+        for(int functionIndex = 0; functionIndex < this->functions.size(); functionIndex++){
+
+            // break if the function pointer is not valid
+            if(functions[functionIndex].isNull()){
+                return false;
+            }
+
+            foreach(InputElementMapping mapping, this->config.inputElementsMapping.values(functionIndex)) {
+                foreach(InputElement inputElement, this->inputElements.value(mapping.srcInputElementIndex)) {
+                    functions[mapping.functionIndex]->addInputElement(inputElement, mapping.dstInputElementIndex);
+                }
+            }
+
+            // try to solve the current function
+            if(!functions[functionIndex]->exec(feature)){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+private:
+    ConfiguredFunctionConfig config;
+
+    QList<QPointer<Function> > functions;
+};
+
+class ConfiguredFunction2 : public Function {
+    friend class Feature;
+    Q_OBJECT
+
+public:
+    ConfiguredFunction2(ConfiguredFunctionConfig config, QList<QPointer<Function> > functions, QObject *parent = 0): Function(parent), functions(functions), config(config) {
+    }
+
+    void init() override {
+        this->metaData.name = this->config.name;
+        this->applicableFor = this->config.applicableFor;
+        this->neededElements = config.getNeededElements();
+    }
+
+    bool exec(const QPointer<FeatureWrapper> &feature) override {
 
         //execute all functions in the specified order
         for(int functionIndex = 0; functionIndex < this->functions.size(); functionIndex++){
