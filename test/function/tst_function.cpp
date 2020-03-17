@@ -47,6 +47,317 @@ struct ConfiguredFunctionConfig {
 
 };
 
+class DistanceBetweenTwoPoints : public ConstructFunction
+{
+    Q_OBJECT
+public:
+    void init() override {
+        this->metaData.name = "DistanceBetweenTwoPoints";
+    }
+    bool DistanceBetweenTwoPoints::exec(ScalarEntityDistance &distance)
+    {
+        OiVec p1 = this->inputElements[0].first().geometry->getPosition().getVector();
+        OiVec p2 = this->inputElements[1].first().geometry->getPosition().getVector();
+        OiVec v = p2-p1;
+        double dot;
+        OiVec::dot(dot, v, v);
+        distance.setDistance(qSqrt(dot));
+
+        return true;
+    }
+
+};
+
+
+class ConfiguredFunction : public Function {
+    friend class Feature;
+    Q_OBJECT
+
+public:
+    ConfiguredFunction(ConfiguredFunctionConfig config, QList<QPointer<Function> > functions, QObject *parent = 0): Function(parent), functions(functions), config(config) {
+    }
+
+    void init() override {
+        this->metaData.name = this->config.name;
+        this->applicableFor = this->config.applicableFor;
+        for(int i=0; i<this->config.neededElements.size(); i++) {
+            this->neededElements.append(config.neededElements[i].second);
+        }
+    }
+
+    bool exec(const QPointer<FeatureWrapper> &feature) {
+
+        //execute all functions in the specified order
+        for(int functionIndex = 0; functionIndex < this->functions.size(); functionIndex++){
+
+            // break if the function pointer is not valid
+            if(functions[functionIndex].isNull()){
+                return false;
+            }
+
+            foreach(InputElementMapping mapping, this->config.inputElementsMapping.values(functionIndex)) {
+                foreach(InputElement inputElement, this->inputElements.value(mapping.srcInputElementIndex)) {
+                    functions[mapping.functionIndex]->addInputElement(inputElement, mapping.dstInputElementIndex);
+                }
+            }
+
+            // try to solve the current function
+            if(!functions[functionIndex]->exec(feature)){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+private:
+    ConfiguredFunctionConfig config;
+
+    QList<QPointer<Function> > functions;
+};
+
+class FunctionConfigParser {
+
+public:
+    QList<ConfiguredFunctionConfig> readConfigFromJson(QString filename) {
+
+        QList<ConfiguredFunctionConfig> configs;
+
+        QString val;
+        QFile file;
+        file.setFileName(filename);
+        file.open(QIODevice::ReadOnly | QIODevice::Text);
+        val = file.readAll();
+        file.close();
+
+        QJsonDocument doc = QJsonDocument::fromJson(val.toUtf8());
+        QJsonObject json = doc.object();
+        foreach(QJsonValue function, json["functions"].toArray()) {
+            // qDebug() << function;
+
+            ConfiguredFunctionConfig config;
+
+            QJsonObject object = function.toObject();
+            config.name = object["name"].toString();
+            config.applicableFor = applicableFor(object["applicableFor"]);
+
+            config.neededElements = neededElements(object["neededElements"]);
+
+            config.functionNames = functionNames(object["innerFunctions"]);
+
+            config.inputElementsMapping = inputElementsMapping(config, object["inputElementMappings"]);
+
+            configs.append(config);
+        }
+
+
+        return configs;
+    }
+
+private:
+    QMultiMap<int, InputElementMapping> inputElementsMapping(ConfiguredFunctionConfig config, QJsonValue value) {
+        if(value.isNull() || !value.isArray()) {
+            throw logic_error("can not parse json");
+        }
+
+        QMultiMap<int, InputElementMapping> inputElementsMapping;
+        foreach(QJsonValue element, value.toArray()) {
+            QJsonObject object = element.toObject();
+
+            InputElementMapping mapping;
+            mapping.functionIndex = -1;
+            mapping.srcInputElementIndex = -1;
+            mapping.dstInputElementIndex = -1;
+
+            QString fromNeededElementName = object["from"].toObject()["neededElement"].toString();
+            for(int i=0; i < config.neededElements.size(); i++) {
+                if(config.neededElements[i].first.compare(fromNeededElementName) == 0) {
+                    mapping.srcInputElementIndex = i;
+                    break;
+                }
+            }
+
+            QString toFunctionName = object["to"].toObject()["function"].toString();
+            mapping.functionIndex = config.functionNames.indexOf(toFunctionName);
+
+            mapping.dstInputElementIndex = object["to"].toObject()["index"].toInt();
+
+
+            inputElementsMapping.insert(mapping.functionIndex, mapping);
+
+        }
+
+        return inputElementsMapping;
+    }
+
+    QList<QString> functionNames(QJsonValue value) {
+        if(value.isNull() || !value.isArray()) {
+            throw logic_error("can not parse json");
+        }
+        QList<QString> list;
+        foreach(QJsonValue element, value.toArray()) {
+            QJsonObject object = element.toObject();
+            list.append(object["name"].toString());
+        }
+        return list;
+    }
+
+    ElementTypes typeOfElement(QJsonValue value) {
+        if(value.isNull()) {
+            throw logic_error("can not parse json");
+        }
+        QString s = value.toString();
+        if (s.compare("Circle") == 0 ) {
+            return eCircleElement;
+        } else if (s.compare("Cone") == 0 ) {
+            return eConeElement;
+        } else if (s.compare("Cylinder") == 0 ) {
+            return eCylinderElement;
+        } else if (s.compare("Ellipse") == 0 ) {
+            return eEllipseElement;
+        } else if (s.compare("Ellipsoid") == 0 ) {
+            return eEllipsoidElement;
+        } else if (s.compare("Hyperboloid") == 0 ) {
+            return eHyperboloidElement;
+        } else if (s.compare("Line") == 0 ) {
+            return eLineElement;
+        } else if (s.compare("Nurbs") == 0 ) {
+            return eNurbsElement;
+        } else if (s.compare("Paraboloid") == 0 ) {
+            return eParaboloidElement;
+        } else if (s.compare("Plane") == 0 ) {
+            return ePlaneElement;
+        } else if (s.compare("Point") == 0 ) {
+            return ePointElement;
+        } else if (s.compare("PointCloud") == 0 ) {
+            return ePointCloudElement;
+        } else if (s.compare("ScalarEntityAngle") == 0 ) {
+            return eScalarEntityAngleElement;
+        } else if (s.compare("ScalarEntityDistance") == 0 ) {
+            return eScalarEntityDistanceElement;
+        } else if (s.compare("ScalarEntityMeasurementSeries") == 0 ) {
+            return eScalarEntityMeasurementSeriesElement;
+        } else if (s.compare("ScalarEntityTemperature") == 0 ) {
+            return eScalarEntityTemperatureElement;
+        } else if (s.compare("SlottedHole") == 0 ) {
+            return eSlottedHoleElement;
+        } else if (s.compare("Sphere") == 0 ) {
+            return eSphereElement;
+        } else if (s.compare("Torus") == 0 ) {
+            return eTorusElement;
+        } else if (s.compare("Direction") == 0 ) {
+            return eDirectionElement;
+        } else if (s.compare("Position") == 0 ) {
+            return ePositionElement;
+        } else if (s.compare("Radius") == 0 ) {
+            return eRadiusElement;
+        } else if (s.compare("CoordinateSystem") == 0 ) {
+            return eCoordinateSystemElement;
+        } else if (s.compare("Station") == 0 ) {
+            return eStationElement;
+        } else if (s.compare("TrafoParam") == 0 ) {
+            return eTrafoParamElement;
+        } else if (s.compare("Observation") == 0 ) {
+            return eObservationElement;
+        } else if (s.compare("ReadingCartesian") == 0 ) {
+            return eReadingCartesianElement;
+        } else if (s.compare("ReadingPolar") == 0 ) {
+            return eReadingPolarElement;
+        } else if (s.compare("ReadingDistance") == 0 ) {
+            return eReadingDistanceElement;
+        } else if (s.compare("ReadingDirection") == 0 ) {
+            return eReadingDirectionElement;
+        } else if (s.compare("ReadingTemperature") == 0 ) {
+            return eReadingTemperatureElement;
+        } else if (s.compare("ReadingLevel") == 0 ) {
+            return eReadingLevelElement;
+        } else {
+            return eUndefinedElement;
+        }
+    }
+
+    QList<QPair<QString, NeededElement> > neededElements(QJsonValue value) {
+        if(value.isNull() || !value.isArray()) {
+            throw logic_error("can not parse json");
+        }
+        QList<QPair<QString, NeededElement> > list;
+        foreach(QJsonValue element, value.toArray()) {
+            QJsonObject object = element.toObject();
+
+            NeededElement neededElement;
+            neededElement.description = object["description"].toString();
+            neededElement.infinite = object["infinite"].toBool();
+            neededElement.typeOfElement = typeOfElement(object["typeOfElement"]);
+            QPair<QString, NeededElement> ne;
+            ne.first = object["name"].toString();
+            ne.second = neededElement;
+            list.append(ne);
+        }
+
+        return list;
+    }
+
+    QList<FeatureTypes> applicableFor(QJsonValue value) {
+        if(value.isNull() || !value.isArray()) {
+            throw logic_error("can not parse json");
+        }
+        QList<FeatureTypes> list;
+        foreach(QJsonValue element, value.toArray()) {
+            QString s = element.toString();
+
+            if (s.compare("Circle") == 0 ) {
+                list.append(eCircleFeature);
+            } else if (s.compare("Cone") == 0 ) {
+                list.append(eConeFeature);
+            } else if (s.compare("Cylinder") == 0 ) {
+                list.append(eCylinderFeature);
+            } else if (s.compare("Ellipse") == 0 ) {
+                list.append(eEllipseFeature);
+            } else if (s.compare("Ellipsoid") == 0 ) {
+                list.append(eEllipsoidFeature);
+            } else if (s.compare("Hyperboloid") == 0 ) {
+                list.append(eHyperboloidFeature);
+            } else if (s.compare("Line") == 0 ) {
+                list.append(eLineFeature);
+            } else if (s.compare("Nurbs") == 0 ) {
+                list.append(eNurbsFeature);
+            } else if (s.compare("Paraboloid") == 0 ) {
+                list.append(eParaboloidFeature);
+            } else if (s.compare("Plane") == 0 ) {
+                list.append(ePlaneFeature);
+            } else if (s.compare("Point") == 0 ) {
+                list.append(ePointFeature);
+            } else if (s.compare("PointCloud") == 0 ) {
+                list.append(ePointCloudFeature);
+            } else if (s.compare("ScalarEntityAngle") == 0 ) {
+                list.append(eScalarEntityAngleFeature);
+            } else if (s.compare("ScalarEntityDistance") == 0 ) {
+                list.append(eScalarEntityDistanceFeature);
+            } else if (s.compare("ScalarEntityMeasurementSeries") == 0 ) {
+                list.append(eScalarEntityMeasurementSeriesFeature);
+            } else if (s.compare("ScalarEntityTemperature") == 0 ) {
+                list.append(eScalarEntityTemperatureFeature);
+            } else if (s.compare("SlottedHole") == 0 ) {
+                list.append(eSlottedHoleFeature);
+            } else if (s.compare("Sphere") == 0 ) {
+                list.append(eSphereFeature);
+            } else if (s.compare("Torus") == 0 ) {
+                list.append(eTorusFeature);
+            } else if (s.compare("CoordinateSystem") == 0 ) {
+                list.append(eCoordinateSystemFeature);
+            } else if (s.compare("Station") == 0 ) {
+                list.append(eStationFeature);
+            } else if (s.compare("TrafoParam") == 0 ) {
+                list.append(eTrafoParamFeature);
+            }
+        }
+
+        return list;
+    }
+};
+
+
 class FunctionTest : public QObject
 {
     Q_OBJECT
@@ -2935,304 +3246,34 @@ void FunctionTest::testPointFromPoints_Register() {
 
 }
 
-QPointer<Function> FunctionTest::createFunction(QString name) {
-    OiTemplatePlugin plugin;
+QPointer<Function> FunctionTest::createFunction(QString functionName) {
+    QPointer<Function> function;
+    if(functionName.compare("DistanceBetweenTwoPoints") == 0) {
+        function = new DistanceBetweenTwoPoints();
+    } else {
+        OiTemplatePlugin plugin;
+        function = plugin.createFunction(functionName);
+    }
 
-    QPointer<Function> function = plugin.createFunction(name);
+    if(function.isNull()) {
+        FunctionConfigParser parser;
+        foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson("functionConfig.json")) {
+            if(config.name.compare(functionName) == 0) {
+                QList<QPointer<Function> > functions;
+                foreach(QString name, config.functionNames) {
+                    QPointer<Function> f = createFunction(name);
+                    functions.append(f);
+                }
+                function = new ConfiguredFunction(config, functions);
+                break;
+            }
+        }
+    }
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
     return function;
 }
-
-class ConfiguredFunction : public Function {
-    friend class Feature;
-    Q_OBJECT
-
-public:
-    ConfiguredFunction(ConfiguredFunctionConfig config, QList<QPointer<Function> > functions, QObject *parent = 0): Function(parent), functions(functions), config(config) {
-    }
-
-    void init() override {
-        this->metaData.name = this->config.name;
-        this->applicableFor = this->config.applicableFor;
-        for(int i=0; i<this->config.neededElements.size(); i++) {
-            this->neededElements.append(config.neededElements[i].second);
-        }
-    }
-
-    bool exec(const QPointer<FeatureWrapper> &feature) {
-
-        //execute all functions in the specified order
-        for(int functionIndex = 0; functionIndex < this->functions.size(); functionIndex++){
-
-            // break if the function pointer is not valid
-            if(functions[functionIndex].isNull()){
-                return false;
-            }
-
-            foreach(InputElementMapping mapping, this->config.inputElementsMapping.values(functionIndex)) {
-                foreach(InputElement inputElement, this->inputElements.value(mapping.srcInputElementIndex)) {
-                    functions[mapping.functionIndex]->addInputElement(inputElement, mapping.dstInputElementIndex);
-                }
-            }
-
-            // try to solve the current function
-            if(!functions[functionIndex]->exec(feature)){
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-
-private:
-    ConfiguredFunctionConfig config;
-
-    QList<QPointer<Function> > functions;
-};
-
-class FunctionConfigParser {
-
-public:
-    QList<ConfiguredFunctionConfig> readConfigFromJson(QString filename) {
-
-        QList<ConfiguredFunctionConfig> configs;
-
-        QString val;
-        QFile file;
-        file.setFileName(filename);
-        file.open(QIODevice::ReadOnly | QIODevice::Text);
-        val = file.readAll();
-        file.close();
-
-        QJsonDocument doc = QJsonDocument::fromJson(val.toUtf8());
-        QJsonObject json = doc.object();
-        foreach(QJsonValue function, json["functions"].toArray()) {
-            // qDebug() << function;
-
-            ConfiguredFunctionConfig config;
-
-            QJsonObject object = function.toObject();
-            config.name = object["name"].toString();
-            config.applicableFor = applicableFor(object["applicableFor"]);
-
-            config.neededElements = neededElements(object["neededElements"]);
-
-            config.functionNames = functionNames(object["innerFunctions"]);
-
-            config.inputElementsMapping = inputElementsMapping(config, object["inputElementMappings"]);
-
-            configs.append(config);
-        }
-
-
-        return configs;
-    }
-
-private:
-    QMultiMap<int, InputElementMapping> inputElementsMapping(ConfiguredFunctionConfig config, QJsonValue value) {
-        if(value.isNull() || !value.isArray()) {
-            throw logic_error("can not parse json");
-        }
-
-        QMultiMap<int, InputElementMapping> inputElementsMapping;
-        foreach(QJsonValue element, value.toArray()) {
-            QJsonObject object = element.toObject();
-
-            InputElementMapping mapping;
-            mapping.functionIndex = -1;
-            mapping.srcInputElementIndex = -1;
-            mapping.dstInputElementIndex = -1;
-
-            QString fromNeededElementName = object["from"].toObject()["neededElement"].toString();
-            for(int i=0; i < config.neededElements.size(); i++) {
-                if(config.neededElements[i].first.compare(fromNeededElementName) == 0) {
-                    mapping.srcInputElementIndex = i;
-                    break;
-                }
-            }
-
-            QString toFunctionName = object["to"].toObject()["function"].toString();
-            mapping.functionIndex = config.functionNames.indexOf(toFunctionName);
-
-            mapping.dstInputElementIndex = object["to"].toObject()["index"].toInt();
-
-
-            inputElementsMapping.insert(mapping.functionIndex, mapping);
-
-        }
-
-        return inputElementsMapping;
-    }
-
-    QList<QString> functionNames(QJsonValue value) {
-        if(value.isNull() || !value.isArray()) {
-            throw logic_error("can not parse json");
-        }
-        QList<QString> list;
-        foreach(QJsonValue element, value.toArray()) {
-            QJsonObject object = element.toObject();
-            list.append(object["name"].toString());
-        }
-        return list;
-    }
-
-    ElementTypes typeOfElement(QJsonValue value) {
-        if(value.isNull()) {
-            throw logic_error("can not parse json");
-        }
-        QString s = value.toString();
-        if (s.compare("Circle") == 0 ) {
-            return eCircleElement;
-        } else if (s.compare("Cone") == 0 ) {
-            return eConeElement;
-        } else if (s.compare("Cylinder") == 0 ) {
-            return eCylinderElement;
-        } else if (s.compare("Ellipse") == 0 ) {
-            return eEllipseElement;
-        } else if (s.compare("Ellipsoid") == 0 ) {
-            return eEllipsoidElement;
-        } else if (s.compare("Hyperboloid") == 0 ) {
-            return eHyperboloidElement;
-        } else if (s.compare("Line") == 0 ) {
-            return eLineElement;
-        } else if (s.compare("Nurbs") == 0 ) {
-            return eNurbsElement;
-        } else if (s.compare("Paraboloid") == 0 ) {
-            return eParaboloidElement;
-        } else if (s.compare("Plane") == 0 ) {
-            return ePlaneElement;
-        } else if (s.compare("Point") == 0 ) {
-            return ePointElement;
-        } else if (s.compare("PointCloud") == 0 ) {
-            return ePointCloudElement;
-        } else if (s.compare("ScalarEntityAngle") == 0 ) {
-            return eScalarEntityAngleElement;
-        } else if (s.compare("ScalarEntityDistance") == 0 ) {
-            return eScalarEntityDistanceElement;
-        } else if (s.compare("ScalarEntityMeasurementSeries") == 0 ) {
-            return eScalarEntityMeasurementSeriesElement;
-        } else if (s.compare("ScalarEntityTemperature") == 0 ) {
-            return eScalarEntityTemperatureElement;
-        } else if (s.compare("SlottedHole") == 0 ) {
-            return eSlottedHoleElement;
-        } else if (s.compare("Sphere") == 0 ) {
-            return eSphereElement;
-        } else if (s.compare("Torus") == 0 ) {
-            return eTorusElement;
-        } else if (s.compare("Direction") == 0 ) {
-            return eDirectionElement;
-        } else if (s.compare("Position") == 0 ) {
-            return ePositionElement;
-        } else if (s.compare("Radius") == 0 ) {
-            return eRadiusElement;
-        } else if (s.compare("CoordinateSystem") == 0 ) {
-            return eCoordinateSystemElement;
-        } else if (s.compare("Station") == 0 ) {
-            return eStationElement;
-        } else if (s.compare("TrafoParam") == 0 ) {
-            return eTrafoParamElement;
-        } else if (s.compare("Observation") == 0 ) {
-            return eObservationElement;
-        } else if (s.compare("ReadingCartesian") == 0 ) {
-            return eReadingCartesianElement;
-        } else if (s.compare("ReadingPolar") == 0 ) {
-            return eReadingPolarElement;
-        } else if (s.compare("ReadingDistance") == 0 ) {
-            return eReadingDistanceElement;
-        } else if (s.compare("ReadingDirection") == 0 ) {
-            return eReadingDirectionElement;
-        } else if (s.compare("ReadingTemperature") == 0 ) {
-            return eReadingTemperatureElement;
-        } else if (s.compare("ReadingLevel") == 0 ) {
-            return eReadingLevelElement;
-        } else {
-            return eUndefinedElement;
-        }
-    }
-
-    QList<QPair<QString, NeededElement> > neededElements(QJsonValue value) {
-        if(value.isNull() || !value.isArray()) {
-            throw logic_error("can not parse json");
-        }
-        QList<QPair<QString, NeededElement> > list;
-        foreach(QJsonValue element, value.toArray()) {
-            QJsonObject object = element.toObject();
-
-            NeededElement neededElement;
-            neededElement.description = object["description"].toString();
-            neededElement.infinite = object["infinite"].toBool();
-            neededElement.typeOfElement = typeOfElement(object["typeOfElement"]);
-            QPair<QString, NeededElement> ne;
-            ne.first = object["name"].toString();
-            ne.second = neededElement;
-            list.append(ne);
-        }
-
-        return list;
-    }
-
-    QList<FeatureTypes> applicableFor(QJsonValue value) {
-        if(value.isNull() || !value.isArray()) {
-            throw logic_error("can not parse json");
-        }
-        QList<FeatureTypes> list;
-        foreach(QJsonValue element, value.toArray()) {
-            QString s = element.toString();
-
-            if (s.compare("Circle") == 0 ) {
-                list.append(eCircleFeature);
-            } else if (s.compare("Cone") == 0 ) {
-                list.append(eConeFeature);
-            } else if (s.compare("Cylinder") == 0 ) {
-                list.append(eCylinderFeature);
-            } else if (s.compare("Ellipse") == 0 ) {
-                list.append(eEllipseFeature);
-            } else if (s.compare("Ellipsoid") == 0 ) {
-                list.append(eEllipsoidFeature);
-            } else if (s.compare("Hyperboloid") == 0 ) {
-                list.append(eHyperboloidFeature);
-            } else if (s.compare("Line") == 0 ) {
-                list.append(eLineFeature);
-            } else if (s.compare("Nurbs") == 0 ) {
-                list.append(eNurbsFeature);
-            } else if (s.compare("Paraboloid") == 0 ) {
-                list.append(eParaboloidFeature);
-            } else if (s.compare("Plane") == 0 ) {
-                list.append(ePlaneFeature);
-            } else if (s.compare("Point") == 0 ) {
-                list.append(ePointFeature);
-            } else if (s.compare("PointCloud") == 0 ) {
-                list.append(ePointCloudFeature);
-            } else if (s.compare("ScalarEntityAngle") == 0 ) {
-                list.append(eScalarEntityAngleFeature);
-            } else if (s.compare("ScalarEntityDistance") == 0 ) {
-                list.append(eScalarEntityDistanceFeature);
-            } else if (s.compare("ScalarEntityMeasurementSeries") == 0 ) {
-                list.append(eScalarEntityMeasurementSeriesFeature);
-            } else if (s.compare("ScalarEntityTemperature") == 0 ) {
-                list.append(eScalarEntityTemperatureFeature);
-            } else if (s.compare("SlottedHole") == 0 ) {
-                list.append(eSlottedHoleFeature);
-            } else if (s.compare("Sphere") == 0 ) {
-                list.append(eSphereFeature);
-            } else if (s.compare("Torus") == 0 ) {
-                list.append(eTorusFeature);
-            } else if (s.compare("CoordinateSystem") == 0 ) {
-                list.append(eCoordinateSystemFeature);
-            } else if (s.compare("Station") == 0 ) {
-                list.append(eStationFeature);
-            } else if (s.compare("TrafoParam") == 0 ) {
-                list.append(eTrafoParamFeature);
-            }
-        }
-
-        return list;
-    }
-};
-
 
 
 void FunctionTest::testPointFromPoints_Register2() {
@@ -3242,18 +3283,7 @@ void FunctionTest::testPointFromPoints_Register2() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setPoint(feature);
 
-    FunctionConfigParser parser;
-    QPointer<Function> function;
-    foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson("functionConfig.json")) {
-        QList<QPointer<Function> > functions;
-        foreach(QString name, config.functionNames) {
-            QPointer<Function> f = createFunction(name);
-            functions.append(f);
-        }
-        function = new ConfiguredFunction(config, functions);
-        function->init();
-    }
-
+    QPointer<Function> function = createFunction("RegisterPositionToPlane");
     QVERIFY2(!function.isNull(), "function is null");
 
     // colum delim: " "
