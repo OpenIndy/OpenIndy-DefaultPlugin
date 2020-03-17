@@ -3429,7 +3429,7 @@ void FunctionTest::testPointFromPoints_Register() {
 
 }
 
-QPointer<Function> FunctionTest::createFunction(QString functionName, QString config = "") {
+QPointer<Function> FunctionTest::createFunction(QString functionName, QString configName = "") {
     QPointer<Function> function;
     if(functionName.compare("DistanceBetweenTwoPoints") == 0) {
         function = new DistanceBetweenTwoPoints();
@@ -3438,13 +3438,13 @@ QPointer<Function> FunctionTest::createFunction(QString functionName, QString co
         function = plugin.createFunction(functionName);
     }
 
-    if(!config.isEmpty() && function.isNull()) {
+    if(!configName.isEmpty() && function.isNull()) {
         FunctionConfigParser parser;
-        foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson(config)) {
+        foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson(configName)) {
             if(config.name.compare(functionName) == 0) {
                 QList<QPointer<Function> > functions;
                 foreach(QString name, config.getFunctionNames()) {
-                    QPointer<Function> f = createFunction(name);
+                    QPointer<Function> f = createFunction(name, configName);
                     functions.append(f);
                 }
 
