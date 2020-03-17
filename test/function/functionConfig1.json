@@ -2,6 +2,7 @@
     "functions" : [
         {
             "name": "RegisterPositionToPlane",
+            "description": "OI-523",
             "applicableFor" : [ "Point" ],
 
             "neededElements": [
@@ -18,7 +19,6 @@
                     "typeOfElement": "Plane"
                 }
             ],
-
 
             "innerFunctions" : [
                 {
@@ -50,6 +50,6 @@
                 }
             ]
         }
-        
+
     ]
 }
