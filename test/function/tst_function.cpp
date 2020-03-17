@@ -3450,7 +3450,7 @@ void FunctionTest::testPointFromPoints_Register2() {
     // unit:        [mm]
     addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
 
-    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2000, 1);
+    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2001, 1);
 
     feature->addFunction(function);
     QVERIFY2(feature->getDisplayFunctions().compare("RegisterPositionToPlane")==0, "getDisplayFunctions");
@@ -3482,7 +3482,7 @@ void FunctionTest::testPointFromPoints_Register3() {
     // unit:        [mm]
     addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
 
-    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2000, 1);
+    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2001, 1);
 
     feature->addFunction(function);
     QVERIFY2(feature->getDisplayFunctions().compare("RegisterPositionToPlane")==0, "getDisplayFunctions");
@@ -3515,7 +3515,7 @@ void FunctionTest::testDistance_PointFromPoints_Register() {
     // unit:        [mm]
     addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
 
-    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2000, 1);
+    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2001, 1);
 
     feature->addFunction(function);
     QVERIFY2(feature->getDisplayFunctions().compare("DistanceFromPlane")==0, "getDisplayFunctions");
