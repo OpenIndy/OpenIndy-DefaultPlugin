@@ -191,19 +191,58 @@ public:
     }
 
     bool exec(const QPointer<FeatureWrapper> &feature) override {
+        return execute(this->config.parameter, feature);
+    }
 
-        //execute all functions in the specified order
-        for(int functionIndex = 0; functionIndex < this->functions.size(); functionIndex++){
+private:
+    QPointer<Function> getFunction(QString name) {
+        for(int index = 0; index < functions.size(); index++) {
+            if(functions[index]->getMetaData().name.compare(name) == 0) {
+                return functions.takeAt(index); // remove from list
+            }
+        }
+
+        throw logic_error("no function found");
+    }
+
+    QList<InputElement> getInputElementsByName(QString name) {
+        return this->getInputElements().value(config.getNeededElementNames().indexOf(name));
+    }
+
+    bool execute(QList<CFCParameter> parameter, QPointer<FeatureWrapper> feature, QPointer<Function> function = 0, int depth = 0) {
+        depth++;
+
+        QList<QPointer<Function> > functions;
+
+        for(int index = 0; index <parameter.size(); index++) {
+            CFCParameter p = parameter[index];
+
+            qDebug() << depth << ": "<< p.name;
+
+            if(this->config.isNeededElement(p.name)) { // is leaf
+                foreach(InputElement ie, this->getInputElementsByName(p.name)) {
+                    qDebug() << depth << ": " << function->getMetaData().name << ", " << ie.id;
+                    function->addInputElement(ie, index);
+                }
+            } else { // is branch
+                QPointer<Function> f = this->getFunction(p.name);
+
+                if(!execute(p.parameter, feature, f, depth)) {
+                    return false; // fail fast
+                }
+
+                functions.append(f);
+            }
+
+
+
+        }
+
+        for(int functionIndex = 0; functionIndex < functions.size(); functionIndex++){
 
             // break if the function pointer is not valid
             if(functions[functionIndex].isNull()){
                 return false;
-            }
-
-            foreach(InputElementMapping mapping, this->config.inputElementsMapping.values(functionIndex)) {
-                foreach(InputElement inputElement, this->inputElements.value(mapping.srcInputElementIndex)) {
-                    functions[mapping.functionIndex]->addInputElement(inputElement, mapping.dstInputElementIndex);
-                }
             }
 
             // try to solve the current function
