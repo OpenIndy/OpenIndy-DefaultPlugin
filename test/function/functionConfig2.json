@@ -28,7 +28,7 @@
                         { "name" : "Position" }
                     ]
                 },
-                 {
+                {
                     "name" : "Register",
                     "parameter" : [
                         { "name": "Plane" }
