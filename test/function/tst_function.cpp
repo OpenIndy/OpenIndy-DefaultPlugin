@@ -38,14 +38,33 @@ struct InputElementMapping {
     int srcInputElementIndex;
     int dstInputElementIndex;
 };
+
+struct CFCParameter {
+    QString name;
+    QList<CFCParameter> parameter;
+};
+
 struct ConfiguredFunctionConfig {
     int version;
     QString name;
-    QList<QString> functionNames;
-    QMultiMap<int, InputElementMapping> inputElementsMapping;
     QList<QPair<QString, NeededElement> > neededElements;
     QList<FeatureTypes> applicableFor;
 
+    // versionn 1
+    QList<QString> functionNames;
+    QMultiMap<int, InputElementMapping> inputElementsMapping;
+
+    // version 2
+    QList<CFCParameter> parameter;
+
+    bool isNeededElement(QString name) {
+        for(int i=0; i<this->neededElements.size(); i++) {
+            if(neededElements[i].first.compare(name) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 class DistanceBetweenTwoPoints : public ConstructFunction
@@ -156,10 +175,22 @@ public:
             }
 
         } case 2: {
+             foreach(QJsonValue function, json["functions"].toArray()) {
+                ConfiguredFunctionConfig config;
+                config.version = 2;
+                QJsonObject object = function.toObject();
+                config.name = object["name"].toString();
+                config.applicableFor = applicableFor(object["applicableFor"]);
+
+                config.neededElements = neededElements(object["neededElements"]);
+                config.parameter = parameter(object["parameter"]);
+
+                configs.append(config);
+             }
 
         }
 
-        }
+        } // switch
 
 
 
@@ -167,6 +198,21 @@ public:
     }
 
 private:
+    QList<CFCParameter> parameter(QJsonValue value) {
+        QList<CFCParameter> list;
+        foreach(QJsonValue element, value.toArray()) {
+            QJsonObject object = element.toObject();
+
+            CFCParameter p;
+            p.name = object["name"].toString();
+            p.parameter = parameter(object["parameter"]);
+
+            list.append(p);
+        }
+
+        return list;
+    }
+
     QMultiMap<int, InputElementMapping> inputElementsMapping(ConfiguredFunctionConfig config, QJsonValue value) {
         if(value.isNull() || !value.isArray()) {
             throw logic_error("can not parse json");
