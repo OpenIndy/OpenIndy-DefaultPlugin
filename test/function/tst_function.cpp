@@ -3257,7 +3257,7 @@ QPointer<Function> FunctionTest::createFunction(QString functionName) {
 
     if(function.isNull()) {
         FunctionConfigParser parser;
-        foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson("functionConfig.json")) {
+        foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson("functionConfig1.json")) {
             if(config.name.compare(functionName) == 0) {
                 QList<QPointer<Function> > functions;
                 foreach(QString name, config.functionNames) {
