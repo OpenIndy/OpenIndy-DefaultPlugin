@@ -24,11 +24,15 @@
             "parameter": [
                 {
                     "name" : "PointFromPoints",
-                    "parameters" : [ "Position" ]
+                    "parameter" : [
+                        { "name" : "Position" }
+                    ]
                 },
                  {
                     "name" : "Register",
-                    "parameters" : [ "Plane" ]
+                    "parameter" : [
+                        { "name": "Plane" }
+                    ]
                 }
             ]
         },
@@ -57,12 +61,13 @@
                 {
                     "name" : "DistanceBetweenTwoPoints",
                     "parameter" : [
-                        "Position",
+                        { "name": "Position"},
                         {
                             "name" : "RegisterPositionToPlane",
                             "parameter" : [
-                                "Position",
-                                "Plane" ]
+                                { "name": "Position"},
+                                { "name": "Plane"}
+                            ]
                         }
                     ]
                 }
