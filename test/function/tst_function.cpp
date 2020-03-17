@@ -133,23 +133,33 @@ public:
 
         QJsonDocument doc = QJsonDocument::fromJson(val.toUtf8());
         QJsonObject json = doc.object();
-        foreach(QJsonValue function, json["functions"].toArray()) {
-            // qDebug() << function;
 
-            ConfiguredFunctionConfig config;
+        switch(json["version"].toInt()) {
+        case 1: {
+            foreach(QJsonValue function, json["functions"].toArray()) {
+                // qDebug() << function;
 
-            QJsonObject object = function.toObject();
-            config.name = object["name"].toString();
-            config.applicableFor = applicableFor(object["applicableFor"]);
+                ConfiguredFunctionConfig config;
 
-            config.neededElements = neededElements(object["neededElements"]);
+                QJsonObject object = function.toObject();
+                config.name = object["name"].toString();
+                config.applicableFor = applicableFor(object["applicableFor"]);
 
-            config.functionNames = functionNames(object["innerFunctions"]);
+                config.neededElements = neededElements(object["neededElements"]);
 
-            config.inputElementsMapping = inputElementsMapping(config, object["inputElementMappings"]);
+                config.functionNames = functionNames(object["innerFunctions"]);
 
-            configs.append(config);
+                config.inputElementsMapping = inputElementsMapping(config, object["inputElementMappings"]);
+
+                configs.append(config);
+            }
+
+        } case 2: {
+
         }
+
+        }
+
 
 
         return configs;
