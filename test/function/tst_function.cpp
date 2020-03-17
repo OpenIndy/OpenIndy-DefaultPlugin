@@ -39,6 +39,7 @@ struct InputElementMapping {
     int dstInputElementIndex;
 };
 struct ConfiguredFunctionConfig {
+    int version;
     QString name;
     QList<QString> functionNames;
     QMultiMap<int, InputElementMapping> inputElementsMapping;
@@ -140,7 +141,7 @@ public:
                 // qDebug() << function;
 
                 ConfiguredFunctionConfig config;
-
+                config.version = 1;
                 QJsonObject object = function.toObject();
                 config.name = object["name"].toString();
                 config.applicableFor = applicableFor(object["applicableFor"]);
@@ -3269,15 +3270,21 @@ QPointer<Function> FunctionTest::createFunction(QString functionName, QString co
     if(!config.isEmpty() && function.isNull()) {
         FunctionConfigParser parser;
         foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson(config)) {
-            if(config.name.compare(functionName) == 0) {
-                QList<QPointer<Function> > functions;
-                foreach(QString name, config.functionNames) {
-                    QPointer<Function> f = createFunction(name);
-                    functions.append(f);
+            switch(config.version) {
+            case 1:
+                if(config.name.compare(functionName) == 0) {
+                    QList<QPointer<Function> > functions;
+                    foreach(QString name, config.functionNames) {
+                        QPointer<Function> f = createFunction(name);
+                        functions.append(f);
+                    }
+                    function = new ConfiguredFunction(config, functions);
+                    break;
                 }
-                function = new ConfiguredFunction(config, functions);
+            case 2:
                 break;
             }
+
         }
     }
 
