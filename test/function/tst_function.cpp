@@ -213,6 +213,38 @@ private:
         return this->getInputElements().value(config.getNeededElementNames().indexOf(name));
     }
 
+    InputElement getHelperInputElementsByName(QString name) {
+        if(name.compare("ZX") == 0) {
+            double x = 0., y = 0., z = 0., i = 0., j = 1., k=0.;
+
+            OiVec * p = new OiVec(4);
+            p->setAt(0, x);
+            p->setAt(1, y);
+            p->setAt(2, z);
+            p->setAt(3, 1.0);
+            Position * xyz = new Position(*p);
+
+            OiVec * a = new OiVec(4);
+            a->setAt(0, i);
+            a->setAt(1, j);
+            a->setAt(2, k);
+            a->setAt(3, 1.0);
+            Direction * ijk = new Direction(*a);
+
+            QPointer<Plane> feature = new Plane(false, *xyz, *ijk);
+            feature->setIsSolved(true);
+            feature->setFeatureName(name);
+
+            InputElement element;
+            element.typeOfElement = ePlaneElement;
+            element.plane = feature;
+            element.geometry = feature;
+            return element;
+        }
+
+        throw logic_error("no helper input element found");
+    }
+
     bool containsAny(QList<FeatureTypes> a, QList<FeatureTypes> b) {
         if(b.isEmpty()) {
             return true;
