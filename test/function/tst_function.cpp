@@ -242,7 +242,7 @@ private:
         depth++;
 
         QList<QPointer<Function> > functions;
-
+        QPointer<FeatureWrapper> feat;
         for(int index = 0; index <parameter.size(); index++) {
             CFCParameter p = parameter[index];
 
@@ -259,8 +259,27 @@ private:
                 qDebug() << QString("%1applicableFor: containsAny=%2").arg(QString(depth*2, QChar(' '))).arg(contains) << this->getApplicableFor() << f->getApplicableFor();
 
 
-                if(!execute(p.parameter, feature, f, depth)) {
+                feat = contains ? feature : createApplicableFeature(f->getApplicableFor());
+                if(!execute(p.parameter, feat, f, depth)) {
                     return false; // fail fast
+                }
+
+                if(!contains) {
+
+                    switch(feat->getFeatureTypeEnum()) {
+                    case ePointFeature: {
+                        InputElement *ie = new InputElement();
+                        ie->typeOfElement = ePointElement;
+                        ie->point = feat->getPoint();
+                        ie->geometry = feat->getGeometry();
+                        function->addInputElement(*ie, index);
+                        break;
+                    }
+                    default:
+                        throw logic_error("not implemented");
+                    }
+
+
                 }
 
                 functions.append(f);
@@ -278,7 +297,7 @@ private:
             }
 
             // try to solve the current function
-            if(!functions[functionIndex]->exec(feature)){
+            if(!functions[functionIndex]->exec(feat)){
                 return false;
             }
         }
