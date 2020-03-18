@@ -246,15 +246,18 @@ private:
         for(int index = 0; index <parameter.size(); index++) {
             CFCParameter p = parameter[index];
 
-            qDebug() << depth << ": "<< p.name;
+            qDebug() << QString("%1%2").arg(QString(depth*2, QChar(' '))).arg(p.name);
 
             if(this->config.isNeededElement(p.name)) { // is leaf
                 foreach(InputElement ie, this->getInputElementsByName(p.name)) {
-                    qDebug() << depth << ": " << function->getMetaData().name << ", " << ie.id;
+                    qDebug() << QString("%1add input element id: %3 to function: %2").arg(QString(depth*2, QChar(' '))).arg(function->getMetaData().name).arg(ie.id);
                     function->addInputElement(ie, index);
                 }
             } else { // is branch
                 QPointer<Function> f = this->getFunction(p.name);
+                const bool contains = containsAny(this->getApplicableFor(), f->getApplicableFor());
+                qDebug() << QString("%1applicableFor: containsAny=%2").arg(QString(depth*2, QChar(' '))).arg(contains) << this->getApplicableFor() << f->getApplicableFor();
+
 
                 if(!execute(p.parameter, feature, f, depth)) {
                     return false; // fail fast
