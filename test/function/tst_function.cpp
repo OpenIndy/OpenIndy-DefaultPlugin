@@ -289,6 +289,10 @@ private:
                     qDebug() << QString("%1add input element id: %3 to function: %2").arg(QString(depth*2, QChar(' '))).arg(function->getMetaData().name).arg(ie.id);
                     function->addInputElement(ie, index);
                 }
+            } else if(this->config.isHelperElement(p.name)) { // is leaf
+                InputElement ie = this->getHelperInputElementsByName(p.name);
+                qDebug() << QString("%1add helper input element: %3 to function: %2").arg(QString(depth*2, QChar(' '))).arg(function->getMetaData().name).arg(p.name);
+                function->addInputElement(ie, index);
             } else { // is branch
                 QPointer<Function> f = this->getFunction(p.name);
                 const bool contains = containsAny(this->getApplicableFor(), f->getApplicableFor());
