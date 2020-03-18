@@ -209,6 +209,35 @@ private:
         return this->getInputElements().value(config.getNeededElementNames().indexOf(name));
     }
 
+    bool containsAny(QList<FeatureTypes> a, QList<FeatureTypes> b) {
+        if(b.isEmpty()) {
+            return true;
+        }
+        foreach(FeatureTypes ft, a) {
+            if(b.contains(ft)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    QPointer<FeatureWrapper> createApplicableFeature(QList<FeatureTypes> fts) {
+        QPointer<FeatureWrapper> fw = new FeatureWrapper();
+
+        switch (fts.first()) {
+        case ePointFeature: {
+            QPointer<Point> point = new Point(false);
+            fw->setPoint(point);
+            break;
+        }
+        default:
+            throw logic_error("not implemented");
+        }
+
+        return fw;
+    }
+
     bool execute(QList<CFCParameter> parameter, QPointer<FeatureWrapper> feature, QPointer<Function> function = 0, int depth = 0) {
         depth++;
 
