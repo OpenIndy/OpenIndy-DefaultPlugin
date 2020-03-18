@@ -598,6 +598,7 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testZXDistance_PointFromPoints_Register();
     void testDistance_PointFromPoints_Register();
     void testPointFromPoints_Register3();
     void testPointFromPoints_Register2();
@@ -3615,6 +3616,34 @@ void FunctionTest::testDistance_PointFromPoints_Register() {
     QVERIFY2(feature->getIsSolved(), "recalc");
 
     COMPARE_DOUBLE(feature->getDistance(), 1881.5050, 0.0001);
+
+}
+
+void FunctionTest::testZXDistance_PointFromPoints_Register() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setScalarEntityDistance(feature);
+
+    QPointer<Function> function = createFunction("DistanceProjectionZX", "functionConfig2.json");
+    QVERIFY2(!function.isNull(), "function is null");
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
+    addInputPlane( 1374.9964, 1624.9982, 1024.7504, 0.100818, -0.097854, 0.990081, function, 2001, 1);
+
+
+
+    feature->addFunction(function);
+    QVERIFY2(feature->getDisplayFunctions().compare("DistanceProjectionZX")==0, "getDisplayFunctions");
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "recalc");
+
+    COMPARE_DOUBLE(feature->getDistance(), 1872.4751, 0.0001);
 
 }
 QTEST_APPLESS_MAIN(FunctionTest)
