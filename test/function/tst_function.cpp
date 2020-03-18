@@ -66,6 +66,10 @@ struct ConfiguredFunctionConfig {
         return false;
     }
 
+    bool isHelperElement(QString name) {
+        return name.compare("ZX") == 0;
+    }
+
     QList<QString> getFunctionNames() {
         switch(version) {
         case 1:
@@ -83,7 +87,7 @@ struct ConfiguredFunctionConfig {
 
     void collectFunctionNames(QList<CFCParameter> &parameter, QList<QString> &names) {
         foreach(CFCParameter p, parameter) {
-            if(!isNeededElement(p.name)) {
+            if(!isNeededElement(p.name) && !isHelperElement(p.name)) {
                 names.append(p.name);
             }
             collectFunctionNames(p.parameter, names);
