@@ -978,7 +978,7 @@ void FunctionTest::addInputPlane(double x, double y, double z, double i, double 
     feature->setFeatureName(QString("plane_%1").arg(id));
 
     InputElement * element = new InputElement(id);
-    element->typeOfElement = eLineElement;
+    element->typeOfElement = ePlaneElement;
     element->plane = feature;
     element->geometry = feature;
 
