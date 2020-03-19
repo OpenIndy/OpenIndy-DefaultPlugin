@@ -41,6 +41,7 @@ struct InputElementMapping {
 
 struct CFCParameter {
     QString name;
+    QString comment;
     QList<CFCParameter> parameter;
 };
 
@@ -420,6 +421,7 @@ private:
 
             CFCParameter p;
             p.name = object["name"].toString();
+            p.comment = object["comment"].toString();
             p.parameter = parameter(object["parameter"]);
 
             list.append(p);
