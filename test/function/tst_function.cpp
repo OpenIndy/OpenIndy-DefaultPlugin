@@ -310,11 +310,15 @@ private:
 
                     switch(feat->getFeatureTypeEnum()) {
                     case ePointFeature: {
-                        InputElement *ie = new InputElement();
-                        ie->typeOfElement = ePointElement;
-                        ie->point = feat->getPoint();
-                        ie->geometry = feat->getGeometry();
-                        function->addInputElement(*ie, index);
+                        InputElement ie;
+                        ie.label = QString("%1 %2").arg(p.name).arg("point");
+                        ie.typeOfElement = ePointElement;
+                        ie.point = feat->getPoint();
+                        ie.geometry = feat->getGeometry();
+
+                        qDebug() << QString("%1add feature input element: %3 (%4) to function: %2").arg(QString(depth*2, QChar(' '))).arg(function->getMetaData().name).arg(ie.id).arg(ie.label);
+
+                        function->addInputElement(ie, index);
                         break;
                     }
                     default:
