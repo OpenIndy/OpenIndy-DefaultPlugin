@@ -61,12 +61,12 @@
                 {
                     "name" : "DistanceBetweenTwoPoints",
                     "parameter" : [
-                        { "name": "Position"},
+                        { "name": "Position" },
                         {
                             "name" : "RegisterPositionToPlane",
                             "parameter" : [
-                                { "name": "Position"},
-                                { "name": "Plane"}
+                                { "name": "Position" },
+                                { "name": "Plane" }
                             ]
                         }
                     ]
@@ -101,22 +101,25 @@
                     "parameter" : [
                         {
                             "name" : "RegisterPositionToPlane",
+                            "comment" : "Lotfusspunkt von Punkt auf ZX",
                             "parameter" : [
-                                { "name": "Position"},
-                                { "name": "ZX"}
+                                { "name": "Position" },
+                                { "name": "ZX" }
                             ]
                         },
                         {
                             "name" : "RegisterPositionToPlane",
+                            "comment" : "Lotfusspunkt von 'Lotfusspunkt auf Ebene' auf ZX",
                             "parameter" : [
                                 {
                                     "name" : "RegisterPositionToPlane",
+                                    "comment" : "Lotfusspunkt von Punkt auf Ebene",
                                     "parameter" : [
-                                        { "name": "Position"},
-                                        { "name": "Plane"}
+                                        { "name": "Position" },
+                                        { "name": "Plane" }
                                     ]
                                 },
-                                { "name": "ZX"}
+                                { "name": "ZX" }
                             ]
                         }
                     ]
