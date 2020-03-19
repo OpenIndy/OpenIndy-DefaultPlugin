@@ -284,16 +284,16 @@ private:
         for(int index = 0; index <parameter.size(); index++) {
             CFCParameter p = parameter[index];
 
-            qDebug() << QString("%1%2").arg(QString(depth*2, QChar(' '))).arg(p.name);
+            qDebug() << QString("%1%2: %3").arg(QString(depth*2, QChar(' '))).arg(p.name).arg(p.comment);
 
             if(this->config.isNeededElement(p.name)) { // is leaf
                 foreach(InputElement ie, this->getInputElementsByName(p.name)) {
-                    qDebug() << QString("%1add input element id: %3 to function: %2").arg(QString(depth*2, QChar(' '))).arg(function->getMetaData().name).arg(ie.id);
+                    qDebug() << QString("%1add input element id: %3 (%4) to function: %2").arg(QString(depth*2, QChar(' '))).arg(function->getMetaData().name).arg(ie.id).arg(ie.label);
                     function->addInputElement(ie, index);
                 }
             } else if(this->config.isHelperElement(p.name)) { // is leaf
                 InputElement ie = this->getHelperInputElementsByName(p.name);
-                qDebug() << QString("%1add helper input element: %3 to function: %2").arg(QString(depth*2, QChar(' '))).arg(function->getMetaData().name).arg(p.name);
+                qDebug() << QString("%1add helper input element: %3 (%4) to function: %2").arg(QString(depth*2, QChar(' '))).arg(function->getMetaData().name).arg(ie.id).arg(ie.label);
                 function->addInputElement(ie, index);
             } else { // is branch
                 QPointer<Function> f = this->getFunction(p.name);
@@ -303,7 +303,8 @@ private:
 
                 feat = contains ? feature : createApplicableFeature(f->getApplicableFor());
                 if(!execute(p.parameter, feat, f, depth)) {
-                    return false; // fail fast
+                    qDebug() << QString("%1fail: %2").arg(QString(depth*2, QChar(' '))).arg(p.name);
+                    return false; // fail
                 }
 
                 if(!contains) {
