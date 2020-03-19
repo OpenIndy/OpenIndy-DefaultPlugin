@@ -237,6 +237,7 @@ private:
             feature->setFeatureName(name);
 
             InputElement element;
+            element.label = name;
             element.typeOfElement = ePlaneElement;
             element.plane = feature;
             element.geometry = feature;
