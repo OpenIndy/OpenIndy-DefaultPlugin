@@ -40,10 +40,23 @@ struct InputElementMapping {
 };
 
 struct CFCParameter {
+
     QString name;
     QString comment;
     QList<CFCParameter> parameter;
+
+    QString prettyPrint() {
+        QString s;
+        s += "name: " + this->name + ", comment: " + this->comment + ", parameter: [ ";
+        foreach(CFCParameter p, this->parameter) {
+            s += p.prettyPrint();
+        }
+        s += " ], ";
+        return s;
+    }
+
 };
+
 
 struct ConfiguredFunctionConfig {
     int version;
