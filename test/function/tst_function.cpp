@@ -647,6 +647,11 @@ public:
 
 private Q_SLOTS:
     void testZXDistance_PointFromPoints_Register();
+    void testTODO1();
+    void testTODO2();
+    void testTODO3();
+    void testTODO4();
+    void testTODO5();
     void testDistance_PointFromPoints_Register();
     void testPointFromPoints_Register3();
     void testPointFromPoints_Register2();
@@ -3694,6 +3699,25 @@ void FunctionTest::testZXDistance_PointFromPoints_Register() {
     COMPARE_DOUBLE(feature->getDistance(), 1872.4751, 0.0001);
 
 }
+
+void FunctionTest::testTODO1() {
+    QFAIL("TODO:  test transformation"); // see ZXPlane construct function
+
+}
+void FunctionTest::testTODO2() {
+    QFAIL("TODO:  test BestFitCylinder, ChangeRadius");
+}
+void FunctionTest::testTODO3() {
+    QFAIL("TODO:  test BestFitPoint, TranslateByValue");
+}
+
+void FunctionTest::testTODO4() {
+    QFAIL("TODO:  test BestFitPoint, RectifyToPoint, Shift");
+}
+void FunctionTest::testTODO5() {
+    QFAIL("TODO:  test OriginPointVector");
+}
+
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
