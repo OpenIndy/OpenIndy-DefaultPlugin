@@ -3676,6 +3676,7 @@ void FunctionTest::testZXDistance_PointFromPoints_Register() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
+    feature->setFeatureName("ScalarEntityDistance");
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setScalarEntityDistance(feature);
 
