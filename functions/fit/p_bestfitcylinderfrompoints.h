@@ -1,19 +1,18 @@
-#ifndef P_BESTFITCYLINDER_H
-#define P_BESTFITCYLINDER_H
+#ifndef P_BESTFITCYLINDERFROMPOINTS_H
+#define P_BESTFITCYLINDERFROMPOINTS_H
 
 #include <QObject>
 #include <QPointer>
 
 #include "fitfunction.h"
-#include "oivec.h"
-#include "oimat.h"
+#include "p_bestfitcylinder.h"
 
 using namespace oi;
 
 /*!
- * \brief The BestFitCylinder class
+ * \brief The BestFitCylinderFromPoints class
  */
-class BestFitCylinder : public FitFunction, public BestFitCylinderUtil
+class BestFitCylinderFromPoints : public FitFunction, public BestFitCylinderUtil
 {  
     Q_OBJECT
 
@@ -43,4 +42,4 @@ private:
 
 };
 
-#endif // P_BESTFITCYLINDER_H
+#endif // P_BESTFITCYLINDERFROMPOINTS_H

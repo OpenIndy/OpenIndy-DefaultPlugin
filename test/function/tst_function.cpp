@@ -5,6 +5,7 @@
 
 #include "p_register.h"
 #include "p_bestfitcylinder.h"
+#include "p_bestfitcylinderfrompoints.h"
 #include "p_intersectlineline.h"
 #include "p_rectifytopoint.h"
 #include "p_rectifytovector.h"
@@ -32,6 +33,11 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+
+    void testVRadial();
+    void testVRadial2();
+    void testVRadial3();
+
     void testCircleInPlaneFromPoints();
 
     void testRectifyToVector_PlaneToCoodinateSystem_yAxis();
@@ -91,7 +97,6 @@ private Q_SLOTS:
     void testBestFitCylinder2_guess_axis();
     void testBestFitCylinder2_1st_2_pts();
 
-    void testVRadial();
 
     void testDisableAllObservationsButLastOne_no();
     void testDisableAllObservationsButLastOne_yes();
@@ -101,7 +106,7 @@ private Q_SLOTS:
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
-    void addInputObservations(QString data, QPointer<Function> function, int id, int inputElementKey);
+    void addInputObservations(QString data, QPointer<Function> function, int id, int inputElementKey, bool shouldBeUsed);
 
     void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
     void addInputStation(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
@@ -126,7 +131,7 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
     qDebug() << msg;
 }
 
-void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int id = 1000, int inputElementKey = InputElementKey::eDefault) {
+void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int id = 1000, int inputElementKey = InputElementKey::eDefault, bool shouldBeUsed = true) {
     QTextStream stream(data.toUtf8());
     while(!stream.atEnd()) {
         id++;
@@ -160,6 +165,7 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
         InputElement * element = new InputElement(id);
         element->typeOfElement = eObservationElement;
         element->observation = observation;
+        element->shouldBeUsed = shouldBeUsed;
 
 
         function->addInputElement(*element, inputElementKey);
@@ -176,7 +182,7 @@ void FunctionTest::addInputPoints(QString data, QPointer<Function> function, int
             continue;
         }
 
-        QPointer<Point> feature = new Point(false, Position( xyz.at(0).toDouble(),  xyz.at(1).toDouble(),  xyz.at(2).toDouble()));
+        QPointer<Point> feature = new Point(id, false, Position( xyz.at(0).toDouble(),  xyz.at(1).toDouble(),  xyz.at(2).toDouble()));
         feature->setIsSolved(true);
         feature->setFeatureName(QString("point_%1").arg(id));
 
@@ -537,6 +543,118 @@ void FunctionTest::testVRadial()
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.007), 0.001);
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
+
+    COMPARE_DOUBLE(function->getStatistic().getFormError(), 0.067, 0.001);
+
+    delete function.data();
+}
+
+// OI-637
+void FunctionTest::testVRadial2()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCylinderFromPoints();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-3283.654 -79.927 194.917\n\
+-3271.578 -84.991 203.643\n\
+-3292.599 -64.647 196.517\n\
+-3308.806 -73.417 213.805\n\
+-3301.555 -87.819 210.971\n\
+-3289.428 -79.973 198.027\n\
+-3292.505 -57.849 200.595\n\
+-3303.342 -63.362 213.794\n\
+");
+
+
+    addInputPoints(data, function);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "guess axis");
+    function->setScalarInputParams(scalarInputParams);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
+    COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1),   0.026, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (-0.037), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1),   0.010, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.003), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
+
+    COMPARE_DOUBLE(function->getStatistic().getFormError(), 0.067, 0.001);
+
+    delete function.data();
+}
+void FunctionTest::testVRadial3() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-3283.654 -79.927 194.917\n\
+-3271.578 -84.991 203.643\n\
+-3292.599 -64.647 196.517\n\
+-3308.806 -73.417 213.805\n\
+-3301.555 -87.819 210.971\n\
+-3289.428 -79.973 198.027\n\
+-3292.505 -57.849 200.595\n\
+-3303.342 -63.362 213.794\n\
+");
+
+
+    addInputObservations(data, function);
+    addInputObservations("-3305.0 -65.0 15.", function, 5000, InputElementKey::eDefault, false);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "guess axis");
+    function->setScalarInputParams(scalarInputParams);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
+    COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1),   0.026, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (-0.037), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1),   0.010, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.003), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(5001).corrections.value("vr", -1), (140.563), 0.001);
 
     COMPARE_DOUBLE(function->getStatistic().getFormError(), 0.067, 0.001);
 
