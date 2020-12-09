@@ -18,6 +18,11 @@
 #include "p_bestfitcircleinplanefrompoints.h"
 #include "p_bestfitline.h"
 #include "p_bestfitsphere.h"
+#include "p_pointfrompoints.h"
+#include "p_register.h"
+#include "p_factory.h"
+
+#include "configuredfunction.h"
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY2(std::abs(actual-expected)< threshold, QString("actual: %1, expected: %2").arg(actual).arg(expected).toLatin1().data());
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
@@ -38,6 +43,20 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testZXDistance_PointFromPoints_Register();
+    void testTODO1();
+    void testTODO2();
+    void testTODO3();
+    void testTODO4();
+    void testTODO5();
+    void testDistance_PointFromPoints_Register();
+    void testPointFromPoints_Register3();
+    void testPointFromPoints_Register2();
+    void testPointFromPoints_Register();
+
+    void testPointFromPoints_point();
+    void testPointFromPoints_circle();
+
     void testBestFitSphere_residuals();
     void testBestFitCircleInPlane_residuals2();
     void testBestFitCircleInPlane_residuals();
@@ -117,6 +136,8 @@ private Q_SLOTS:
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
+    QPointer<Function> createFunction(QString name, QString config);
+
     void addInputObservations(QString data, QPointer<Function> function, int id, int inputElementKey, bool shouldBeUsed);
 
     void addInputLine(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
@@ -126,6 +147,7 @@ private:
     void addInputPoint(double x, double y, double z, QPointer<Function> function, int id, int inputElementKey);
     void addInputPoints(QString data, QPointer<Function> function, int id, int inputElementKey);
     void addInputPlane(double x, double y, double z, double i, double j, double k, QPointer<Function> function, int id, int inputElementKey);
+    void addInputCircle(double x, double y, double z, double i, double j, double k, double radius, QPointer<Function> function, int id, int inputElementKey);
 
     QPointer<Plane> createPlane(double x, double y, double z, double i, double j, double k);
     QPointer<Cylinder> createCylinder(double x, double y, double z, double i, double j, double k, double r);
@@ -301,16 +323,46 @@ void FunctionTest::addInputCoordinateSystem(OiMat trafo, QPointer<Function> func
 
 void FunctionTest::addInputPoint(double x, double y, double z, QPointer<Function> function, int id = 2000, int inputElementKey = InputElementKey::eDefault) {
     OiVec pointPos = OiVec(3);
-    pointPos.setAt(0, 1.);
-    pointPos.setAt(1, 1.);
-    pointPos.setAt(2, -5.);
+    pointPos.setAt(0, x);
+    pointPos.setAt(1, y);
+    pointPos.setAt(2, z);
     QPointer<Point> feature = new Point(false, Position(pointPos));
     feature->setIsSolved(true);
     feature->setFeatureName(QString("point_%1").arg(id));
 
     InputElement * element = new InputElement(id);
-    element->typeOfElement = eLineElement;
+    element->typeOfElement = ePointElement;
     element->point = feature;
+    element->geometry = feature;
+
+    function->addInputElement(*element, inputElementKey);
+}
+
+void FunctionTest::addInputCircle(double x, double y, double z, double i, double j, double k, double radius, QPointer<Function> function, int id = 2000, int inputElementKey = InputElementKey::eDefault){
+    OiVec * p = new OiVec(4);
+    p->setAt(0, x);
+    p->setAt(1, y);
+    p->setAt(2, z);
+    p->setAt(3, 1.0);
+    Position * xyz = new Position(*p);
+
+    OiVec * a = new OiVec(4);
+    a->setAt(0, i);
+    a->setAt(1, j);
+    a->setAt(2, k);
+    a->setAt(3, 1.0);
+    Direction * ijk = new Direction(*a);
+
+    Radius *r = new Radius();
+    r->setRadius(radius);
+
+    Circle * feature = new Circle(false, *xyz, *ijk, *r);
+    feature->setIsSolved(true);
+    feature->setFeatureName(QString("circle_%1").arg(id));
+
+    InputElement * element = new InputElement(id);
+    element->typeOfElement = eCircleElement;
+    element->circle = feature;
     element->geometry = feature;
 
     function->addInputElement(*element, inputElementKey);
@@ -336,7 +388,7 @@ void FunctionTest::addInputPlane(double x, double y, double z, double i, double 
     feature->setFeatureName(QString("plane_%1").arg(id));
 
     InputElement * element = new InputElement(id);
-    element->typeOfElement = eLineElement;
+    element->typeOfElement = ePlaneElement;
     element->plane = feature;
     element->geometry = feature;
 
@@ -2710,10 +2762,7 @@ void FunctionTest::testBestFitSphere_residuals()
 
     COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.0017, 0.001);
 
-    foreach(Residual r, function->getStatistic().getDisplayResiduals()) {
-        //qDebug()<< r.elementId << ": " << r.corrections;
-        qDebug() << QString("COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(%1).corrections.value(\"vr\", -1), (%2), 0.00001);").arg(r.elementId).arg(r.corrections.value(("vr")));
-    }
+
 //QDEBUG : FunctionTest::testBestFitSphere_residuals() 1000 :  QMap(("v", 0.004422)("vx", -4.32221e-05)("vy", -0.00046997)("vz", -0.00442179))
 //QDEBUG : FunctionTest::testBestFitSphere_residuals() 1001 :  QMap(("v", 3.62772e-05)("vx", -3.0068e-06)("vy", -2.47065e-06)("vz", -3.61524e-05))
 //QDEBUG : FunctionTest::testBestFitSphere_residuals() 1002 :  QMap(("v", 0.0025312)("vx", -0.0002547)("vy", 2.68612e-05)("vz", -0.00251835))
@@ -2784,6 +2833,287 @@ void FunctionTest::testBestFitSphere_residuals()
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("vr", -1), (-0.140637), 0.00001); // shouldInUse == false
 
     delete function.data();
+}
+
+
+void FunctionTest::testPointFromPoints_point()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new PointFromPoints();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> feature = new Point(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPoint(feature);
+
+    addInputPoint(1000.6609, 2000.3247, 3000.3180, function);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (1000.6609), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), (2000.3247), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (3000.3180), 0.0001);
+
+    delete function.data();
+}
+
+void FunctionTest::testPointFromPoints_circle()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new PointFromPoints();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> feature = new Point(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPoint(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (1000.6609), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), (2000.3247), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (3000.3180), 0.0001);
+
+    delete function.data();
+}
+
+void FunctionTest::testPointFromPoints_Register() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Point> feature = new Point(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPoint(feature);
+
+    QPointer<Function> function1 = new PointFromPoints();
+    function1->init();
+    QObject::connect(function1.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+    feature->addFunction(function1);
+
+    QPointer<Function> function2 = new Register();
+    function2->init();
+    QObject::connect(function2.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+    feature->addFunction(function2);
+
+    QVERIFY2(feature->getDisplayFunctions().compare("PointFromPoints, Register")==0, "getDisplayFunctions");
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function1);
+
+    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function2);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "recalc");
+
+    // QDEBUG : FunctionTest::testFunctions() position= 710.7908481 , 2281.722941 , 153.1470537 , direction= 0 , 0 , 0 , stdev= nan
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
+
+}
+
+QPointer<Function> FunctionTest::createFunction(QString functionName, QString configName = "") {
+    QPointer<Function> function;
+    if(functionName.compare("DistanceBetweenTwoPoints") == 0) {
+        function = new DistanceBetweenTwoPoints();
+    } else {
+        OiTemplatePlugin plugin;
+        function = plugin.createFunction(functionName);
+    }
+
+    if(!configName.isEmpty() && function.isNull()) {
+        FunctionConfigParser parser;
+        foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson(configName)) {
+            if(config.name.compare(functionName) == 0) {
+                QList<QPointer<Function> > functions;
+                foreach(QString name, config.getFunctionNames()) {
+                    QPointer<Function> f = createFunction(name, configName);
+                    functions.append(f);
+                }
+
+                switch(config.version) {
+                case 1:
+                    function = new ConfiguredFunction(config, functions);
+                    break;
+                case 2:
+                    function = new ConfiguredFunction2(config, functions);
+                    break;
+                }
+            }
+
+            if(!function.isNull()) {
+                break;
+            }
+
+        }
+    }
+
+    Q_ASSERT_X(!function.isNull(), "createFunction", QString("no function found: %1").arg(functionName).toLatin1().data());
+
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    return function;
+}
+
+
+void FunctionTest::testPointFromPoints_Register2() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Point> feature = new Point(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPoint(feature);
+
+    QPointer<Function> function = createFunction("RegisterPositionToPlane", "functionConfig1.json");
+    QVERIFY2(!function.isNull(), "function is null");
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
+
+    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2001, 1);
+
+    feature->addFunction(function);
+    QVERIFY2(feature->getDisplayFunctions().compare("RegisterPositionToPlane")==0, "getDisplayFunctions");
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "recalc");
+
+    // QDEBUG : FunctionTest::testFunctions() position= 710.7908481 , 2281.722941 , 153.1470537 , direction= 0 , 0 , 0 , stdev= nan
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
+
+}
+
+void FunctionTest::testPointFromPoints_Register3() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Point> feature = new Point(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPoint(feature);
+
+    QPointer<Function> function = createFunction("RegisterPositionToPlane", "functionConfig2.json");
+    QVERIFY2(!function.isNull(), "function is null");
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
+
+    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2001, 1);
+
+    feature->addFunction(function);
+    QVERIFY2(feature->getDisplayFunctions().compare("RegisterPositionToPlane")==0, "getDisplayFunctions");
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "recalc");
+
+    // QDEBUG : FunctionTest::testFunctions() position= 710.7908481 , 2281.722941 , 153.1470537 , direction= 0 , 0 , 0 , stdev= nan
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
+
+}
+
+
+void FunctionTest::testDistance_PointFromPoints_Register() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setScalarEntityDistance(feature);
+
+    QPointer<Function> function = createFunction("DistanceFromPlane", "functionConfig2.json");
+    QVERIFY2(!function.isNull(), "function is null");
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
+    addInputPlane( 1374.9964, 1624.9982, 1024.7504, 0.100818, -0.097854, 0.990081, function, 2001, 1);
+
+
+
+    feature->addFunction(function);
+    QVERIFY2(feature->getDisplayFunctions().compare("DistanceFromPlane")==0, "getDisplayFunctions");
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "recalc");
+
+    COMPARE_DOUBLE(feature->getDistance(), 1881.5050, 0.0001);
+
+}
+
+void FunctionTest::testZXDistance_PointFromPoints_Register() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
+    feature->setFeatureName("ScalarEntityDistance");
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setScalarEntityDistance(feature);
+
+    QPointer<Function> function = createFunction("DistanceProjectionZX", "functionConfig2.json");
+    QVERIFY2(!function.isNull(), "function is null");
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
+    addInputPlane( 1374.9964, 1624.9982, 1024.7504, 0.100818, -0.097854, 0.990081, function, 2001, 1);
+
+
+
+    feature->addFunction(function);
+    QVERIFY2(feature->getDisplayFunctions().compare("DistanceProjectionZX")==0, "getDisplayFunctions");
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "recalc");
+
+    COMPARE_DOUBLE(feature->getDistance(), 1872.4751, 0.0001);
+
+}
+
+void FunctionTest::testTODO1() {
+    QFAIL("TODO:  test transformation"); // see ZXPlane construct function
+
+}
+void FunctionTest::testTODO2() {
+    QFAIL("TODO:  test BestFitCylinder, ChangeRadius");
+}
+void FunctionTest::testTODO3() {
+    QFAIL("TODO:  test BestFitPoint, TranslateByValue");
+}
+
+void FunctionTest::testTODO4() {
+    QFAIL("TODO:  test BestFitPoint, RectifyToPoint, Shift");
+}
+void FunctionTest::testTODO5() {
+    QFAIL("TODO:  test OriginPointVector");
 }
 
 QTEST_APPLESS_MAIN(FunctionTest)

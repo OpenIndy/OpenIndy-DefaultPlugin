@@ -1,0 +1,56 @@
+{
+    "version" : 1,
+    "functions" : [
+        {
+            "name": "RegisterPositionToPlane",
+            "description": "OI-523",
+            "applicableFor" : [ "Point" ],
+
+            "neededElements": [
+                {
+                    "name": "Position",
+                    "description" : "Select at least one points to calculate the best fit point.",
+                    "infinite": true,
+                    "typeOfElement": "Position"
+                },
+                {
+                    "name": "Plane",
+                    "description" : "Select a plane in which the target geometry is to be projected.",
+                    "infinite": false,
+                    "typeOfElement": "Plane"
+                }
+            ],
+
+            "innerFunctions" : [
+                {
+                    "name": "PointFromPoints"
+                },
+                {
+                    "name": "Register"
+                }
+            ],
+
+            "inputElementMappings" : [
+                {
+                    "from": {
+                        "neededElement" : "Position"
+                    },
+                    "to" : {
+                        "function" : "PointFromPoints",
+                        "index" : 0
+                    }
+                },
+                {
+                    "from": {
+                        "neededElement" : "Plane"
+                    },
+                    "to" : {
+                        "function" : "Register",
+                        "index" : 0
+                    }
+                }
+            ]
+        }
+
+    ]
+}

@@ -30,8 +30,15 @@ INCLUDEPATH += \
     $$PWD/../../lib/OpenIndy-Core/include/geometry \
     $$PWD/../../lib/OpenIndy-Core/include/plugin/function \
     $$PWD/../../lib/OpenIndy-Core/include/plugin/simulation \
-    $$PWD/../../lib/OpenIndy-Core/include/plugin/sensor
-
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/sensor \
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/networkAdjustment \
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/tool \
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/exchange \
+    $$PWD/../../functions/systemTransformation \
+    $$PWD/../../sensors/laserTracker/pseudoTracker \
+    $$PWD/../../sensors/tachymeter/LeicaGeoCom \
+    $$PWD/../../simulations/simplePolarMeasurement \
+    $$PWD/../../exchange
 
 CONFIG(debug, debug|release) {
     BUILD_DIR=debug
@@ -78,3 +85,7 @@ LIBS += \
 
     }
 }
+
+HEADERS += \
+    treeutil.h \
+    configuredfunction.h

@@ -1,0 +1,131 @@
+{
+    "version" : 2,
+    "functions" : [
+        {
+            "name": "RegisterPositionToPlane",
+            "description": "OI-523",
+            "applicableFor" : [ "Point" ],
+
+            "neededElements": [
+                {
+                    "name": "Position",
+                    "description" : "Select one points to register to the plane.",
+                    "infinite": true,
+                    "typeOfElement": "Position"
+                },
+                {
+                    "name": "Plane",
+                    "description" : "Select a plane in which the target geometry is to be projected.",
+                    "infinite": false,
+                    "typeOfElement": "Plane"
+                }
+            ],
+
+            "parameter": [
+                {
+                    "name" : "PointFromPoints",
+                    "parameter" : [
+                        { "name" : "Position" }
+                    ]
+                },
+                {
+                    "name" : "Register",
+                    "parameter" : [
+                        { "name": "Plane" }
+                    ]
+                }
+            ]
+        },
+        
+        {
+            "name": "DistanceFromPlane",
+            "description": "OI-520",
+            "applicableFor" : [ "ScalarEntityDistance" ],
+
+            "neededElements": [
+                {
+                    "name": "Position",
+                    "description" : "Select one points to register to the plane.",
+                    "infinite": true,
+                    "typeOfElement": "Position"
+                },
+                {
+                    "name": "Plane",
+                    "description" : "Select a plane in which the target geometry is to be projected.",
+                    "infinite": false,
+                    "typeOfElement": "Plane"
+                }
+            ],
+
+            "parameter": [
+                {
+                    "name" : "DistanceBetweenTwoPoints",
+                    "parameter" : [
+                        { "name": "Position" },
+                        {
+                            "name" : "RegisterPositionToPlane",
+                            "parameter" : [
+                                { "name": "Position" },
+                                { "name": "Plane" }
+                            ]
+                        }
+                    ]
+                }
+
+            ]
+        },
+
+        {
+            "name": "DistanceProjectionZX",
+            "description": "OI-520",
+            "applicableFor" : [ "ScalarEntityDistance" ],
+
+            "neededElements": [
+                {
+                    "name": "Position",
+                    "description" : "Select one points to register to the plane.",
+                    "infinite": true,
+                    "typeOfElement": "Position"
+                },
+                {
+                    "name": "Plane",
+                    "description" : "Select a plane in which the target geometry is to be projected.",
+                    "infinite": false,
+                    "typeOfElement": "Plane"
+                }
+            ],
+
+            "parameter": [
+                {
+                    "name" : "DistanceBetweenTwoPoints",
+                    "parameter" : [
+                        {
+                            "name" : "RegisterPositionToPlane",
+                            "comment" : "Lotfusspunkt von Punkt auf ZX",
+                            "parameter" : [
+                                { "name": "Position" },
+                                { "name": "ZX" }
+                            ]
+                        },
+                        {
+                            "name" : "RegisterPositionToPlane",
+                            "comment" : "Lotfusspunkt von 'Lotfusspunkt auf Ebene' auf ZX",
+                            "parameter" : [
+                                {
+                                    "name" : "RegisterPositionToPlane",
+                                    "comment" : "Lotfusspunkt von Punkt auf Ebene",
+                                    "parameter" : [
+                                        { "name": "Position" },
+                                        { "name": "Plane" }
+                                    ]
+                                },
+                                { "name": "ZX" }
+                            ]
+                        }
+                    ]
+                }
+
+            ]
+        }
+    ]
+}
