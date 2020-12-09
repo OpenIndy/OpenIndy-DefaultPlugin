@@ -41,7 +41,7 @@ private:
     //##############
 
     bool approximate(Sphere &sphere, const QList<QPointer<Observation> > &inputObservations);
-    bool fit(Sphere &sphere, const QList<QPointer<Observation> > &inputObservations);
+    bool fit(Sphere &sphere, const QList<QPointer<Observation> > &inputObservations, const QList<QPointer<Observation> > &allUsableObservations);
 
 };
 

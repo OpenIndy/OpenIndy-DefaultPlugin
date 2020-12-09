@@ -37,20 +37,9 @@ bool BestFitSphere::exec(Sphere &sphere){
     this->statistic.reset();
 
     //get and check input observations
-    if(!this->inputElements.contains(0) || this->inputElements[0].size() < 4){
-        emit this->sendMessage(QString("Not enough valid observations to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);
-        return false;
-    }
+    QList<QPointer<Observation> > allUsableObservations;
     QList<QPointer<Observation> > inputObservations;
-    foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.observation.isNull() && element.observation->getIsSolved() && element.observation->getIsValid()
-                && element.shouldBeUsed){
-            inputObservations.append(element.observation);
-            this->setIsUsed(0, element.id, true);
-            continue;
-        }
-        this->setIsUsed(0, element.id, false);
-    }
+    filterObservations(allUsableObservations, inputObservations);
     if(inputObservations.size() < 4){
         emit this->sendMessage(QString("Not enough valid observations to fit the sphere %1").arg(sphere.getFeatureName()), eWarningMessage);
         return false;
@@ -58,7 +47,7 @@ bool BestFitSphere::exec(Sphere &sphere){
 
     //fit the sphere
     if(this->approximate(sphere, inputObservations)){
-        return this->fit(sphere, inputObservations);
+        return this->fit(sphere, inputObservations, allUsableObservations);
     }
     return false;
 
@@ -160,7 +149,7 @@ bool BestFitSphere::approximate(Sphere &sphere, const QList<QPointer<Observation
  * \param inputObservations
  * \return
  */
-bool BestFitSphere::fit(Sphere &sphere, const QList<QPointer<Observation> > &inputObservations){
+bool BestFitSphere::fit(Sphere &sphere, const QList<QPointer<Observation> > &inputObservations, const QList<QPointer<Observation> > &allUsableObservations){
 
     int numIterations = 0;
 
@@ -270,19 +259,28 @@ bool BestFitSphere::fit(Sphere &sphere, const QList<QPointer<Observation> > &inp
     sphere.setSphere(position, radius);
 
     //calculate display residuals for each observation
-    OiVec v_sphere(3);
-    for(int i = 0; i < inputObservations.size(); i++){
+    if(false) {
+        OiVec v_sphere(3);
+        for(int i = 0; i < inputObservations.size(); i++){
 
-        //calculate residual vector
-        v_sphere.setAt(0, verb.getAt(3*i));
-        v_sphere.setAt(1, verb.getAt(3*i+1));
-        v_sphere.setAt(2, verb.getAt(3*i+2));
+            //calculate residual vector
+            v_sphere.setAt(0, verb.getAt(3*i));
+            v_sphere.setAt(1, verb.getAt(3*i+1));
+            v_sphere.setAt(2, verb.getAt(3*i+2));
 
-        //set up display residual
-        addDisplayResidual(inputObservations[i]->getId(), v_sphere.getAt(0), v_sphere.getAt(1), v_sphere.getAt(2),
-                           qSqrt(v_sphere.getAt(0) * v_sphere.getAt(0)
-                                + v_sphere.getAt(2) * v_sphere.getAt(2)));
+            //set up display residual
+            addDisplayResidual(inputObservations[i]->getId(), v_sphere.getAt(0), v_sphere.getAt(1), v_sphere.getAt(2),
+                               qSqrt(v_sphere.getAt(0) * v_sphere.getAt(0)
+                                    + v_sphere.getAt(2) * v_sphere.getAt(2)));
 
+        }
+    } else {
+        for(int i = 0; i < allUsableObservations.size(); i++){
+            OiVec xyz = allUsableObservations[i]->getXYZ();
+            xyz.removeLast();
+            OiVec dr = xyz - position.getVector();
+            this->addDisplayResidual(allUsableObservations[i]->getId(), dr.length() - r);
+        }
     }
 
     //calculate standard deviation

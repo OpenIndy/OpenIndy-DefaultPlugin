@@ -16,12 +16,17 @@
 #include "p_bestfitpoint.h"
 #include "p_bestfitcircleinplane.h"
 #include "p_bestfitcircleinplanefrompoints.h"
+#include "p_bestfitline.h"
+#include "p_bestfitsphere.h"
 
-#define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY(std::abs(actual-expected)< threshold);
+#define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY2(std::abs(actual-expected)< threshold, QString("actual: %1, expected: %2").arg(actual).arg(expected).toLatin1().data());
 #define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
-#define DEBUG_CYLINDER(cylinder) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(cylinder->getPosition().getVector()) << ", direction=" << _OI_VEC(cylinder->getDirection().getVector()) << ", radius=" << cylinder->getRadius().getRadius() << ", stdev=" << cylinder->getStatistic().getStdev();
-#define DEBUG_PLANE(plane) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(plane->getPosition().getVector()) << ", direction=" << _OI_VEC(plane->getDirection().getVector()) << ", stdev=" << plane->getStatistic().getStdev();
-#define DEBUG_POINT(point) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(point->getPosition().getVector()) << ", direction=" << _OI_VEC(point->getDirection().getVector()) << ", stdev=" << point->getStatistic().getStdev();
+#define DEBUG_CYLINDER(feature) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", radius=" << feature->getRadius().getRadius() << ", stdev=" << feature->getStatistic().getStdev();
+#define DEBUG_CIRCLE(feature)   qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", radius=" << feature->getRadius().getRadius() << ", stdev=" << feature->getStatistic().getStdev();
+#define DEBUG_SPHERE(feature)   qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", radius=" << feature->getRadius().getRadius() << ", stdev=" << feature->getStatistic().getStdev();
+#define DEBUG_PLANE(feature)    qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
+#define DEBUG_POINT(feature)    qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
+#define DEBUG_LINE(feature)     qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
 
 using namespace oi;
 
@@ -33,6 +38,12 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testBestFitSphere_residuals();
+    void testBestFitCircleInPlane_residuals2();
+    void testBestFitCircleInPlane_residuals();
+    void testBestFitLine_residuals();
+    void testBestFitPlane_residuals();
+    void testBestFitPoint_residuals();
 
     void testVRadial();
     void testVRadial2();
@@ -134,8 +145,6 @@ void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType,
 void FunctionTest::addInputObservations(QString data, QPointer<Function> function, int id = 1000, int inputElementKey = InputElementKey::eDefault, bool shouldBeUsed = true) {
     QTextStream stream(data.toUtf8());
     while(!stream.atEnd()) {
-        id++;
-
         QStringList xyz = stream.readLine().split(" ");
         if(xyz.size() == 0) {
             continue;
@@ -169,14 +178,14 @@ void FunctionTest::addInputObservations(QString data, QPointer<Function> functio
 
 
         function->addInputElement(*element, inputElementKey);
+
+        id++;
      }
 }
 
 void FunctionTest::addInputPoints(QString data, QPointer<Function> function, int id = 1000, int inputElementKey = InputElementKey::eDefault) {
     QTextStream stream(data.toUtf8());
     while(!stream.atEnd()) {
-        id++;
-
         QStringList xyz = stream.readLine().split(" ");
         if(xyz.size() == 0) {
             continue;
@@ -193,6 +202,7 @@ void FunctionTest::addInputPoints(QString data, QPointer<Function> function, int
 
         function->addInputElement(*element, inputElementKey);
 
+        id++;
      }
 }
 
@@ -535,14 +545,14 @@ void FunctionTest::testVRadial()
     COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
     COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
 
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1),   0.026, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (-0.037), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1),   0.010, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.003), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("vr", -1),   0.026, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.037), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1),   0.010, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1), (-0.003), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1),   0.030, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1), (-0.012), 0.001);
 
     COMPARE_DOUBLE(function->getStatistic().getFormError(), 0.067, 0.001);
 
@@ -591,14 +601,14 @@ void FunctionTest::testVRadial2()
     COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
     COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
 
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1),   0.026, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (-0.037), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1),   0.010, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.003), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("vr", -1),   0.026, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.037), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1),   0.010, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1), (-0.003), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1),   0.030, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1), (-0.012), 0.001);
 
     COMPARE_DOUBLE(function->getStatistic().getFormError(), 0.067, 0.001);
 
@@ -645,16 +655,16 @@ void FunctionTest::testVRadial3() {
     COMPARE_DOUBLE(cylinder->getRadius().getRadius(), 19.16, 0.005);
     COMPARE_DOUBLE(cylinder->getStatistic().getStdev(), 0.03, 0.01);
 
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1),   0.026, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (-0.037), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1),   0.010, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.003), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.007), 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1),   0.030, 0.001);
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (-0.012), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("vr", -1),   0.026, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (-0.037), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1),   0.010, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1), (-0.003), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.007), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1),   0.030, 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1), (-0.012), 0.001);
 
-    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(5001).corrections.value("vr", -1), (140.563), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(5000).corrections.value("vr", -1), (140.563), 0.001);
 
     COMPARE_DOUBLE(function->getStatistic().getFormError(), 0.067, 0.001);
 
@@ -1311,7 +1321,7 @@ void FunctionTest::testBestFitPlane()
     addInputObservations(data, function);
 
     bool res = function->exec(planeFeature);
-
+    QVERIFY2(res, "exec");
 
     // QDEBUG : FunctionTest::testBestFitPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 3.654760904e-10
     DEBUG_PLANE(plane);
@@ -1427,7 +1437,7 @@ void FunctionTest::testBestFitCircleInPlane()
     addInputObservations(data, function);
 
     bool res = function->exec(circleFeature);
-
+    QVERIFY2(res, "exec");
 
     // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
@@ -1464,8 +1474,9 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
 
     addInputObservations(data, function);
     addInputObservations("0.0 0.0 10\n", function, 3000, InputElementKey::eDummyPoint);
-    bool res = function->exec(circleFeature);
 
+    bool res = function->exec(circleFeature);
+    QVERIFY2(res, "exec");
 
     // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
@@ -1502,8 +1513,9 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
 
     addInputObservations(data, function);
     addInputObservations("0.0 0.0 -10\n", function, 3000, InputElementKey::eDummyPoint);
-    bool res = function->exec(circleFeature);
 
+    bool res = function->exec(circleFeature);
+    QVERIFY2(res, "exec");
 
     // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
@@ -2366,7 +2378,7 @@ void FunctionTest::testCircleInPlaneFromPoints()
     addInputPoints(data, function);
 
     bool res = function->exec(circleFeature);
-
+    QVERIFY2(res, "exec");
 
     // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
@@ -2378,6 +2390,402 @@ void FunctionTest::testCircleInPlaneFromPoints()
 
     delete function.data();
 }
+
+// OI-508
+void FunctionTest::testBestFitPoint_residuals()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+
+    QPointer<Function> function = new BestFitPoint();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Point> feature = new Point(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPoint(feature);
+
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+999.9912 1999.9865 2999.9741\n\
+999.9942 1999.9931 2999.9893\n\
+1001.9972 2000.9946 3000.9907\n\
+");
+
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getStatistic().getStdev(), 1.42, 0.01);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("v", -1), ( 0.825), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), ( 0.814), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), ( 1.639), 0.001);
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitPlane_residuals()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> feature = new Plane(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPlane(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1000.0014 1000.0030 1001.0031\n\
+1999.9994 2000.0043 998.0100\n\
+999.9965 1999.9965 1099.9985\n\
+1499.9884 1499.9889 999.9898\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("2000.0007 999.9968 1002.0012", function, 3000, InputElementKey::eDefault, false);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(feature);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.100818), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (-0.097854), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (0.990081), 0.000001);
+
+    COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.39, 0.01);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("v", -1), ( -  0.1595), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), ( -  0.1595), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), (    0.0000), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (    0.3191), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("v", -1), (  101.6470), 0.001); // shouldInUse == false
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitLine_residuals()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitLine();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Line> feature = new Line(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setLine(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+999.9916 999.9958 999.9917\n\
+2000.0015 2000.0008 999.9970\n\
+3000.0270 3000.0247 1000.0083\n\
+4999.9732 4999.9797 1000.0041\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("3899.9642 4099.9690 999.9721", function, 3000, InputElementKey::eDefault, false);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_LINE(feature);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.707106), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (0.707107), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (0.000002), 0.000001);
+
+    COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.0069, 0.001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("v", -1), (    0.0040), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("v", -1), (    0.0017), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), (    0.0079), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("v", -1), (    0.0039), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("v", -1), (  141.4227), 0.001); // shouldInUse == false
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCircleInPlane_residuals()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> feature = new Circle(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setCircle(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+999.9962 999.9970 999.9958\n\
+-0.0001 999.9971 999.9975\n\
+-0.0002 0.0017 999.9884\n\
+-0.0002 999.9924 999.9938\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("1100.0093 1100.0075 1000.0071", function, 3000, InputElementKey::eDefault, false);
+    addInputObservations("400. 400. 1000.1", function, 3001, InputElementKey::eDefault, false);
+    addInputObservations("900. 900. 1000.1", function, 3002, InputElementKey::eDefault, false);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    // position= 499.99915 , 499.9982 , 999.9921 , direction= -1.499801648e-07 , -7.25006333e-06 , 1 , stdev= 0.002300006535
+    DEBUG_CIRCLE(feature);
+    // 499.9991	499.9982	999.9921	0.0023	4/5	FastPoint	BestFitCircleInPlane		-0.000000	-0.000007	1.000000	707.1038
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.0), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (-0.000007), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (1.), 0.000001);
+
+    COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.0023, 0.001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("vr", -1), (    0.0000), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1), (    0.0025), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (    0.0000), 0.001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (   -0.0025), 0.001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("vr", -1), (  141.4381), 0.001); // shouldInUse == false
+
+    // - sign
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("vr", -1), (  -565.684), 0.001);  // shouldInUse == false
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3002).corrections.value("vr", -1), (  -141.4171), 0.001); // shouldInUse == false
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCircleInPlane_residuals2()
+{
+    QSKIP("");
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> feature = new Circle(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setCircle(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.100568 1.002327 0.9999\n\
+0.669641 0.750807 0.9998\n\
+0.980149 0.213177 0.9997\n\
+0.922815 -0.405656 0.9996\n\
+0.505371 -0.865865 1.0002\n\
+-0.100048 -0.997141 1.0003\n\
+-0.671723 -0.753143 1.0004\n\
+-0.985862 -0.214420 1.0001\n\
+-0.919378 0.404145 1.0002\n\
+-0.508547 0.871306 1.0003\n\
+");
+
+    addInputObservations(data, function);
+//    addInputObservations("1100.0093 1100.0075 1000.0071", function, 3000, InputElementKey::eDefault, false);
+//    addInputObservations("400. 400. 1000.1", function, 3001, InputElementKey::eDefault, false);
+//    addInputObservations("900. 900. 1000.1", function, 3002, InputElementKey::eDefault, false);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    // position= -0.001404037774 , 0.001101723963 , 1.000050134 , direction= -0.0002842264613 , -0.0001194733372 , -0.9999999525 , radius= 1.006048006 , stdev= 0.002803002496
+    DEBUG_CIRCLE(feature);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (-0.0002842264613), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (-0.0001194733372), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (-0.9999999525), 0.000001);
+
+    COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.0028, 0.001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("vr", -1), (    0.000036), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1), (    0.000012), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (   -0.000018), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (    0.003728), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1), (   -0.001841), 0.00001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (   -0.002945), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (    0.003018), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1), (   -0.001744), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (   -0.003492), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1009).corrections.value("vr", -1), (   -0.001170), 0.00001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("vr", -1), (  141.4381), 0.001); // shouldInUse == false
+
+    // - sign
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("vr", -1), (  -565.684), 0.001);  // shouldInUse == false
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3002).corrections.value("vr", -1), (  -141.4171), 0.001); // shouldInUse == false
+
+    delete function.data();
+}
+
+
+void FunctionTest::testBestFitSphere_residuals()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitSphere();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Sphere> feature = new Sphere(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setSphere(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.010757 0.107215 1.004511\n\
+0.084127 0.068784 1.000029\n\
+0.102412 -0.010275 1.003127\n\
+0.064782 -0.079232 0.996630\n\
+-0.010505 -0.104704 0.995745\n\
+-0.077842 -0.063646 0.997522\n\
+-0.102593 0.010294 0.995853\n\
+-0.068755 0.084091 1.001206\n\
+0.078093 0.778322 0.636901\n\
+0.605526 0.495096 0.635753\n\
+0.770792 -0.077337 0.638643\n\
+0.494094 -0.604301 0.638498\n\
+-0.078274 -0.780132 0.638571\n\
+-0.600530 -0.491010 0.633805\n\
+-0.777325 0.077993 0.638047\n\
+-0.491122 0.600666 0.635220\n\
+0.100016 0.996825 -0.100212\n\
+0.774789 0.633490 -0.100801\n\
+0.997101 -0.100044 -0.100286\n\
+0.634610 -0.776159 -0.100562\n\
+-0.100191 -0.998567 -0.100784\n\
+-0.774254 -0.633052 -0.100123\n\
+-0.993433 0.099676 -0.100003\n\
+-0.636018 0.777882 -0.100647\n\
+0.063588 0.633755 -0.779228\n\
+0.490677 0.401192 -0.779711\n\
+0.635817 -0.063794 -0.778091\n\
+0.403917 -0.494010 -0.778308\n\
+-0.063645 -0.634327 -0.775701\n\
+-0.490056 -0.400684 -0.774851\n\
+-0.633104 0.063522 -0.781068\n\
+-0.402384 0.492135 -0.781833\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("2. 2. 2.", function, 3000, InputElementKey::eDefault, false);
+    addInputObservations(".5 .5 .5", function, 3001, InputElementKey::eDefault, false);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    //  position= 0.0009435528999 , 0.0004326516194 , -0.0002321768279 , direction= 0 , 0 , 0 , radius= 1.006002313 , stdev= 0.001720371939
+    DEBUG_SPHERE(feature);
+
+//    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (-0.0002842264613), 0.000001);
+//    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (-0.0001194733372), 0.000001);
+//    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (-0.9999999525), 0.000001);
+
+    COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.0017, 0.001);
+
+    foreach(Residual r, function->getStatistic().getDisplayResiduals()) {
+        //qDebug()<< r.elementId << ": " << r.corrections;
+        qDebug() << QString("COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(%1).corrections.value(\"vr\", -1), (%2), 0.00001);").arg(r.elementId).arg(r.corrections.value(("vr")));
+    }
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1000 :  QMap(("v", 0.004422)("vx", -4.32221e-05)("vy", -0.00046997)("vz", -0.00442179))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1001 :  QMap(("v", 3.62772e-05)("vx", -3.0068e-06)("vy", -2.47065e-06)("vz", -3.61524e-05))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1002 :  QMap(("v", 0.0025312)("vx", -0.0002547)("vy", 2.68612e-05)("vz", -0.00251835))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1003 :  QMap(("v", 0.00391404)("vx", 0.000250172)("vy", -0.000312133)("vz", 0.00390604))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1004 :  QMap(("v", 0.00440145)("vx", -5.05573e-05)("vy", -0.000464571)("vz", 0.00440115))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1005 :  QMap(("v", 0.00308691)("vx", -0.000242974)("vy", -0.000197619)("vz", 0.00307733))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1006 :  QMap(("v", 0.00450185)("vx", -0.000465401)("vy", 4.43563e-05)("vz", 0.00447773))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1007 :  QMap(("v", 0.00133364)("vx", 9.25858e-05)("vy", -0.000111149)("vz", -0.00133042))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1008 :  QMap(("v", 0.00156752)("vx", -0.000188453)("vy", -0.00189998)("vz", -0.00155615))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1009 :  QMap(("v", 0.00114584)("vx", -0.00078948)("vy", -0.000645944)("vz", -0.000830463))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1010 :  QMap(("v", 0.00256235)("vx", 0.00197183)("vy", -0.000199176)("vz", 0.00163632))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1011 :  QMap(("v", 0.00192102)("vx", -0.00117401)("vy", 0.00143961)("vz", -0.00152053))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1012 :  QMap(("v", 0.00365304)("vx", 0.000449531)("vy", 0.00442982)("vz", -0.00362527))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1013 :  QMap(("v", 0.00292964)("vx", -0.00201627)("vy", -0.00164743)("vz", 0.00212543))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1014 :  QMap(("v", 0.00350098)("vx", 0.00270703)("vy", -0.000269799)("vz", -0.0022201))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1015 :  QMap(("v", 0.00232597)("vx", -0.00142408)("vy", 0.00173718)("vz", 0.00183906))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1016 :  QMap(("v", 3.95106e-05)("vx", -2.78103e-05)("vy", -0.000279674)("vz", 2.80656e-05))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1017 :  QMap(("v", 0.000899147)("vx", 0.000891648)("vy", 0.000729427)("vz", -0.000115889))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1018 :  QMap(("v", 0.000195485)("vx", -0.000194506)("vy", 1.96174e-05)("vz", 1.95379e-05))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1019 :  QMap(("v", 0.000839322)("vx", -0.000828993)("vy", 0.00101596)("vz", 0.000131268))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1020 :  QMap(("v", 0.000441733)("vx", 0.000313226)("vy", 0.00309424)("vz", 0.000311475))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1021 :  QMap(("v", 6.62449e-05)("vx", 6.57015e-05)("vy", 5.36907e-05)("vz", 8.46712e-06))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1022 :  QMap(("v", 0.00170899)("vx", -0.00170045)("vy", 0.000169724)("vz", -0.000170633))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1023 :  QMap(("v", 0.0025934)("vx", 0.00256175)("vy", -0.00312683)("vz", 0.000403896))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1024 :  QMap(("v", 7.12998e-05)("vx", 5.71588e-06)("vy", 5.77798e-05)("vz", -7.10703e-05))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1025 :  QMap(("v", 0.0018276)("vx", 0.00097228)("vy", 0.000795636)("vz", -0.00154751))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1026 :  QMap(("v", 0.000105669)("vx", -6.68151e-05)("vy", 6.75863e-06)("vz", 8.18632e-05))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1027 :  QMap(("v", 9.6292e-05)("vx", -4.42841e-05)("vy", 5.43343e-05)("vz", 8.55048e-05))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1028 :  QMap(("v", 0.00138667)("vx", -0.000115082)("vy", -0.00113112)("vz", -0.00138189))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1029 :  QMap(("v", 0.00457928)("vx", -0.00245156)("vy", -0.00200277)("vz", -0.00386778))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1030 :  QMap(("v", 0.00181412)("vx", 0.00114354)("vy", -0.000113797)("vz", 0.00140831))
+//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1031 :  QMap(("v", 0.00143198)("vx", 0.000656647)("vy", -0.000800552)("vz", 0.00127254))
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("vr", -1), (0.00444691), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1), (3.63613e-05), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("vr", -1), (0.00253134), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1003).corrections.value("vr", -1), (-0.00392647), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1004).corrections.value("vr", -1), (-0.00442589), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1005).corrections.value("vr", -1), (-0.00309323), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1006).corrections.value("vr", -1), (-0.00450207), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1007).corrections.value("vr", -1), (0.00133826), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1008).corrections.value("vr", -1), (0.00246314), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1009).corrections.value("vr", -1), (0.00131537), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1010).corrections.value("vr", -1), (-0.00257008), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1011).corrections.value("vr", -1), (0.00240058), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1012).corrections.value("vr", -1), (0.00574177), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1013).corrections.value("vr", -1), (-0.00336107), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1014).corrections.value("vr", -1), (0.00351136), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1015).corrections.value("vr", -1), (-0.00290309), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1016).corrections.value("vr", -1), (0.000282451), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1017).corrections.value("vr", -1), (-0.00115781), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1018).corrections.value("vr", -1), (0.000196467), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1019).corrections.value("vr", -1), (0.00131781), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1020).corrections.value("vr", -1), (0.00312561), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1021).corrections.value("vr", -1), (8.52707e-05), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1022).corrections.value("vr", -1), (-0.0017174), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1023).corrections.value("vr", -1), (0.00406236), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1024).corrections.value("vr", -1), (-9.17723e-05), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1025).corrections.value("vr", -1), (-0.00199328), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1026).corrections.value("vr", -1), (0.000105884), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1027).corrections.value("vr", -1), (0.000110564), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1028).corrections.value("vr", -1), (-0.00178949), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1029).corrections.value("vr", -1), (-0.00499809), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1030).corrections.value("vr", -1), (0.00181768), 0.00001);
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1031).corrections.value("vr", -1), (0.00164056), 0.00001);
+
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3000).corrections.value("vr", -1), (2.45744), 0.00001);   // shouldInUse == false
+    COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(3001).corrections.value("vr", -1), (-0.140637), 0.00001); // shouldInUse == false
+
+    delete function.data();
+}
+
 QTEST_APPLESS_MAIN(FunctionTest)
 
 #include "tst_function.moc"
