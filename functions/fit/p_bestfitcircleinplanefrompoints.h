@@ -1,5 +1,5 @@
-#ifndef P_BESTFTICIRCLEINPLANE_H
-#define P_BESTFTICIRCLEINPLANE_H
+#ifndef P_BESTFTICIRCLEINPLANEFROMPOINTS_H
+#define P_BESTFTICIRCLEINPLANEFROMPOINTS_H
 
 #include <QObject>
 #include <QPointer>
@@ -12,10 +12,11 @@
 using namespace oi;
 using namespace std;
 
+
 /*!
- * \brief The BestFitCircleInPlane class
+ * \brief The BestFitCircleInPlaneFromPoints class
  */
-class BestFitCircleInPlane : public FitFunction, public BestFitCircleUtil
+class BestFitCircleInPlaneFromPoints : public FitFunction, public BestFitCircleUtil
 { 
     Q_OBJECT
 
@@ -45,4 +46,4 @@ private:
 
 };
 
-#endif // P_BESTFTICIRCLEINPLANE_H
+#endif // P_BESTFTICIRCLEINPLANEFROMPOINTS_H

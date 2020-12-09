@@ -52,6 +52,7 @@ QList<QPointer<Function> > OiTemplatePlugin::createFunctions(){
     //resultSet.append(new ExtendedTemperatureCompensation());
     resultSet.append(new BestFitSphere());
     resultSet.append(new BestFitCircleInPlane());
+    resultSet.append(new BestFitCircleInPlaneFromPoints());
     resultSet.append(new RectifyToPoint());
     resultSet.append(new RectifyToVector());
     resultSet.append(new Shift());
@@ -169,6 +170,8 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
         result = new BestFitCircle();
     }*/else if(name.compare("BestFitCircleInPlane") == 0){
         result = new BestFitCircleInPlane();
+    } else if(name.compare("BestFitCircleInPlaneFromPoints") == 0){
+        result = new BestFitCircleInPlaneFromPoints();
     }/*else if(name.compare("9ParameterHelmertTransformation") == 0){
         result = new ExtendedTemperatureCompensation();
     }*/else if(name.compare("BestFitSphere") == 0){

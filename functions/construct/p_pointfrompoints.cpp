@@ -51,8 +51,9 @@ bool PointFromPoints::setUpResult(Point &point){
         if(!element.point.isNull() && element.point->getIsSolved()){
             inputPoints.append(element.point);
             this->setIsUsed(0, element.id, true);
+        } else {
+            this->setIsUsed(0, element.id, false);
         }
-        this->setIsUsed(0, element.id, false);
     }
     if(inputPoints.size() < 1){
         emit this->sendMessage(QString("Not enough valid points to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
