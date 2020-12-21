@@ -85,7 +85,3 @@ LIBS += \
 
     }
 }
-
-HEADERS += \
-    treeutil.h \
-    configuredfunction.h
