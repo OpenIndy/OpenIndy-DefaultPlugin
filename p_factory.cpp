@@ -187,8 +187,43 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
         return new BestFitCylinder();
     }else if(name.compare("BestFitCylinderFromPoints") == 0){
         return new BestFitCylinderFromPoints();
+    } else {
+        return createFunction(name, "config/function/functionConfig2.json");
     }
     return result;
+}
+
+QPointer<Function> OiTemplatePlugin::createFunction(const QString &functionName, QString configName){
+    QPointer<Function> function;
+
+    if(!configName.isEmpty()) {
+        FunctionConfigParser parser;
+        foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson(configName)) {
+            if(config.name.compare(functionName) == 0) {
+                QList<QPointer<Function> > functions;
+                foreach(QString name, config.getFunctionNames()) {
+                    QPointer<Function> f = createFunction(name);
+                    functions.append(f);
+                }
+
+                switch(config.version) {
+                case 1:
+                    function = new ConfiguredFunction(config, functions);
+                    break;
+                case 2:
+                    function = new ConfiguredFunction2(config, functions);
+                    break;
+                }
+            }
+
+            if(!function.isNull()) {
+                return function;
+            }
+
+        }
+    }
+
+    return function;
 }
 
 /*!
