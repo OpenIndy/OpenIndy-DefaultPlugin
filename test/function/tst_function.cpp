@@ -2933,38 +2933,15 @@ void FunctionTest::testPointFromPoints_Register() {
 
 QPointer<Function> FunctionTest::createFunction(QString functionName, QString configName = "") {
     QPointer<Function> function;
+    OiTemplatePlugin plugin;
     if(functionName.compare("DistanceBetweenTwoPoints") == 0) {
         function = new DistanceBetweenTwoPoints();
     } else {
-        OiTemplatePlugin plugin;
         function = plugin.createFunction(functionName);
     }
 
     if(!configName.isEmpty() && function.isNull()) {
-        FunctionConfigParser parser;
-        foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson(configName)) {
-            if(config.name.compare(functionName) == 0) {
-                QList<QPointer<Function> > functions;
-                foreach(QString name, config.getFunctionNames()) {
-                    QPointer<Function> f = createFunction(name, configName);
-                    functions.append(f);
-                }
-
-                switch(config.version) {
-                case 1:
-                    function = new ConfiguredFunction(config, functions);
-                    break;
-                case 2:
-                    function = new ConfiguredFunction2(config, functions);
-                    break;
-                }
-            }
-
-            if(!function.isNull()) {
-                break;
-            }
-
-        }
+        function = plugin.createFunction(functionName, configName);
     }
 
     Q_ASSERT_X(!function.isNull(), "createFunction", QString("no function found: %1").arg(functionName).toLatin1().data());
