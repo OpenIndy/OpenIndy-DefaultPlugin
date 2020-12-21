@@ -57,6 +57,7 @@ QList<QPointer<Function> > OiTemplatePlugin::createFunctions(){
     resultSet.append(new RectifyToVector());
     resultSet.append(new Shift());
     resultSet.append(new BestFitCylinder());
+    resultSet.append(new BestFitCylinderFromPoints());
 
     return resultSet;
 }
@@ -184,6 +185,8 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
         return new RectifyToVector();
     }else if(name.compare("BestFitCylinder") == 0){
         return new BestFitCylinder();
+    }else if(name.compare("BestFitCylinderFromPoints") == 0){
+        return new BestFitCylinderFromPoints();
     }
     return result;
 }

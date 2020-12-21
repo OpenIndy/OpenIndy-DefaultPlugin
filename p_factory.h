@@ -31,6 +31,7 @@
 #include "p_bestfitcircleinplane.h"
 #include "p_bestfitcircleinplanefrompoints.h"
 #include "p_bestfitcylinder.h"
+#include "p_bestfitcylinderfrompoints.h"
 
 #include "p_pointfrompoints.h"
 #include "p_linefrompoints.h"
