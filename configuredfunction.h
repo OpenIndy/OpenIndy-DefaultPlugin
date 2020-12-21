@@ -2,7 +2,6 @@
 #define CONFIGUREDFUNCTION
 
 #include <QString>
-#include <QtTest>
 #include <QPointer>
 #include <QList>
 #include <QMultiMap>
@@ -543,7 +542,10 @@ public:
 
         QString val;
         QFile file;
-        file.setFileName(filename);
+        file.setFileName(QDir::currentPath() + "/" + filename);
+        if(!file.exists()) {
+            return configs;
+        }
         file.open(QIODevice::ReadOnly | QIODevice::Text);
         val = file.readAll();
         file.close();
