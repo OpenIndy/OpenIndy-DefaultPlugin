@@ -208,15 +208,21 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &functionName,
                 QList<QPointer<Function> > functions;
                 foreach(QString name, config.getFunctionNames()) {
                     QPointer<Function> f = createFunction(name);
+                    if(f.isNull()) {
+                        throw logic_error(QString("no function found: %1").arg(name).toLocal8Bit().data());
+                    }
+                    f->init();
                     functions.append(f);
                 }
 
                 switch(config.version) {
                 case 1:
                     function = new ConfiguredFunction(config, functions);
+                    function->init();
                     break;
                 case 2:
                     function = new ConfiguredFunction2(config, functions);
+                    function->init();
                     break;
                 }
             }
