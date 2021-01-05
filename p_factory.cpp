@@ -194,7 +194,12 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
 }
 
 QPointer<Function> OiTemplatePlugin::createFunction(const QString &functionName, QString configName){
-    QPointer<Function> function;
+    // internal function
+    if(functionName.compare("DistanceBetweenTwoPoints") == 0){
+        return new DistanceBetweenTwoPoints();
+    }
+
+    QPointer<Function> function(NULL);
 
     if(!configName.isEmpty()) {
         FunctionConfigParser parser;

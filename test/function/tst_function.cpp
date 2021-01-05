@@ -2934,11 +2934,8 @@ void FunctionTest::testPointFromPoints_Register() {
 QPointer<Function> FunctionTest::createFunction(QString functionName, QString configName = "") {
     QPointer<Function> function;
     OiTemplatePlugin plugin;
-    if(functionName.compare("DistanceBetweenTwoPoints") == 0) {
-        function = new DistanceBetweenTwoPoints();
-    } else {
-        function = plugin.createFunction(functionName);
-    }
+
+    function = plugin.createFunction(functionName);
 
     if(!configName.isEmpty() && function.isNull()) {
         function = plugin.createFunction(functionName, configName);
