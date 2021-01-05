@@ -188,7 +188,7 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
     }else if(name.compare("BestFitCylinderFromPoints") == 0){
         return new BestFitCylinderFromPoints();
     } else {
-        return createFunction(name, "config/function/functionConfig2.json");
+        return createFunction(name, "config/function/functionConfigV2.json");
     }
     return result;
 }

@@ -2960,7 +2960,7 @@ void FunctionTest::testPointFromPoints_Register2() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setPoint(feature);
 
-    QPointer<Function> function = createFunction("RegisterPositionToPlane", "functionConfig1.json");
+    QPointer<Function> function = createFunction("RegisterPositionToPlane", "config/function/functionConfigV1.json");
     QVERIFY2(!function.isNull(), "function is null");
 
     // colum delim: " "
@@ -2992,7 +2992,7 @@ void FunctionTest::testPointFromPoints_Register3() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setPoint(feature);
 
-    QPointer<Function> function = createFunction("RegisterPositionToPlane", "functionConfig2.json");
+    QPointer<Function> function = createFunction("RegisterPositionToPlane");
     QVERIFY2(!function.isNull(), "function is null");
 
     // colum delim: " "
@@ -3025,7 +3025,7 @@ void FunctionTest::testDistance_PointFromPoints_Register() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setScalarEntityDistance(feature);
 
-    QPointer<Function> function = createFunction("DistanceFromPlane", "functionConfig2.json");
+    QPointer<Function> function = createFunction("DistanceFromPlane");
     QVERIFY2(!function.isNull(), "function is null");
 
     // colum delim: " "
@@ -3054,7 +3054,7 @@ void FunctionTest::testZXDistance_PointFromPoints_Register() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setScalarEntityDistance(feature);
 
-    QPointer<Function> function = createFunction("DistanceProjectionZX", "functionConfig2.json");
+    QPointer<Function> function = createFunction("DistanceProjectionZX");
     QVERIFY2(!function.isNull(), "function is null");
 
     // colum delim: " "
