@@ -44,6 +44,7 @@ public:
 
 private Q_SLOTS:
     void testZXDistance_PointFromPoints_Register();
+    void testDistanceBetweenTwoPoints();
     void testTODO1();
     void testTODO2();
     void testTODO3();
@@ -3088,6 +3089,28 @@ void FunctionTest::testTODO4() {
 }
 void FunctionTest::testTODO5() {
     QFAIL("TODO:  test OriginPointVector");
+}
+
+void FunctionTest::testDistanceBetweenTwoPoints() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
+    feature->setFeatureName("ScalarEntityDistance");
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setScalarEntityDistance(feature);
+
+    QPointer<Function> function = createFunction("DistanceBetweenTwoPoints");
+    QVERIFY2(!function.isNull(), "function is null");
+
+    addInputPoint(1000.6609, 2000.3247, 3000.3180, function, 2000, 0);
+    addInputPoint(1003.6609, 2004.3247, 3000.3180, function, 2001, 1);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    COMPARE_DOUBLE(feature->getDistance(), (5.000), 0.0001);
+
+    delete function.data();
 }
 
 QTEST_APPLESS_MAIN(FunctionTest)
