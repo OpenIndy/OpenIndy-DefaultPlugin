@@ -240,7 +240,7 @@ struct CFContext {
 
      QPointer<Function> getFunction(QString name) {
          for(int index = 0; index < functions.size(); index++) {
-             if(functions[index]->getMetaData().name.compare(name) == 0) {
+             if(!functions[index].isNull() && functions[index]->getMetaData().name.compare(name) == 0) {
                  QPointer<Function> f = functions.takeAt(index); // remove from list
                  return f;
              }
