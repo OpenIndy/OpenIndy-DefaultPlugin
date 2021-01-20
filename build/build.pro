@@ -76,6 +76,7 @@ SOURCES += \
     $$PWD/../functions/fit/p_bestfitcircleinplane.cpp \
     $$PWD/../functions/fit/p_bestfitsphere.cpp \
     $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.cpp \
+    ../cf/configuredfunction2.cpp
 
 # header files
 HEADERS += \
@@ -109,7 +110,8 @@ HEADERS += \
     $$PWD/../functions/fit/p_bestfitsphere.h \
     $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.h \
     $$PWD/../configuredfunction.h \
-    $$PWD/../treeutil.h
+    $$PWD/../treeutil.h \
+    ../cf/configuredfunction2.h
 
 # other files
 OTHER_FILES += $$PWD/../metaInfo.json

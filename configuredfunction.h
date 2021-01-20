@@ -20,7 +20,6 @@ struct InputElementMapping {
     int dstInputElementIndex;
 };
 
-
 class CFCParameter: public Node {
 
 public:
@@ -38,11 +37,15 @@ public:
 
     QString prettyPrint() override {
         QString s;
-        s += "name: " + this->name + ", comment: " + this->comment + ", parameter: [ ";
-        foreach(QPointer<Node> p, this->subnodes) {
-            s += p->prettyPrint();
+        s += "{ name: '" + this->name + "', comment: '" + this->comment + "'";
+        if(!this->subnodes.isEmpty()) {
+            s += ", parameter: [ ";
+            foreach(QPointer<Node> p, this->subnodes) {
+                s += " " + p->prettyPrint();
+            }
+            s += " ], ";
         }
-        s += " ], ";
+        s += "}, ";
         return s;
     }
 
@@ -84,6 +87,10 @@ struct ConfiguredFunctionConfig {
         return !isNeededElement(name) && !isHelperElement(name);
     }
 
+    /**
+     * @brief getFunctionNames
+     * @return all necessary funktions for this config
+     */
     QList<QString> getFunctionNames() {
         switch(version) {
         case 1:
@@ -134,6 +141,13 @@ public:
         this->metaData.name = "DistanceBetweenTwoPoints";
         this->applicableFor.append(eScalarEntityDistanceFeature);
     }
+
+   /* bool DistanceBetweenTwoPoints::exec(const QPointer<FeatureWrapper> &feature){
+        if(!feature->getScalarEntityDistance().isNull()){
+            return this->exec(*feature->getScalarEntityDistance());
+        }
+    }*/
+
     bool DistanceBetweenTwoPoints::exec(ScalarEntityDistance &distance)
     {
         if(this->inputElements[0].isEmpty()) {
@@ -162,6 +176,7 @@ class ZXPlane: public ConstructFunction
 public:
     void init() override {
         this->metaData.name = "ZXPlane";
+        this->applicableFor.append(ePlaneFeature);
     }
     bool ZXPlane::exec(Plane &plane)
     {
@@ -236,8 +251,18 @@ struct CFContext {
 
      ConfiguredFunctionConfig config;
      QMap<int, QList<InputElement> > inputElements;
+     // all necessary funktions
      QList<QPointer<Function> > functions;
 
+     QMap<int, QList<InputElement> > global_inputElements;
+     QPointer<Function> baseFunction;
+     QPointer<FeatureWrapper> baseFeature;
+
+     /**
+      * @brief getFunction
+      * @param name
+      * @return function instance and removes function from list
+      */
      QPointer<Function> getFunction(QString name) {
          for(int index = 0; index < functions.size(); index++) {
              if(!functions[index].isNull() && functions[index]->getMetaData().name.compare(name) == 0) {
@@ -249,8 +274,12 @@ struct CFContext {
          throw logic_error(QString("no function found: %1").arg(name).toLocal8Bit().data());
      }
 
-     QList<InputElement> getInputElementsByName(QString name) {
-         return inputElements.value(config.getNeededElementNames().indexOf(name));
+     InputElement getInputElementsByName(QString name) {
+         QList<InputElement> ies = this->global_inputElements.value(config.getNeededElementNames().indexOf(name));
+         if(ies.size() == 0) {
+             throw logic_error(QString("invalid count (%1) of InputElements: %2").arg(ies.size()).arg(name).toLocal8Bit().data());
+         }
+         return ies.first();
      }
 
      InputElement getHelperInputElementsByName(QString name) {
@@ -299,11 +328,11 @@ struct CFContext {
          }
          }
 
-         throw logic_error(QString("not implemented: FeatureTypeEnum: %1").arg(feat->getFeatureTypeEnum()).toLocal8Bit().data());
+         throw logic_error(QString("not implemented: FeatureTypeEnum: %1").arg(feat->getFeatureTypeString()).toLocal8Bit().data());
 
      }
 
-     QPointer<FeatureWrapper> createApplicableFeature(QList<FeatureTypes> fts) {
+     QPointer<FeatureWrapper> _createApplicableFeature(QList<FeatureTypes> fts) {
          QPointer<FeatureWrapper> fw = new FeatureWrapper();
 
          FeatureTypes ft = fts.first();
@@ -326,11 +355,15 @@ struct CFContext {
              if(func.isNull()){
                  return false;
              }
+             if(!func->getApplicableFor().contains(feature->getFeatureTypeEnum())) {
+                 throw logic_error(QString("function '%1' is not applicable for feature type '%2'").arg(func->getMetaData().name).arg(feature->getFeatureTypeString()).toLocal8Bit().data());
+             }
 
              int depth = 0;
              qDebug() << QString("%1exec function: %2 with feature: %3").arg(QString(depth*2, QChar(' '))).arg(func->getMetaData().name).arg(feature->getFeature()->getFeatureName());
              // try to solve the current function
              if(!func->exec(feature)){
+                 qDebug() << "false";
                  return false;
              }
          }
@@ -338,21 +371,76 @@ struct CFContext {
          return true;
      }
 
+     /**
+      * @brief createApplicableFeature
+      * @param featureTypes
+      * @return feature for first element of featuresTypes
+      */
+     QPointer<FeatureWrapper> createApplicableFeature(QList<FeatureTypes> featureTypes) {
+            QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
+
+            QList<FeatureTypes>::iterator featureType;
+            for (featureType = featureTypes.begin(); featureType != featureTypes.end(); ++featureType) {
+                switch(*featureType){
+                    case ePointFeature: {
+                        QPointer<Point> feature = new Point(false);
+                        feature->setFeatureName("generated Point");
+                        featureWrapper->setPoint(feature);
+                        return featureWrapper;
+                    }
+                    case eScalarEntityDistanceFeature: {
+                        QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
+                        feature->setFeatureName("generated ScalarEntityDistance");
+                        featureWrapper->setScalarEntityDistance(feature);
+                        return featureWrapper;
+                    }
+                }
+            }
+
+            throw logic_error(QString("can not create applicable feature").toLocal8Bit().data());
+     }
+
+     InputElement createInputElement(QPointer<FeatureWrapper> feature) {
+        InputElement element;
+        element.label = QString("generated InputElement: %1").arg(feature->getFeatureTypeString());
+
+        switch (feature->getFeatureTypeEnum()) {
+        case ePointFeature:
+            element.typeOfElement = ePointElement;
+            element.point = feature->getPoint();
+            element.geometry = feature->getPoint();
+            break;
+        case eScalarEntityDistanceFeature:
+            element.typeOfElement = eScalarEntityDistanceElement;
+            element.scalarEntityDistance = feature->getScalarEntityDistance();
+            element.geometry = feature->getScalarEntityDistance();
+            break;
+        default:
+            throw logic_error(QString("can not create input element for feature type: %1").arg(feature->getFeatureTypeString()).toLocal8Bit().data());
+        }
+        return element;
+     }
 };
 
+/**
+ *
+ * @brief The CFFunctionData struct
+ */
 struct CFFunctionData {
     int level;
+    // current (this) function
     QPointer<Function> function;
+    // feature returned by this function
     QPointer<FeatureWrapper> feature;
     QList<QPointer<Function> > featureFunctions;
 
     QString prettyPrint() {
         QString s;
-        s += "function: " + (this->function.isNull() ? "null" : this->function->getMetaData().name)
-            + ", feature: " + (this->feature.isNull() ? "null" : this->feature->getFeature()->getFeatureName() + ", featureType: " + this->feature->getFeatureTypeString())
-            + ", featureFunctions: [ ";
+        s += "function: '" + (this->function.isNull() ? "null" : this->function->getMetaData().name)
+            + "', feature: '" + (this->feature.isNull() ? "null" : this->feature->getFeature()->getFeatureName() + "', featureType: '" + this->feature->getFeatureTypeString())
+            + "', featureFunctions: [ ";
         foreach(QPointer<Function> f, this->featureFunctions) {
-            s += f->getMetaData().name;
+            s += "'" + f->getMetaData().name + "', ";
         }
         s += " ], ";
         return s;
@@ -362,10 +450,10 @@ struct CFFunctionData {
 
 struct CFData {
     QStack<CFFunctionData> functionData;
-    QStack<QPointer<FeatureWrapper> > baseFeature;
-    QMap<int, QPointer<FeatureWrapper> > featurePerLevel;
+    QStack<QPointer<FeatureWrapper> > baseFeature;// TODO necessary ???
+    QMap<int, QPointer<FeatureWrapper> > featurePerLevel;// TODO necessary ???
 
-    QPointer<FeatureWrapper> findFeatureForLevel(int level) {
+    QPointer<FeatureWrapper> findFeatureForLevel(int level) { // TODO necessary ???
         for(int i=functionData.size()-1; i>=0; i--) {
             if(functionData[i].level == level) {
                 return functionData[i].feature;
@@ -384,10 +472,9 @@ public:
         QString pre = QString("pre L%1 I%2").arg(level).arg(index);
         if(ctx.config.isNeededElement(node->getName())) {
             QPointer<Function> function = data.functionData.top().function;
-            foreach(InputElement ie, ctx.getInputElementsByName(node->getName())) {
-                debug(pre, QString("add input element id: %2 (%3) to function: %1 (%4)").arg(function->getMetaData().name).arg(ie.id).arg(ie.label).arg(index), level);
-                function->addInputElement(ie, index);
-            }
+            InputElement ie = ctx.getInputElementsByName(node->getName());
+            debug(pre, QString("add input element id: %2 (%3) to function: %1 (%4)").arg(function->getMetaData().name).arg(ie.id).arg(ie.label).arg(index), level);
+            function->addInputElement(ie, index);
         } else if(ctx.config.isHelperElement(node->getName())) {
             QPointer<Function> function = data.functionData.top().function;
             InputElement ie = ctx.getHelperInputElementsByName(node->getName());
@@ -417,10 +504,9 @@ public:
         QString post = QString("post L%1 I%2").arg(level).arg(index);
         if(false && ctx.config.isNeededElement(node->getName())) {
             QPointer<Function> function = data.functionData.top().function;
-            foreach(InputElement ie, ctx.getInputElementsByName(node->getName())) {
-                debug(post, QString("add input element id: %2 (%3) to function: %1 (%4)").arg(function->getMetaData().name).arg(ie.id).arg(ie.label).arg(index), level);
-                function->addInputElement(ie, index);
-            }
+            InputElement ie = ctx.getInputElementsByName(node->getName());
+            debug(post, QString("add input element id: %2 (%3) to function: %1 (%4)").arg(function->getMetaData().name).arg(ie.id).arg(ie.label).arg(index), level);
+            function->addInputElement(ie, index);
         } else if(false && ctx.config.isHelperElement(node->getName())) {
             QPointer<Function> function = data.functionData.top().function;
             InputElement ie = ctx.getHelperInputElementsByName(node->getName());
@@ -434,7 +520,7 @@ public:
 
                     if(!fd.featureFunctions.isEmpty()) {
                         if(!ctx.exec(fd.feature, fd.featureFunctions)) {
-                        //if(!fd.function->exec(fd.feature)) {
+                            qDebug() << fd.function->getMetaData().name << ", " << fd.feature->getFeature()->getFeatureName();
                             throw logic_error("execution failed");
                         }
 
@@ -458,6 +544,101 @@ private:
 };
 
 
+class CFVisitor2: public NodeVisitor {
+
+public:
+    CFVisitor2(CFContext ctx): ctx(ctx) {}
+
+    void pre(QPointer<Node> node, int index, int level) override {
+        QString pre = QString("pre L%1 I%2").arg(level).arg(index);
+
+        if(level == 0) { // level 0, first level
+
+            CFFunctionData fd;
+            fd.function = this->ctx.baseFunction;
+            fd.feature = this->ctx.baseFeature;
+            this->data.functionData.push(fd);
+
+        } else if(ctx.config.isFunction(node->getName())) { // level 1-n, all other levels
+
+            QPointer<Function> function = data.functionData.top().function;
+
+            CFFunctionData fd;
+            fd.function = this->ctx.getFunction(node->getName());
+            QPointer<FeatureWrapper> feature = this->ctx.createApplicableFeature(fd.function->getApplicableFor());
+
+            if(index == 0) {
+                fd.feature = feature;
+
+                debug(pre, QString("set feature: %2 to function: %1").arg(function->getMetaData().name).arg(fd.feature->getFeature()->getFeatureName()), level);
+            } else {
+                InputElement ie = ctx.createInputElement(feature);
+
+                debug(pre, QString("add input element id: %2, %3, %4 to function: %1 (%5)").arg(function->getMetaData().name).arg(ie.id).arg(ie.typeOfElement).arg(ie.label).arg(index), level);
+                function->addInputElement(ie, index);
+            }
+
+            this->data.functionData.push(fd);
+
+        } else if(ctx.config.isNeededElement(node->getName())) {
+
+            CFFunctionData fd = data.functionData.top();
+            QPointer<Function> function = fd.function;
+
+            InputElement ie = ctx.getInputElementsByName(node->getName());
+            if(index == 0) {
+
+                QPointer<FeatureWrapper> fw = new FeatureWrapper();
+
+                switch (ie.typeOfElement) {
+                case ePointElement: {
+                    fw->setPoint(ie.point);
+                    break;
+                }
+                default:
+                    throw logic_error(QString("not implemented: ElementTypes: %1").arg(ie.typeOfElement).toLocal8Bit().data());
+                }
+
+                fd.feature = fw;
+
+                debug(pre, QString("set feature: %2 to function: %1").arg(function->getMetaData().name).arg(fd.feature->getFeature()->getFeatureName()), level);
+            } else {
+                debug(pre, QString("add input element id: %2, %3, %4 to function: %1 (%5)").arg(function->getMetaData().name).arg(ie.id).arg(ie.typeOfElement).arg(ie.label).arg(index), level);
+                function->addInputElement(ie, index);
+            }
+
+
+        } else if(ctx.config.isHelperElement(node->getName())) {
+
+            QPointer<Function> function = data.functionData.top().function;
+
+            InputElement ie = ctx.getHelperInputElementsByName(node->getName());
+            debug(pre, QString("add input element id: %2, %3, %4 to function: %1 (%5)").arg(function->getMetaData().name).arg(ie.id).arg(ie.typeOfElement).arg(ie.label).arg(index), level);
+            function->addInputElement(ie, index);
+
+        }
+
+    }
+
+    void post(QPointer<Node> node, int index, int level) override {
+        QString post = QString("post L%1 I%2").arg(level).arg(index);
+
+       if(ctx.config.isFunction(node->getName())) {
+
+            CFFunctionData fd = data.functionData.pop();
+            debug(post, QString("exec featureData: %1").arg(fd.prettyPrint()), level);
+            fd.function->setProperty("OI_CF_GLOBAL_INPUTELEMENTS", ctx.baseFunction->property("OI_CF_GLOBAL_INPUTELEMENTS"));
+            if(!fd.function->exec(fd.feature)) {
+                throw logic_error(QString("execution failed for function: '%1'' with feature: '%2'").arg(fd.function->getMetaData().name).arg(fd.feature->getFeature()->getFeatureName()).toLocal8Bit().data());
+            }
+
+        }
+    }
+
+private:
+    CFContext ctx;
+    CFData data;
+};
 class CFHelperFunction: public Function {
 
 public:
@@ -489,34 +670,46 @@ public:
 
     bool exec(const QPointer<FeatureWrapper> &feature) override {
         try {
-            ListVisitor visitor;
+            ListVisitor visitors;
 
             QPointer<NodeVisitor> debug = new PrintVisitor();
-            visitor.list.append(debug);
+            visitors.list.append(debug);
 
-            CFData data;
+            QPointer<NodeVisitor> cf;
 
-            CFFunctionData fd;
-            fd.level = 0;
-            fd.feature = feature;
-            //QPointer<Function> helper = new CFHelperFunction();
-            //helper->init();
-            //fd.function = helper;
-            data.functionData.push(fd);
+            if(true) {
+                CFContext ctx;
+                ctx.config = this->config;
+                ctx.baseFunction = this;
+                ctx.baseFeature = feature;
+                ctx.functions = this->functions; // all necessary funktions
+                ctx.global_inputElements = this->getInputElements();
 
-            data.featurePerLevel.insert(0, feature);
-            data.featurePerLevel.insert(1, feature);
+                cf = new CFVisitor2(ctx);
+            } else {
+                CFFunctionData fd;
+                fd.level = 0; // TODO necessary ???
+                fd.feature = feature;
+                fd.function = this;
 
-            CFContext ctx;
-            ctx.config = config;
-            ctx.inputElements = this->getInputElements();
-            ctx.functions = this->functions;
-            ctx.functions.append(this);
+                CFData data;
+                data.functionData.push(fd);
+                data.featurePerLevel.insert(fd.level, fd.feature); // TODO necessary ???
 
-            QPointer<NodeVisitor> cf = new CFVisitor(ctx, data);
-            visitor.list.append(cf);
+                CFContext ctx;
+                ctx.config = config;
+                ctx.inputElements = this->getInputElements();
+                ctx.functions = this->functions; // all necessary funktions
 
-            TreeUtil::traversal(this->config.parameter, visitor);
+                ctx.functions.append(this); // TODO necessary ???
+
+                cf = new CFVisitor(ctx, data);
+
+            }
+
+             visitors.list.append(cf);
+
+            TreeUtil::traversal(this->config.parameter, visitors);
 
             return true;
         } catch(exception &e) {
@@ -525,10 +718,29 @@ public:
         }
     }
 
+    QString prettyPrint() {
+        QString s;
+        s += "function: '" + this->getMetaData().name
+            + "', featureFunctions: [ ";
+        foreach(QPointer<Function> f, this->functions) {
+            if(f->inherits("ConfiguredFunction2")) {
+                 s += "'" + qobject_cast<ConfiguredFunction2 *>(f)->prettyPrint() + "', ";
+            } else {
+                s += "'" + f->getMetaData().name + "', ";
+            }
+        }
+        s += " ], ";
+        return s;
+    }
+
+public:
+    QMap<int, QList<InputElement> > global_inputElements;
+
 private:
     ConfiguredFunctionConfig config;
-
+    // all necessary funktions
     QList<QPointer<Function> > functions;
+
 };
 
 
@@ -582,7 +794,7 @@ public:
 
                 config.neededElements = neededElements(object["neededElements"]);
 
-                QPointer<Node> node = new CFCParameter(config.name, "configured function", parameter(object["parameter"]));
+                QPointer<Node> node = new CFCParameter(config.name, "configured function", parameter(object["parameter"]) /* parameter tree */);
                 config.parameter = node;
 
                 configs.append(config);
@@ -598,6 +810,11 @@ public:
     }
 
 private:
+    /**
+     * @brief parameter
+     * @param value
+     * @return tree with parameter CFCParameter and sub nodes (CFCParameter)
+     */
     QList<QPointer<Node> > parameter(QJsonValue value) {
         QList<QPointer<Node> > list;
         foreach(QJsonValue element, value.toArray()) {
