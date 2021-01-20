@@ -217,7 +217,7 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &functionName,
 
                 switch(config.version) {
                 case 1:
-                    function = new ConfiguredFunction(config, functions);
+                    function = new ConfiguredFunction1(config, functions);
                     function->init();
                     break;
                 case 2:

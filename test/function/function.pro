@@ -38,7 +38,8 @@ INCLUDEPATH += \
     $$PWD/../../sensors/laserTracker/pseudoTracker \
     $$PWD/../../sensors/tachymeter/LeicaGeoCom \
     $$PWD/../../simulations/simplePolarMeasurement \
-    $$PWD/../../exchange
+    $$PWD/../../exchange \
+    $$PWD/../../cf
 
 CONFIG(debug, debug|release) {
     BUILD_DIR=debug
