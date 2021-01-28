@@ -30,6 +30,7 @@ public:
 
 public:
     QMap<int, QList<InputElement> > global_inputElements;
+    QPointer<FeatureWrapper> global_feature;
 
 private:
     ConfiguredFunctionConfig config;

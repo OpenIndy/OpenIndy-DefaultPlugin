@@ -24,7 +24,9 @@ bool ConfiguredFunction2::exec(const QPointer<FeatureWrapper> &feature) {
             ctx.baseFunction = this;
             ctx.baseFeature = feature;
             ctx.functions = this->functions; // all necessary funktions
+
             ctx.global_inputElements = this->global_inputElements.isEmpty() ? this->getInputElements() :  this->global_inputElements;
+            ctx.global_feature = this->global_feature.isNull() ? feature : this->global_feature;
 
             cf = new CFVisitor2(ctx);
         } else {

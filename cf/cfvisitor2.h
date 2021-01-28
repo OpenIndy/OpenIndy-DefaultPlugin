@@ -4,6 +4,7 @@
 #include "treeutil.h"
 #include "configuredfunctioncommon.h"
 #include "configuredfunction2.h"
+#include "cfcparameter.h"
 
 using namespace oi;
 
