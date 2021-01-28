@@ -24,12 +24,14 @@
             "parameter": [
                 {
                     "name" : "PointFromPoints",
+                    "feature" : "global",
                     "parameter" : [
                         { "name" : "Position" }
                     ]
                 },
                 {
                     "name" : "Register",
+                    "feature" : "global",
                     "parameter" : [
                         { "name": "Plane" }
                     ]
