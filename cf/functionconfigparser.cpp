@@ -48,7 +48,10 @@ QList<ConfiguredFunctionConfig> FunctionConfigParser::readConfigFromJson(QString
 
             config.neededElements = neededElements(object["neededElements"]);
 
-            QPointer<Node> node = new CFCParameter(config.name, "configured function", parameter(object["parameter"]) /* parameter tree */);
+            QPointer<Node> node = new CFCParameter(config.name,
+                                                   "configured function",
+                                                   object["feature"].toString(), // "global" or TypeOfElement name e.g. Plane
+                                                   parameter(object["parameter"]) /* parameter tree */);
             config.parameter = node;
 
             configs.append(config);
@@ -76,6 +79,7 @@ QList<QPointer<Node> > FunctionConfigParser::parameter(QJsonValue value) {
         QPointer<Node> p = new CFCParameter(
             object["name"].toString(),
             object["comment"].toString(),
+            object["feature"].toString(),
             parameter(object["parameter"]));
 
         list.append(p);
