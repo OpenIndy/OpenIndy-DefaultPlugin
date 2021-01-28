@@ -4,7 +4,9 @@ CFVisitor2::CFVisitor2(CFContext ctx): ctx(ctx) {
 
 }
 
-void CFVisitor2::pre(QPointer<Node> node, int index, int level) {
+void CFVisitor2::pre(QPointer<Node> n, int index, int level) {
+    CFCParameter *node = static_cast <CFCParameter*>(n.data());
+
     QString pre = QString("pre L%1 I%2").arg(level).arg(index);
 
     if(level == 0) { // level 0, first level
@@ -75,7 +77,9 @@ void CFVisitor2::pre(QPointer<Node> node, int index, int level) {
 
 }
 
-void CFVisitor2::post(QPointer<Node> node, int index, int level) {
+void CFVisitor2::post(QPointer<Node> n, int index, int level) {
+    CFCParameter *node = static_cast <CFCParameter*>(n.data());
+
     QString post = QString("post L%1 I%2").arg(level).arg(index);
 
    if(ctx.config.isFunction(node->getName())) {
@@ -85,6 +89,7 @@ void CFVisitor2::post(QPointer<Node> node, int index, int level) {
         ConfiguredFunction2 *cf = qobject_cast<ConfiguredFunction2*>(fd.function);
         if(cf) {
             cf->global_inputElements = ctx.global_inputElements;
+            cf->global_feature = ctx.global_feature;
         }
 
         debug(post, QString("exec featureData: %1").arg(fd.prettyPrint()), level);
