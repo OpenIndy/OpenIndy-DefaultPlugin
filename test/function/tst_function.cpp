@@ -103,8 +103,10 @@ private Q_SLOTS:
 
     void testBestFitCircleInPlane_DummyPoint1();
     void testBestFitCircleInPlane_DummyPoint2();
-    void testBestFitCircleInPlane();
+    void testBestFitCircleInPlane_left();
+    void testBestFitCircleInPlane_right();
 
+    void testBestFitPlane_right();
     void testBestFitPlane_DummyPoint1();
     void testBestFitPlane_DummyPoint2();
 
@@ -1465,9 +1467,9 @@ void FunctionTest::testBestFitPlane_DummyPoint2() {
 
 
 // OI-577: old behavior
-void FunctionTest::testBestFitCircleInPlane()
+void FunctionTest::testBestFitCircleInPlane_left()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo); _QSKIP
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<Function> function = new BestFitCircleInPlane();
     function->init();
@@ -1497,12 +1499,49 @@ void FunctionTest::testBestFitCircleInPlane()
 
     COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
     COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
-    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), ( 0.9999975), 0.000001);
 
 
     delete function.data();
 }
 
+void FunctionTest::testBestFitCircleInPlane_right()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+0.0 1.0 0.003\n\
+1.0 1.0 0.004\n\
+1.0 0.0 0.002\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(circleFeature);
+    QVERIFY2(res, "exec");
+
+    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), ( 0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), ( 0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
+
+
+    delete function.data();
+}
 void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo); _QSKIP
@@ -2483,6 +2522,41 @@ void FunctionTest::testBestFitPoint_residuals()
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1002).corrections.value("v", -1), ( 1.639), 0.001);
 
     delete function.data();
+}
+
+// clock wise
+void FunctionTest::testBestFitPlane_right()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> feature = new Plane(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setPlane(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+1000.0014 1000.0030 1001.0031\n\
+999.9965 1999.9965 1099.9985\n\
+1999.9994 2000.0043 998.0100\n\
+1499.9884 1499.9889 999.9898\n\
+");
+
+    addInputObservations(data, function);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(feature);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (-0.100818), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), ( 0.097854), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (-0.990081), 0.000001);
 }
 
 void FunctionTest::testBestFitPlane_residuals()
