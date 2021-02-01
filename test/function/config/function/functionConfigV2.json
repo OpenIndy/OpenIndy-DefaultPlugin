@@ -62,10 +62,12 @@
             "parameter": [
                 {
                     "name" : "DistanceBetweenTwoPoints",
+                    "feature" : "global",
                     "parameter" : [
                         { "name": "Position" },
                         {
                             "name" : "RegisterPositionToPlane",
+                            "feature" : "Point",
                             "parameter" : [
                                 { "name": "Position" },
                                 { "name": "Plane" }
