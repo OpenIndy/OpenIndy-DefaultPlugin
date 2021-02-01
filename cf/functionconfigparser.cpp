@@ -237,52 +237,7 @@ QList<FeatureTypes> FunctionConfigParser::applicableFor(QJsonValue value) {
     QList<FeatureTypes> list;
     foreach(QJsonValue element, value.toArray()) {
         QString s = element.toString();
-
-        if (s.compare("Circle") == 0 ) {
-            list.append(eCircleFeature);
-        } else if (s.compare("Cone") == 0 ) {
-            list.append(eConeFeature);
-        } else if (s.compare("Cylinder") == 0 ) {
-            list.append(eCylinderFeature);
-        } else if (s.compare("Ellipse") == 0 ) {
-            list.append(eEllipseFeature);
-        } else if (s.compare("Ellipsoid") == 0 ) {
-            list.append(eEllipsoidFeature);
-        } else if (s.compare("Hyperboloid") == 0 ) {
-            list.append(eHyperboloidFeature);
-        } else if (s.compare("Line") == 0 ) {
-            list.append(eLineFeature);
-        } else if (s.compare("Nurbs") == 0 ) {
-            list.append(eNurbsFeature);
-        } else if (s.compare("Paraboloid") == 0 ) {
-            list.append(eParaboloidFeature);
-        } else if (s.compare("Plane") == 0 ) {
-            list.append(ePlaneFeature);
-        } else if (s.compare("Point") == 0 ) {
-            list.append(ePointFeature);
-        } else if (s.compare("PointCloud") == 0 ) {
-            list.append(ePointCloudFeature);
-        } else if (s.compare("ScalarEntityAngle") == 0 ) {
-            list.append(eScalarEntityAngleFeature);
-        } else if (s.compare("ScalarEntityDistance") == 0 ) {
-            list.append(eScalarEntityDistanceFeature);
-        } else if (s.compare("ScalarEntityMeasurementSeries") == 0 ) {
-            list.append(eScalarEntityMeasurementSeriesFeature);
-        } else if (s.compare("ScalarEntityTemperature") == 0 ) {
-            list.append(eScalarEntityTemperatureFeature);
-        } else if (s.compare("SlottedHole") == 0 ) {
-            list.append(eSlottedHoleFeature);
-        } else if (s.compare("Sphere") == 0 ) {
-            list.append(eSphereFeature);
-        } else if (s.compare("Torus") == 0 ) {
-            list.append(eTorusFeature);
-        } else if (s.compare("CoordinateSystem") == 0 ) {
-            list.append(eCoordinateSystemFeature);
-        } else if (s.compare("Station") == 0 ) {
-            list.append(eStationFeature);
-        } else if (s.compare("TrafoParam") == 0 ) {
-            list.append(eTrafoParamFeature);
-        }
+        list.append(CFUtil::featureTypesForName(s));
     }
 
     return list;
