@@ -18,27 +18,7 @@ QList<ConfiguredFunctionConfig> FunctionConfigParser::readConfigFromJson(QString
     QJsonDocument doc = QJsonDocument::fromJson(val.toUtf8());
     QJsonObject json = doc.object();
 
-    switch(json["version"].toInt()) {
-    case 1: {
-        foreach(QJsonValue function, json["functions"].toArray()) {
-            // qDebug() << function;
-
-            ConfiguredFunctionConfig config;
-            config.version = 1;
-            QJsonObject object = function.toObject();
-            config.name = object["name"].toString();
-            config.applicableFor = applicableFor(object["applicableFor"]);
-
-            config.neededElements = neededElements(object["neededElements"]);
-
-            config.functionNames = functionNames(object["innerFunctions"]);
-
-            config.inputElementsMapping = inputElementsMapping(config, object["inputElementMappings"]);
-
-            configs.append(config);
-        }
-
-    } case 2: {
+    if(json["version"].toInt() == 2) {
          foreach(QJsonValue function, json["functions"].toArray()) {
             ConfiguredFunctionConfig config;
             config.version = 2;
@@ -58,9 +38,6 @@ QList<ConfiguredFunctionConfig> FunctionConfigParser::readConfigFromJson(QString
          }
 
     }
-
-    } // switch
-
 
 
     return configs;
