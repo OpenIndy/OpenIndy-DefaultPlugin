@@ -12,7 +12,6 @@
 #include "types.h"
 #include "treeutil.h"
 #include "configuredfunctionconfig.h"
-#include "zxplane.h"
 
 using namespace oi;
 

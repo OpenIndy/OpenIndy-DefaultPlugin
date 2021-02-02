@@ -3183,7 +3183,7 @@ void FunctionTest::testZDistance_PointFromPoints_RegisterV2() {
 
 void FunctionTest::testTODO1() {
     QSKIP("");
-    QFAIL("TODO:  test transformation"); // see ZXPlane construct function
+    QFAIL("TODO:  test transformation");
 
 }
 void FunctionTest::testTODO2() {
