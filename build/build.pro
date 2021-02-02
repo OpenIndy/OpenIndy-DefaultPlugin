@@ -80,7 +80,6 @@ SOURCES += \
     $$PWD/../cf/configuredfunction.cpp \
     $$PWD/../cf/functionconfigparser.cpp \
     $$PWD/../cf/distancebetweentwopoints.cpp \
-    $$PWD/../cf/zxplane.cpp \
     $$PWD/../cf/cfvisitor.cpp \
     $$PWD/../cf/cfcparameter.cpp \
     $$PWD/../cf/xyzfilter.cpp \
@@ -122,7 +121,6 @@ HEADERS += \
     $$PWD/../cf/functionconfigparser.h \
     $$PWD/../cf/distancebetweentwopoints.h \
     $$PWD/../cf/configuredfunctionconfig.h \
-    $$PWD/../cf/zxplane.h \
     $$PWD/../cf/cfvisitor.h \
     $$PWD/../cf/cfcparameter.h \
     $$PWD/../cf/xyzfilter.h \
