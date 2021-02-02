@@ -50,7 +50,7 @@ void CFVisitor2::pre(QPointer<Node> n, int index, int level) {
         }
 
         // add input elements to parent, but not for level 1 or lower, because that overwrites you base input elements
-        if(false && level > 1){
+        if(level > 1){
             InputElement ie = ctx.createInputElement(fd.feature);
 
             debug(pre, QString("add input element id: %2, %3, %4 to function: %1 (%5)").arg(parentFunction->getMetaData().name).arg(ie.id).arg(ie.typeOfElement).arg(ie.label).arg(index), level);
@@ -115,7 +115,8 @@ void CFVisitor2::post(QPointer<Node> n, int index, int level) {
         ConfiguredFunction2 *cf = qobject_cast<ConfiguredFunction2*>(fd.function); // inner ConfiguredFunction
         if(cf) {
             cf->global_inputElements = ctx.global_inputElements;
-            cf->global_feature = ctx.global_feature;
+            // maybe later there is a need for "global.global"
+            // cf->global_feature = ctx.global_feature;
         }
 
         debug(post, QString("exec featureData: %1").arg(fd.prettyPrint()), level);
