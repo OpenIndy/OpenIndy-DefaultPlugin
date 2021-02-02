@@ -62,7 +62,7 @@ void CFVisitor1::post(QPointer<Node> node, int index, int level) {
         }
 
     } else {
-        // throw logic_error("is not a 'needed element', 'helper element', 'function'");
+        throw logic_error("is not a 'needed element', 'helper element', 'function'");
     }
 }
 
