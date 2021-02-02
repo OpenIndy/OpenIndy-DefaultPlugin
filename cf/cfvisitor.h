@@ -21,7 +21,8 @@ public:
 
 private:
     CFContext ctx;
-    CFData data;
+    // data for each function stack is pushed / poped while traversal the node tree
+    QStack<CFFunctionData> data;
 };
 
 #endif // CFVISITOR_H

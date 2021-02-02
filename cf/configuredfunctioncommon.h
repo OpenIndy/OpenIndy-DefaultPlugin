@@ -188,21 +188,6 @@ struct CFFunctionData {
 
 };
 
-struct CFData {
-    QStack<CFFunctionData> functionData;
-    QStack<QPointer<FeatureWrapper> > baseFeature;// TODO necessary ???
-    QMap<int, QPointer<FeatureWrapper> > featurePerLevel;// TODO necessary ???
-
-    QPointer<FeatureWrapper> findFeatureForLevel(int level) { // TODO necessary ???
-        for(int i=functionData.size()-1; i>=0; i--) {
-            if(functionData[i].level == level) {
-                return functionData[i].feature;
-            }
-        }
-        return 0;
-    }
-};
-
 class CFUtil {
 
 public:

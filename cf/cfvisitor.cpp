@@ -14,11 +14,11 @@ void CFVisitor::pre(QPointer<Node> n, int index, int level) {
         CFFunctionData fd;
         fd.function = this->ctx.baseFunction;
         fd.feature = this->ctx.baseFeature; // == ctx.global_feature
-        this->data.functionData.push(fd);
+        this->data.push(fd);
 
     } else if(ctx.config.isFunction(node->getName())) { // level 1-n, all other levels
 
-        QPointer<Function> parentFunction = data.functionData.top().function;
+        QPointer<Function> parentFunction = data.top().function;
 
         CFFunctionData fd;
         fd.function = this->ctx.getFunction(node->getName());
@@ -57,11 +57,11 @@ void CFVisitor::pre(QPointer<Node> n, int index, int level) {
             parentFunction->addInputElement(ie, index);
         }
 
-        this->data.functionData.push(fd);
+        this->data.push(fd);
 
     } else if(ctx.config.isNeededElement(node->getName())) {
 
-        CFFunctionData parentFd = data.functionData.top();
+        CFFunctionData parentFd = data.top();
         QPointer<Function> parentFunction = parentFd.function;
 
         InputElement ie = ctx.getInputElementsByName(node->getName());
@@ -79,7 +79,7 @@ void CFVisitor::post(QPointer<Node> n, int index, int level) {
 
    if(ctx.config.isFunction(node->getName()) && level > 0) {
 
-        CFFunctionData fd = data.functionData.pop();
+        CFFunctionData fd = data.pop();
 
         ConfiguredFunction *cf = qobject_cast<ConfiguredFunction*>(fd.function); // inner ConfiguredFunction
         if(cf) {
