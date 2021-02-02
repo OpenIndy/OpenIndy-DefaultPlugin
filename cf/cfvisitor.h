@@ -8,6 +8,9 @@
 
 using namespace oi;
 
+/**
+ * @brief Visitor for CFCParameter
+ */
 class CFVisitor: public NodeVisitor {
 
 public:

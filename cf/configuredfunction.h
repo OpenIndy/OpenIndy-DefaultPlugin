@@ -14,6 +14,9 @@
 
 using namespace oi;
 
+/**
+ * @brief The ConfiguredFunction class
+ */
 class ConfiguredFunction : public Function {
     friend class Feature;
     friend class CFVisitor;

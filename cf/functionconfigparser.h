@@ -11,6 +11,9 @@
 
 using namespace oi;
 
+/**
+ * @brief parses JSON config file and generate list of FunctionConfigParser
+ */
 class FunctionConfigParser
 {
 

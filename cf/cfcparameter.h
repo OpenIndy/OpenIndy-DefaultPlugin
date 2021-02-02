@@ -3,6 +3,9 @@
 
 #include "treeutil.h"
 
+/**
+ * @brief parsed parameter from JSON
+ */
 class CFCParameter: public Node {
 
 public:

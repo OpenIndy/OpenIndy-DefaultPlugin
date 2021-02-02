@@ -9,6 +9,9 @@
 
 using namespace oi;
 
+/**
+ * @brief set axis to 0 and keeps others
+ */
 class XYZFilter : public ConstructFunction
 {
     Q_OBJECT
