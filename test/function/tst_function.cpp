@@ -3083,7 +3083,7 @@ void FunctionTest::testDistance_PointFromPoints_RegisterV2() {
     feature->addFunction(function);
     QVERIFY2(feature->getDisplayFunctions().compare("DistanceFromPlane")==0, "getDisplayFunctions");
 
-    qDebug() << qobject_cast<ConfiguredFunction2 *>(function)->prettyPrint();
+    qDebug() << qobject_cast<ConfiguredFunction *>(function)->prettyPrint();
 
     feature->recalc();
     QVERIFY2(feature->getIsSolved(), "recalc");
