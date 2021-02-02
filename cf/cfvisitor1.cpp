@@ -13,11 +13,6 @@ void CFVisitor1::pre(QPointer<Node> node, int index, int level) {
         InputElement ie = ctx.getInputElementsByName(node->getName());
         debug(pre, QString("add input element id: %2 (%3) to function: %1 (%4)").arg(function->getMetaData().name).arg(ie.id).arg(ie.label).arg(index), level);
         function->addInputElement(ie, index);
-    } else if(ctx.config.isHelperElement(node->getName())) {
-        QPointer<Function> function = data.functionData.top().function;
-        InputElement ie = ctx.getHelperInputElementsByName(node->getName());
-        debug(pre, QString("add helper input element id: %2 (%3) to function: %1 (%4)").arg(function->getMetaData().name).arg(ie.id).arg(ie.label).arg(index), level);
-        function->addInputElement(ie, index);
     } else if(ctx.config.isFunction(node->getName())) {
         QPointer<Function> function = ctx.getFunction(node->getName());
         QPointer<FeatureWrapper> feat = data.featurePerLevel.value(level);
@@ -44,11 +39,6 @@ void CFVisitor1::post(QPointer<Node> node, int index, int level) {
         QPointer<Function> function = data.functionData.top().function;
         InputElement ie = ctx.getInputElementsByName(node->getName());
         debug(post, QString("add input element id: %2 (%3) to function: %1 (%4)").arg(function->getMetaData().name).arg(ie.id).arg(ie.label).arg(index), level);
-        function->addInputElement(ie, index);
-    } else if(false && ctx.config.isHelperElement(node->getName())) {
-        QPointer<Function> function = data.functionData.top().function;
-        InputElement ie = ctx.getHelperInputElementsByName(node->getName());
-        debug(post, QString("add helper input element id: %2 (%3) to function: %1 (%4)").arg(function->getMetaData().name).arg(ie.id).arg(ie.label).arg(index), level);
         function->addInputElement(ie, index);
     } else if(ctx.config.isFunction(node->getName())) {
         {

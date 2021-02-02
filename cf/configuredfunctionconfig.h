@@ -36,12 +36,8 @@ struct ConfiguredFunctionConfig {
         return false;
     }
 
-    bool isHelperElement(QString name) {
-        return name.compare("ZX") == 0;
-    }
-
     bool isFunction(QString name) {
-        return !isNeededElement(name) && !isHelperElement(name);
+        return !isNeededElement(name);
     }
 
     /**
@@ -65,7 +61,7 @@ struct ConfiguredFunctionConfig {
 
     void collectFunctionNames(QList<QPointer<Node> > &parameter, QList<QString> &names) {
         foreach(QPointer<Node> p, parameter) {
-            if(!isNeededElement(p->getName()) && !isHelperElement(p->getName())) {
+            if(!isNeededElement(p->getName())) {
                 names.append(p->getName());
             }
             collectFunctionNames(p->getSubnodes(), names);

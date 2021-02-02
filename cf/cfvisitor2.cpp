@@ -65,40 +65,9 @@ void CFVisitor2::pre(QPointer<Node> n, int index, int level) {
         QPointer<Function> parentFunction = parentFd.function;
 
         InputElement ie = ctx.getInputElementsByName(node->getName());
-        /*if(index == 0) {
 
-            QPointer<FeatureWrapper> fw = new FeatureWrapper();
-
-            switch (ie.typeOfElement) {
-            case ePointElement: {
-                fw->setPoint(ie.point);
-                break;
-            }
-            case eCircleElement: {
-                fw->setCircle(ie.circle);
-                break;
-            }
-            default:
-                throw logic_error(QString("not implemented: ElementTypes: %1").arg(ie.typeOfElement).toLocal8Bit().data());
-            }
-
-            parentFd.feature = fw;
-
-            debug(pre, QString("set feature: %2 to function: %1").arg(parentFunction->getMetaData().name).arg(parentFd.feature->getFeature()->getFeatureName()), level);
-        } else */ {
-            debug(pre, QString("add input element id: %2, %3, %4 to function: %1 (%5)").arg(parentFunction->getMetaData().name).arg(ie.id).arg(ie.typeOfElement).arg(ie.label).arg(index), level);
-            parentFunction->addInputElement(ie, index);
-        }
-
-
-    } else if(ctx.config.isHelperElement(node->getName())) {
-
-        QPointer<Function> parentFunction = data.functionData.top().function;
-
-        InputElement ie = ctx.getHelperInputElementsByName(node->getName());
         debug(pre, QString("add input element id: %2, %3, %4 to function: %1 (%5)").arg(parentFunction->getMetaData().name).arg(ie.id).arg(ie.typeOfElement).arg(ie.label).arg(index), level);
         parentFunction->addInputElement(ie, index);
-
     }
 
 }
