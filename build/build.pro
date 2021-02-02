@@ -84,7 +84,8 @@ SOURCES += \
     $$PWD/../cf/zxplane.cpp \
     $$PWD/../cf/cfvisitor2.cpp \
     $$PWD/../cf/cfcparameter.cpp \
-    $$PWD/../cf/cfvisitor1.cpp
+    $$PWD/../cf/cfvisitor1.cpp \
+    $$PWD/../cf/xyzfilter.cpp
 
 # header files
 HEADERS += \
@@ -127,7 +128,8 @@ HEADERS += \
     $$PWD/../cf/zxplane.h \
     $$PWD/../cf/cfvisitor2.h \
     $$PWD/../cf/cfcparameter.h \
-    $$PWD/../cf/cfvisitor1.h
+    $$PWD/../cf/cfvisitor1.h \
+    $$PWD/../cf/xyzfilter.h \
 
 # other files
 OTHER_FILES += $$PWD/../metaInfo.json
