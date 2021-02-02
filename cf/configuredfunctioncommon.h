@@ -22,10 +22,11 @@ struct CFContext {
      // all necessary funktions
      QList<QPointer<Function> > functions;
 
-     QMap<int, QList<InputElement> > global_inputElements;
-     QPointer<FeatureWrapper> global_feature;
      QPointer<Function> baseFunction;
      QPointer<FeatureWrapper> baseFeature;
+
+     QMap<int, QList<InputElement> > global_inputElements;
+     QPointer<FeatureWrapper> global_feature;
 
      /**
       * @brief getFunction
@@ -43,7 +44,7 @@ struct CFContext {
          throw logic_error(QString("no function found: %1").arg(name).toLocal8Bit().data());
      }
 
-     InputElement getInputElementsByName(QString name) {
+     InputElement getInputElement(QString name) {
          QList<InputElement> ies = this->global_inputElements.value(config.getNeededElementNames().indexOf(name));
          if(ies.size() == 0) {
              throw logic_error(QString("invalid count (%1) of InputElements: %2").arg(ies.size()).arg(name).toLocal8Bit().data());
@@ -51,75 +52,11 @@ struct CFContext {
          return ies.first();
      }
 
-     InputElement getFeatureInputElementsByName(QPointer<FeatureWrapper> feat) {
-         switch(feat->getFeatureTypeEnum()) {
-         case ePointFeature: {
-             InputElement ie;
-             ie.label = QString("%1").arg("point");
-             ie.typeOfElement = ePointElement;
-             ie.point = feat->getPoint();
-             ie.geometry = feat->getGeometry();
-
-             return ie;
-         }
-         }
-
-         throw logic_error(QString("not implemented: FeatureTypeEnum: %1").arg(feat->getFeatureTypeString()).toLocal8Bit().data());
-
-     }
-
-     QPointer<FeatureWrapper> _createApplicableFeature(QList<FeatureTypes> fts) {
-         QPointer<FeatureWrapper> fw = new FeatureWrapper();
-
-         FeatureTypes ft = fts.first();
-         switch (ft) {
-         case ePointFeature: {
-             QPointer<Point> point = new Point(false);
-             fw->setPoint(point);
-             break;
-         }
-         default:
-             throw logic_error(QString("not implemented: FeatureTypes: %1").arg(ft).toLocal8Bit().data());
-         }
-
-         return fw;
-     }
-
-     bool exec(QPointer<FeatureWrapper> feature, QList<QPointer<Function> > functions) {
-         foreach(QPointer<Function> func, functions){
-             // break if the function pointer is not valid
-             if(func.isNull()){
-                 return false;
-             }
-             if(!func->getApplicableFor().contains(feature->getFeatureTypeEnum())) {
-                 throw logic_error(QString("function '%1' is not applicable for feature type '%2'").arg(func->getMetaData().name).arg(feature->getFeatureTypeString()).toLocal8Bit().data());
-             }
-
-             int depth = 0;
-             qDebug() << QString("%1exec function: %2 with feature: %3").arg(QString(depth*2, QChar(' '))).arg(func->getMetaData().name).arg(feature->getFeature()->getFeatureName());
-             // try to solve the current function
-             if(!func->exec(feature)){
-                 qDebug() << "false";
-                 return false;
-             }
-         }
-
-         return true;
-     }
-
      /**
       * @brief createApplicableFeature
-      * @param featureTypes
-      * @return feature for first element of featuresTypes
+      * @param featureType
+      * @return feature for element of featuresTypes
       */
-     QPointer<FeatureWrapper> createApplicableFeature(QList<FeatureTypes> featureTypes) {
-            QList<FeatureTypes>::iterator featureType;
-            for (featureType = featureTypes.begin(); featureType != featureTypes.end(); ++featureType) {
-                return createApplicableFeature(*featureType);
-            }
-
-            throw logic_error(QString("can not create applicable feature").toLocal8Bit().data());
-     }
      QPointer<FeatureWrapper> createApplicableFeature(FeatureTypes featureType) {
             QPointer<FeatureWrapper> featureWrapper = new FeatureWrapper();
 
@@ -167,22 +104,17 @@ struct CFContext {
  * @brief The CFFunctionData struct
  */
 struct CFFunctionData {
-    int level;
+
     // current (this) function
     QPointer<Function> function;
-    // feature returned by this function
+
+    // feature returned / modified by this function
     QPointer<FeatureWrapper> feature;
-    QList<QPointer<Function> > featureFunctions;
 
     QString prettyPrint() {
         QString s;
         s += "function: '" + (this->function.isNull() ? "null" : this->function->getMetaData().name)
-            + "', feature: '" + (this->feature.isNull() ? "null" : this->feature->getFeature()->getFeatureName() + "', featureType: '" + this->feature->getFeatureTypeString())
-            + "', featureFunctions: [ ";
-        foreach(QPointer<Function> f, this->featureFunctions) {
-            s += "'" + f->getMetaData().name + "', ";
-        }
-        s += " ], ";
+            + "', feature: '" + (this->feature.isNull() ? "null" : this->feature->getFeature()->getFeatureName() + "', featureType: '" + this->feature->getFeatureTypeString());
         return s;
     }
 

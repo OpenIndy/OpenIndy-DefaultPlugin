@@ -64,7 +64,7 @@ void CFVisitor::pre(QPointer<Node> n, int index, int level) {
         CFFunctionData parentFd = data.top();
         QPointer<Function> parentFunction = parentFd.function;
 
-        InputElement ie = ctx.getInputElementsByName(node->getName());
+        InputElement ie = ctx.getInputElement(node->getName());
 
         debug(pre, QString("add input element id: %2, %3, %4 to function: %1 (%5)").arg(parentFunction->getMetaData().name).arg(ie.id).arg(ie.typeOfElement).arg(ie.label).arg(index), level);
         parentFunction->addInputElement(ie, index);
@@ -77,7 +77,8 @@ void CFVisitor::post(QPointer<Node> n, int index, int level) {
 
     QString post = QString("post L%1 I%2").arg(level).arg(index);
 
-   if(ctx.config.isFunction(node->getName()) && level > 0) {
+   if ( ctx.config.isFunction(node->getName())
+           && level > 0 /* skip level 0 because this is the base function */) {
 
         CFFunctionData fd = data.pop();
 
