@@ -77,15 +77,13 @@ SOURCES += \
     $$PWD/../functions/fit/p_bestfitcircleinplane.cpp \
     $$PWD/../functions/fit/p_bestfitsphere.cpp \
     $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.cpp \
-    $$PWD/../cf/configuredfunction2.cpp \
+    $$PWD/../cf/configuredfunction.cpp \
     $$PWD/../cf/functionconfigparser.cpp \
-    $$PWD/../cf/configuredfunction1.cpp \
     $$PWD/../cf/distancebetweentwopoints.cpp \
     $$PWD/../cf/zxplane.cpp \
-    $$PWD/../cf/cfvisitor2.cpp \
+    $$PWD/../cf/cfvisitor.cpp \
     $$PWD/../cf/cfcparameter.cpp \
-    $$PWD/../cf/cfvisitor1.cpp \
-    $$PWD/../cf/xyzfilter.cpp
+    $$PWD/../cf/xyzfilter.cpp \
 
 # header files
 HEADERS += \
@@ -120,15 +118,13 @@ HEADERS += \
     $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.h \
     $$PWD/../cf/configuredfunctioncommon.h \
     $$PWD/../treeutil.h \
-    $$PWD/../cf/configuredfunction2.h \
+    $$PWD/../cf/configuredfunction.h \
     $$PWD/../cf/functionconfigparser.h \
-    $$PWD/../cf/configuredfunction1.h \
     $$PWD/../cf/distancebetweentwopoints.h \
     $$PWD/../cf/configuredfunctionconfig.h \
     $$PWD/../cf/zxplane.h \
-    $$PWD/../cf/cfvisitor2.h \
+    $$PWD/../cf/cfvisitor.h \
     $$PWD/../cf/cfcparameter.h \
-    $$PWD/../cf/cfvisitor1.h \
     $$PWD/../cf/xyzfilter.h \
 
 # other files
