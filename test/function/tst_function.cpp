@@ -57,7 +57,6 @@ private Q_SLOTS:
     void testTODO4(); // later
     void testTODO5(); // later
 
-    void testPointFromPoints_RegisterV1();
     void testPointFromPoints_Register();
 
     void testPointFromPoints_point();
@@ -3028,40 +3027,6 @@ QPointer<Function> FunctionTest::createFunction(QString functionName, QString co
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
     return function;
-}
-
-
-void FunctionTest::testPointFromPoints_RegisterV1() {
-
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
-
-    QPointer<Point> feature = new Point(false);
-    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
-    wrapper->setPoint(feature);
-
-    QPointer<Function> function = createFunction("RegisterPositionToPlane", "config/function/functionConfigV1.json");
-    QVERIFY2(!function.isNull(), "function is null");
-
-    // colum delim: " "
-    // line ending: "\n"
-    // unit:        [mm]
-    addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
-
-    addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function, 2001, 1);
-
-    feature->addFunction(function);
-    QVERIFY2(feature->getDisplayFunctions().compare("RegisterPositionToPlane")==0, "getDisplayFunctions");
-
-    feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
-
-    // QDEBUG : FunctionTest::testFunctions() position= 710.7908481 , 2281.722941 , 153.1470537 , direction= 0 , 0 , 0 , stdev= nan
-    DEBUG_POINT(feature);
-
-    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
-    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
-    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
-
 }
 
 void FunctionTest::testPointFromPoints_RegisterV2() {
