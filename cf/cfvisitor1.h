@@ -1,7 +1,6 @@
 #ifndef CFVISITOR1_H
 #define CFVISITOR1_H
 
-
 #include "treeutil.h"
 #include "configuredfunctioncommon.h"
 
@@ -18,8 +17,5 @@ private:
     CFContext ctx;
     CFData data;
 };
-
-
-
 
 #endif // CFVISITOR1_H

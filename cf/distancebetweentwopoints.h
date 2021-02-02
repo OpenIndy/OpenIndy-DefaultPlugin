@@ -14,4 +14,5 @@ public:
     bool exec(ScalarEntityDistance &distance) override;
 
 };
+
 #endif // DISTANCEBETWEENTWOPOINTS_H

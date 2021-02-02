@@ -1,5 +1,6 @@
 #ifndef XYZFILTER_H
 #define XYZFILTER_H
+
 #include <QObject>
 
 #include "constructfunction.h"

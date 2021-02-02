@@ -30,4 +30,5 @@ private:
 
     QList<FeatureTypes> applicableFor(QJsonValue value);
 };
+
 #endif // FUNCTIONCONFIGPARSER_H

@@ -24,5 +24,4 @@ private:
 
 };
 
-
 #endif // CFCPARAMETER_H

@@ -16,7 +16,6 @@
 
 using namespace oi;
 
-
 struct CFContext {
 
      ConfiguredFunctionConfig config;

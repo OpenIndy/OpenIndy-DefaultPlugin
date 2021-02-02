@@ -20,4 +20,5 @@ private:
     CFContext ctx;
     CFData data;
 };
+
 #endif // CFVISITOR2_H

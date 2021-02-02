@@ -85,5 +85,6 @@ struct ConfiguredFunctionConfig {
     }
 
 };
+
 #endif // CONFIGUREDFUNCTIONCONFIG
 
