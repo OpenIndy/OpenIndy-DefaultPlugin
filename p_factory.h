@@ -64,6 +64,7 @@
 #include "configuredfunction1.h"
 #include "configuredfunction2.h"
 #include "distancebetweentwopoints.h"
+#include "xyzfilter.h"
 #include "functionconfigparser.h"
 #include "configuredfunctionconfig.h"
 

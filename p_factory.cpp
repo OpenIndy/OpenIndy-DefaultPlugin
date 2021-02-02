@@ -194,9 +194,15 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
 }
 
 QPointer<Function> OiTemplatePlugin::createFunction(const QString &functionName, QString configName){
-    // internal function
+    // internal functions
     if(functionName.compare("DistanceBetweenTwoPoints") == 0){
         return new DistanceBetweenTwoPoints();
+    } else if(functionName.compare("XYFilter") == 0){
+        return new XYZFilter("XYFilter", true, true, false); // keep Z
+    } else if(functionName.compare("XZFilter") == 0){
+        return new XYZFilter("XZFilter", true, false, true); // keep Y
+    } else if(functionName.compare("YZFilter") == 0){
+        return new XYZFilter("YZFilter", false, true, true); // keep X
     }
 
     QPointer<Function> function(NULL);
