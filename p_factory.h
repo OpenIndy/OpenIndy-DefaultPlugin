@@ -62,6 +62,10 @@
 #include "p_oiexchangeascii.h"
 
 #include "configuredfunction.h"
+#include "distancebetweentwopoints.h"
+#include "xyzfilter.h"
+#include "functionconfigparser.h"
+#include "configuredfunctionconfig.h"
 
 using namespace oi;
 

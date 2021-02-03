@@ -30,6 +30,11 @@ public:
     }
 };
 
+/**
+ * common visitor to pretty print the current node
+ *
+ * @brief The PrintVisitor class
+ */
 class PrintVisitor: public NodeVisitor {
 
 public:

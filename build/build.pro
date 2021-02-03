@@ -43,6 +43,7 @@ INCLUDEPATH += $$PWD/../functions/generateFeature
 INCLUDEPATH += $$PWD/../functions/generateFeature/pointcloud_segmentation
 INCLUDEPATH += $$PWD/../simulations/simplePolarMeasurement
 INCLUDEPATH += $$PWD/../exchange
+INCLUDEPATH += $$PWD/../cf
 
 # source files
 SOURCES += \
@@ -76,6 +77,12 @@ SOURCES += \
     $$PWD/../functions/fit/p_bestfitcircleinplane.cpp \
     $$PWD/../functions/fit/p_bestfitsphere.cpp \
     $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.cpp \
+    $$PWD/../cf/configuredfunction.cpp \
+    $$PWD/../cf/functionconfigparser.cpp \
+    $$PWD/../cf/distancebetweentwopoints.cpp \
+    $$PWD/../cf/cfvisitor.cpp \
+    $$PWD/../cf/cfcparameter.cpp \
+    $$PWD/../cf/xyzfilter.cpp \
 
 # header files
 HEADERS += \
@@ -108,8 +115,15 @@ HEADERS += \
     $$PWD/../functions/fit/p_bestfitcircleinplane.h \
     $$PWD/../functions/fit/p_bestfitsphere.h \
     $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.h \
-    $$PWD/../configuredfunction.h \
-    $$PWD/../treeutil.h
+    $$PWD/../cf/configuredfunctioncommon.h \
+    $$PWD/../treeutil.h \
+    $$PWD/../cf/configuredfunction.h \
+    $$PWD/../cf/functionconfigparser.h \
+    $$PWD/../cf/distancebetweentwopoints.h \
+    $$PWD/../cf/configuredfunctionconfig.h \
+    $$PWD/../cf/cfvisitor.h \
+    $$PWD/../cf/cfcparameter.h \
+    $$PWD/../cf/xyzfilter.h \
 
 # other files
 OTHER_FILES += $$PWD/../metaInfo.json
