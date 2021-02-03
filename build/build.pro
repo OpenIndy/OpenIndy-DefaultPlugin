@@ -107,7 +107,9 @@ HEADERS += \
     $$PWD/../functions/fit/p_bestfitcylinderfrompoints.h \
     $$PWD/../functions/fit/p_bestfitcircleinplane.h \
     $$PWD/../functions/fit/p_bestfitsphere.h \
-    $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.h
+    $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.h \
+    $$PWD/../configuredfunction.h \
+    $$PWD/../treeutil.h
 
 # other files
 OTHER_FILES += $$PWD/../metaInfo.json

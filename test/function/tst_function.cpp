@@ -2933,38 +2933,12 @@ void FunctionTest::testPointFromPoints_Register() {
 
 QPointer<Function> FunctionTest::createFunction(QString functionName, QString configName = "") {
     QPointer<Function> function;
-    if(functionName.compare("DistanceBetweenTwoPoints") == 0) {
-        function = new DistanceBetweenTwoPoints();
-    } else {
-        OiTemplatePlugin plugin;
-        function = plugin.createFunction(functionName);
-    }
+    OiTemplatePlugin plugin;
+
+    function = plugin.createFunction(functionName);
 
     if(!configName.isEmpty() && function.isNull()) {
-        FunctionConfigParser parser;
-        foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson(configName)) {
-            if(config.name.compare(functionName) == 0) {
-                QList<QPointer<Function> > functions;
-                foreach(QString name, config.getFunctionNames()) {
-                    QPointer<Function> f = createFunction(name, configName);
-                    functions.append(f);
-                }
-
-                switch(config.version) {
-                case 1:
-                    function = new ConfiguredFunction(config, functions);
-                    break;
-                case 2:
-                    function = new ConfiguredFunction2(config, functions);
-                    break;
-                }
-            }
-
-            if(!function.isNull()) {
-                break;
-            }
-
-        }
+        function = plugin.createFunction(functionName, configName);
     }
 
     Q_ASSERT_X(!function.isNull(), "createFunction", QString("no function found: %1").arg(functionName).toLatin1().data());
@@ -2983,7 +2957,7 @@ void FunctionTest::testPointFromPoints_Register2() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setPoint(feature);
 
-    QPointer<Function> function = createFunction("RegisterPositionToPlane", "functionConfig1.json");
+    QPointer<Function> function = createFunction("RegisterPositionToPlane", "config/function/functionConfigV1.json");
     QVERIFY2(!function.isNull(), "function is null");
 
     // colum delim: " "
@@ -3015,7 +2989,7 @@ void FunctionTest::testPointFromPoints_Register3() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setPoint(feature);
 
-    QPointer<Function> function = createFunction("RegisterPositionToPlane", "functionConfig2.json");
+    QPointer<Function> function = createFunction("RegisterPositionToPlane");
     QVERIFY2(!function.isNull(), "function is null");
 
     // colum delim: " "
@@ -3048,7 +3022,7 @@ void FunctionTest::testDistance_PointFromPoints_Register() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setScalarEntityDistance(feature);
 
-    QPointer<Function> function = createFunction("DistanceFromPlane", "functionConfig2.json");
+    QPointer<Function> function = createFunction("DistanceFromPlane");
     QVERIFY2(!function.isNull(), "function is null");
 
     // colum delim: " "
@@ -3077,7 +3051,7 @@ void FunctionTest::testZXDistance_PointFromPoints_Register() {
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
     wrapper->setScalarEntityDistance(feature);
 
-    QPointer<Function> function = createFunction("DistanceProjectionZX", "functionConfig2.json");
+    QPointer<Function> function = createFunction("DistanceProjectionZX");
     QVERIFY2(!function.isNull(), "function is null");
 
     // colum delim: " "

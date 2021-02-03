@@ -2,7 +2,6 @@
 #define CONFIGUREDFUNCTION
 
 #include <QString>
-#include <QtTest>
 #include <QPointer>
 #include <QList>
 #include <QMultiMap>
@@ -241,9 +240,8 @@ struct CFContext {
 
      QPointer<Function> getFunction(QString name) {
          for(int index = 0; index < functions.size(); index++) {
-             if(functions[index]->getMetaData().name.compare(name) == 0) {
+             if(!functions[index].isNull() && functions[index]->getMetaData().name.compare(name) == 0) {
                  QPointer<Function> f = functions.takeAt(index); // remove from list
-                 f->init();
                  return f;
              }
          }
@@ -543,7 +541,10 @@ public:
 
         QString val;
         QFile file;
-        file.setFileName(filename);
+        file.setFileName(QDir::currentPath() + "/" + filename);
+        if(!file.exists()) {
+            return configs;
+        }
         file.open(QIODevice::ReadOnly | QIODevice::Text);
         val = file.readAll();
         file.close();
