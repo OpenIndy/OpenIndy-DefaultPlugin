@@ -18,8 +18,7 @@ class FunctionConfigParser
 {
 
 public:
-    QList<ConfiguredFunctionConfig> readConfigFromJson(QString filename);
-
+    QList<ConfiguredFunctionConfig> readConfigFromJson(QString filename  = "config/function/functionConfigV2.json");
 private:
     QList<QPointer<Node> > parameter(QJsonValue value);
 
