@@ -188,12 +188,12 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
     }else if(name.compare("BestFitCylinderFromPoints") == 0){
         return new BestFitCylinderFromPoints();
     } else {
-        return createFunction(name, "config/function/functionConfigV2.json");
+        return createFunctionFromConfig(name);
     }
     return result;
 }
 
-QPointer<Function> OiTemplatePlugin::createFunction(const QString &functionName, QString configName){
+QPointer<Function> OiTemplatePlugin::createFunctionFromConfig(const QString &functionName){
     // internal functions
     if(functionName.compare("DistanceBetweenTwoPoints") == 0){
         return new DistanceBetweenTwoPoints();
@@ -207,32 +207,30 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &functionName,
 
     QPointer<Function> function(NULL);
 
-    if(!configName.isEmpty()) {
-        FunctionConfigParser parser;
-        foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson(configName)) {
-            if(config.name.compare(functionName) == 0) {
-                QList<QPointer<Function> > functions;
-                foreach(QString name, config.getFunctionNames()) {
-                    QPointer<Function> f = createFunction(name);
-                    if(f.isNull()) {
-                        throw logic_error(QString("no function found: %1").arg(name).toLocal8Bit().data());
-                    }
-                    f->init();
-                    functions.append(f);
+    FunctionConfigParser parser;
+    foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson()) {
+        if(config.name.compare(functionName) == 0) {
+            QList<QPointer<Function> > functions;
+            foreach(QString name, config.getFunctionNames()) {
+                QPointer<Function> f = createFunction(name);
+                if(f.isNull()) {
+                    throw logic_error(QString("no function found: %1").arg(name).toLocal8Bit().data());
                 }
-
-                if(config.version == 2) {
-                    function = new ConfiguredFunction(config, functions);
-                    function->init();
-                    break;
-                }
+                f->init();
+                functions.append(f);
             }
 
-            if(!function.isNull()) {
-                return function;
+            if(config.version == 2) {
+                function = new ConfiguredFunction(config, functions);
+                function->init();
+                break;
             }
-
         }
+
+        if(!function.isNull()) {
+            return function;
+        }
+
     }
 
     return function;
