@@ -143,7 +143,7 @@ private Q_SLOTS:
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
-    QPointer<Function> createFunction(QString name, QString config);
+    QPointer<Function> createFunction(QString name);
 
     void addInputObservations(QString data, QPointer<Function> function, int id, int inputElementKey, bool shouldBeUsed);
 
@@ -3011,14 +3011,14 @@ void FunctionTest::testPointFromPoints_Register() {
 
 }
 
-QPointer<Function> FunctionTest::createFunction(QString functionName, QString configName = "") {
+QPointer<Function> FunctionTest::createFunction(QString functionName) {
     QPointer<Function> function;
     OiTemplatePlugin plugin;
 
     function = plugin.createFunction(functionName);
 
-    if(!configName.isEmpty() && function.isNull()) {
-        function = plugin.createFunction(functionName, configName);
+    if(function.isNull()) {
+        function = plugin.createFunction(functionName);
     }
 
     Q_ASSERT_X(!function.isNull(), "createFunction", QString("no function found: %1").arg(functionName).toLatin1().data());
