@@ -1,5 +1,8 @@
 #include "functionconfigparser.h"
 
+const char *jsonData =
+#include "cfconfig.res"
+;
 
 QList<ConfiguredFunctionConfig> FunctionConfigParser::readConfigFromJson(QString filename) {
 
@@ -17,6 +20,25 @@ QList<ConfiguredFunctionConfig> FunctionConfigParser::readConfigFromJson(QString
 
     QJsonDocument doc = QJsonDocument::fromJson(val.toUtf8());
     QJsonObject json = doc.object();
+
+    return this->readConfigFromJson(json);
+}
+
+/**
+ * @brief FunctionConfigParser::readConfigFromJson
+ * @return internal JSON config
+ */
+QList<ConfiguredFunctionConfig> FunctionConfigParser::readConfigFromJson() {
+
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    QJsonObject json = doc.object();
+
+    return this->readConfigFromJson(json);
+}
+
+QList<ConfiguredFunctionConfig> FunctionConfigParser::readConfigFromJson(QJsonObject json) {
+
+    QList<ConfiguredFunctionConfig> configs;
 
     if(json["version"].toInt() == 2) {
          foreach(QJsonValue function, json["functions"].toArray()) {
