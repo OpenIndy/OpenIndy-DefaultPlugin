@@ -59,6 +59,14 @@ QList<QPointer<Function> > OiTemplatePlugin::createFunctions(){
     resultSet.append(new BestFitCylinder());
     resultSet.append(new BestFitCylinderFromPoints());
 
+    FunctionConfigParser parser;
+    foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson()) {
+        QList<QPointer<Function> > functions;
+        if(config.version == 2) {
+            resultSet.append(new ConfiguredFunction(config, functions));// this instance contains only function name!
+        }
+    }
+
     return resultSet;
 }
 
