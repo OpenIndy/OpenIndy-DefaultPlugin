@@ -5,7 +5,7 @@ ConfiguredFunction::ConfiguredFunction(ConfiguredFunctionConfig config, QList<QP
 
 void ConfiguredFunction::init() {
     this->metaData.name = this->config.name;
-    this->metaData.iid = SpecialFunction_iidd;
+    this->metaData.iid = SpecialFunction_iidd; // or differentiate?
 
     this->applicableFor = this->config.applicableFor;
     this->neededElements = config.getNeededElements();
