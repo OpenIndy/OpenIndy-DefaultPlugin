@@ -57,7 +57,11 @@ QList<QPointer<Function> > OiTemplatePlugin::createFunctions(){
     resultSet.append(new RectifyToVector());
     resultSet.append(new Shift());
     resultSet.append(new BestFitCylinder());
+    resultSet.append(new BestFitCylinderAppxDirection());
+    resultSet.append(new BestFitCylinderAppxDummyPoint());
     resultSet.append(new BestFitCylinderFromPoints());
+    resultSet.append(new BestFitCylinderFromPointsAppxDirection());
+    resultSet.append(new BestFitCylinderFromPointsAppxDummyPoint());
 
     FunctionConfigParser parser;
     foreach(ConfiguredFunctionConfig config, parser.readConfigFromJson()) {
