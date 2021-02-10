@@ -126,7 +126,9 @@ HEADERS += \
     $$PWD/../cf/xyzfilter.h \
 
 # other files
-OTHER_FILES += $$PWD/../metaInfo.json
+OTHER_FILES += $$PWD/../metaInfo.json \
+    $PWD/../cf/cfconfig.res
+
 
 # ui files
 FORMS += \

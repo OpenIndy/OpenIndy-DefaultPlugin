@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "function.h"
-#include "constructfunction.h"
+#include "specialfunction.h"
 #include "featurewrapper.h"
 #include "types.h"
 #include "treeutil.h"
@@ -17,7 +17,7 @@ using namespace oi;
 /**
  * @brief The ConfiguredFunction class
  */
-class ConfiguredFunction : public Function {
+class ConfiguredFunction : public SpecialFunction {
     friend class Feature;
     friend class CFVisitor;
 

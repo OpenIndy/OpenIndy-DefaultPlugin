@@ -1,10 +1,12 @@
 #include "configuredfunction.h"
 
-ConfiguredFunction::ConfiguredFunction(ConfiguredFunctionConfig config, QList<QPointer<Function> > functions, QObject *parent): Function(parent), functions(functions), config(config) {
+ConfiguredFunction::ConfiguredFunction(ConfiguredFunctionConfig config, QList<QPointer<Function> > functions, QObject *parent): SpecialFunction(parent), functions(functions), config(config) {
 }
 
 void ConfiguredFunction::init() {
     this->metaData.name = this->config.name;
+    this->metaData.iid = SpecialFunction_iidd; // or differentiate?
+
     this->applicableFor = this->config.applicableFor;
     this->neededElements = config.getNeededElements();
 }

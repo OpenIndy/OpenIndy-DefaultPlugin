@@ -96,7 +96,7 @@ public:
 
     QPointer<Sensor> createSensor(const QString &name);
     QPointer<Function> createFunction(const QString &name);
-    QPointer<Function> createFunction(const QString &name, QString configName);
+    QPointer<Function> createFunctionFromConfig(const QString &name);
     QPointer<BundleAdjustment> createBundleAdjustment(const QString &name);
     QPointer<SimulationModel> createSimulation(const QString &name);
     QPointer<Tool> createTool(const QString &name);
