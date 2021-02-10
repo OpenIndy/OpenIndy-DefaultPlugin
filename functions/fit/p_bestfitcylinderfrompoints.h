@@ -42,4 +42,36 @@ private:
 
 };
 
+class BestFitCylinderFromPointsAppxDirection: public BestFitCylinderFromPoints
+{
+    Q_OBJECT
+
+public:
+    void init();
+/*
+protected:
+    bool exec(Cylinder &cylinder);
+
+private:
+
+    bool setUpResult(Cylinder &cylinder);
+*/
+};
+
+class BestFitCylinderFromPointsAppxDummyPoint: public BestFitCylinderFromPoints
+{
+    Q_OBJECT
+
+public:
+    void init();
+/*
+protected:
+    bool exec(Cylinder &cylinder);
+
+private:
+
+    bool setUpResult(Cylinder &cylinder);
+*/
+};
+
 #endif // P_BESTFITCYLINDERFROMPOINTS_H
