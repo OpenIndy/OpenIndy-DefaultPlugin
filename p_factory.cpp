@@ -197,8 +197,16 @@ QPointer<Function> OiTemplatePlugin::createFunction(const QString &name){
         return new RectifyToVector();
     }else if(name.compare("BestFitCylinder") == 0){
         return new BestFitCylinder();
+    }else if(name.compare("BestFitCylinderAppxDirection") == 0){
+        return new BestFitCylinderAppxDirection();
+    }else if(name.compare("BestFitCylinderAppxDummyPoint") == 0){
+        return new BestFitCylinderAppxDummyPoint();
     }else if(name.compare("BestFitCylinderFromPoints") == 0){
         return new BestFitCylinderFromPoints();
+    }else if(name.compare("BestFitCylinderFromPointsAppxDirection") == 0){
+        return new BestFitCylinderFromPointsAppxDirection();
+    }else if(name.compare("BestFitCylinderFromPointsAppxDummyPoint") == 0){
+        return new BestFitCylinderFromPointsAppxDummyPoint();
     } else {
         return createFunctionFromConfig(name);
     }
