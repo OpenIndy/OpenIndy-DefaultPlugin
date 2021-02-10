@@ -22,26 +22,10 @@ void BestFitCylinder::init(){
     param1.typeOfElement = eObservationElement;
     this->neededElements.append(param1);
 
-    /*
-    NeededElement param2;
-    param2.description = "approximation direction.";
-    param2.infinite = true;
-    param2.typeOfElement = eDirectionElement;
-    this->neededElements.append(param2);
-
-    NeededElement param3;
-    param3.description = "Dummy points to indicate cylinder normal.";
-    param3.infinite = true;
-    param3.typeOfElement = eObservationElement;
-    param3.key = InputElementKey::eDummyPoint;
-    this->neededElements.append(param3);
-*/
     //set spplicable for
     this->applicableFor.append(eCylinderFeature);
 
     this->stringParameters.insert("approximation", "first two points");
-    //this->stringParameters.insert("approximation", "first two dummy points");
-    //this->stringParameters.insert("approximation", "direction");
     this->stringParameters.insert("approximation", "guess axis");
 
     this->scalarInputParams.isValid = true;
@@ -122,22 +106,9 @@ void BestFitCylinderAppxDirection::init(){
     param2.infinite = true;
     param2.typeOfElement = eDirectionElement;
     this->neededElements.append(param2);
-/*
-    NeededElement param3;
-    param3.description = "Dummy points to indicate cylinder normal.";
-    param3.infinite = true;
-    param3.typeOfElement = eObservationElement;
-    param3.key = InputElementKey::eDummyPoint;
-    this->neededElements.append(param3);
-*/
 
     //set spplicable for
     this->applicableFor.append(eCylinderFeature);
-//
-//    this->stringParameters.insert("approximation", "first two points");
-//    this->stringParameters.insert("approximation", "first two dummy points");
-//    this->stringParameters.insert("approximation", "direction");
-//    this->stringParameters.insert("approximation", "guess axis");
 
     this->scalarInputParams.isValid = true;
     this->scalarInputParams.stringParameter.insert("approximation", "direction"); // default
@@ -164,13 +135,7 @@ void BestFitCylinderAppxDummyPoint::init(){
     param1.infinite = true;
     param1.typeOfElement = eObservationElement;
     this->neededElements.append(param1);
-/*
-    NeededElement param2;
-    param2.description = "approximation direction.";
-    param2.infinite = true;
-    param2.typeOfElement = eDirectionElement;
-    this->neededElements.append(param2);
-*/
+
     NeededElement param3;
     param3.description = "Dummy points to indicate cylinder normal.";
     param3.infinite = true;
@@ -180,11 +145,6 @@ void BestFitCylinderAppxDummyPoint::init(){
 
     //set spplicable for
     this->applicableFor.append(eCylinderFeature);
-
-//    this->stringParameters.insert("approximation", "first two points");
-//    this->stringParameters.insert("approximation", "first two dummy points");
-    // this->stringParameters.insert("approximation", "direction");
-//    this->stringParameters.insert("approximation", "guess axis");
 
     this->scalarInputParams.isValid = true;
     this->scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
