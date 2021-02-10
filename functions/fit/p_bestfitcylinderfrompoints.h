@@ -22,7 +22,7 @@ public:
     //function initialization method
     //##############################
 
-    void init();
+    void init() override;
 
 protected:
 
@@ -30,7 +30,7 @@ protected:
     //exec methods
     //############
 
-    bool exec(Cylinder &cylinder);
+    bool exec(Cylinder &cylinder) override;
 
 private:
 
@@ -47,15 +47,8 @@ class BestFitCylinderFromPointsAppxDirection: public BestFitCylinderFromPoints
     Q_OBJECT
 
 public:
-    void init();
-/*
-protected:
-    bool exec(Cylinder &cylinder);
+    void init() override;
 
-private:
-
-    bool setUpResult(Cylinder &cylinder);
-*/
 };
 
 class BestFitCylinderFromPointsAppxDummyPoint: public BestFitCylinderFromPoints
@@ -63,15 +56,8 @@ class BestFitCylinderFromPointsAppxDummyPoint: public BestFitCylinderFromPoints
     Q_OBJECT
 
 public:
-    void init();
-/*
-protected:
-    bool exec(Cylinder &cylinder);
+    void init() override;
 
-private:
-
-    bool setUpResult(Cylinder &cylinder);
-*/
 };
 
 #endif // P_BESTFITCYLINDERFROMPOINTS_H
