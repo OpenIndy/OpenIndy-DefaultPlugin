@@ -1180,7 +1180,7 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
-    QPointer<Function> function = new BestFitCylinder();
+    QPointer<Function> function = new BestFitCylinderAppxDirection();
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
@@ -1205,9 +1205,9 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
 
     addInputObservations(data, function);
 
-    ScalarInputParams scalarInputParams;
-    scalarInputParams.stringParameter.insert("approximation", "direction");
-    function->setScalarInputParams(scalarInputParams);
+    //ScalarInputParams scalarInputParams;
+    //scalarInputParams.stringParameter.insert("approximation", "direction");
+    //function->setScalarInputParams(scalarInputParams);
 
     // QDEBUG : FunctionTest::testBestFitCylinder10() position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
 
@@ -1629,7 +1629,7 @@ void FunctionTest::testBestFitCylinder1__DummyPoint1()
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
 
-    QPointer<Function> function = new BestFitCylinder();
+    QPointer<Function> function = new BestFitCylinderAppxDummyPoint();
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
@@ -1656,9 +1656,9 @@ void FunctionTest::testBestFitCylinder1__DummyPoint1()
     addInputObservations(data, function);
     addInputObservations("0. 0. 0.\n2000. 10. 10.\n", function, 2000, InputElementKey::eDummyPoint);
 
-    ScalarInputParams scalarInputParams;
-    scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
-    function->setScalarInputParams(scalarInputParams);
+    //ScalarInputParams scalarInputParams;
+    //scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
+    //function->setScalarInputParams(scalarInputParams);
 
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
@@ -1678,7 +1678,7 @@ void FunctionTest::testBestFitCylinder1__DummyPoint2()
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
 
-    QPointer<Function> function = new BestFitCylinder();
+    QPointer<Function> function = new BestFitCylinderAppxDummyPoint();
     function->init();
     QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
 
@@ -1705,9 +1705,9 @@ void FunctionTest::testBestFitCylinder1__DummyPoint2()
     addInputObservations(data, function);
     addInputObservations("2000. 0. 0.\n0. 10. 10.\n", function, 2000, InputElementKey::eDummyPoint);
 
-    ScalarInputParams scalarInputParams;
-    scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
-    function->setScalarInputParams(scalarInputParams);
+    //ScalarInputParams scalarInputParams;
+    //scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
+    //function->setScalarInputParams(scalarInputParams);
 
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
