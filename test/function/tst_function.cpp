@@ -1205,18 +1205,11 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
 
     addInputObservations(data, function);
 
-    //ScalarInputParams scalarInputParams;
-    //scalarInputParams.stringParameter.insert("approximation", "direction");
-    //function->setScalarInputParams(scalarInputParams);
-
-    // QDEBUG : FunctionTest::testBestFitCylinder10() position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
-
     addInputLine(0,0,0, -0.9, 0, 0, function, 2000, 1);
 
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
-    // QDEBUG : FunctionTest::testBestFitCylinderAproximationDirection1() position= -49.95613858 , 0.002538946657 , 0.003555186993 , direction= 0.9999999383 , 0.0001974276497 , -0.0002907078213 , radius= 19.15680458 , stdev= 0.03371845401
     DEBUG_CYLINDER(cylinder);
 
     COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(0), (-0.9999999383), 0.000001);
@@ -1382,7 +1375,6 @@ void FunctionTest::testBestFitPlane()
     bool res = function->exec(planeFeature);
     QVERIFY2(res, "exec");
 
-    // QDEBUG : FunctionTest::testBestFitPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 3.654760904e-10
     DEBUG_PLANE(plane);
 
     COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
@@ -1498,7 +1490,6 @@ void FunctionTest::testBestFitCircleInPlane_left()
     bool res = function->exec(circleFeature);
     QVERIFY2(res, "exec");
 
-    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
 
     COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
@@ -1536,7 +1527,6 @@ void FunctionTest::testBestFitCircleInPlane_right()
     bool res = function->exec(circleFeature);
     QVERIFY2(res, "exec");
 
-    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
 
     COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), ( 0.0009999975), 0.000001);
@@ -1574,7 +1564,6 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
     bool res = function->exec(circleFeature);
     QVERIFY2(res, "exec");
 
-    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
 
     COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
@@ -1613,7 +1602,6 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
     bool res = function->exec(circleFeature);
     QVERIFY2(res, "exec");
 
-    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
 
     COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
@@ -1656,14 +1644,9 @@ void FunctionTest::testBestFitCylinder1__DummyPoint1()
     addInputObservations(data, function);
     addInputObservations("0. 0. 0.\n2000. 10. 10.\n", function, 2000, InputElementKey::eDummyPoint);
 
-    //ScalarInputParams scalarInputParams;
-    //scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
-    //function->setScalarInputParams(scalarInputParams);
-
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
-    //  position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
     DEBUG_CYLINDER(cylinder);
 
     COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(0), (0.9999999383), 0.00001);
@@ -1705,14 +1688,9 @@ void FunctionTest::testBestFitCylinder1__DummyPoint2()
     addInputObservations(data, function);
     addInputObservations("2000. 0. 0.\n0. 10. 10.\n", function, 2000, InputElementKey::eDummyPoint);
 
-    //ScalarInputParams scalarInputParams;
-    //scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
-    //function->setScalarInputParams(scalarInputParams);
-
     bool res = function->exec(cylinderFeature);
     QVERIFY2(res, "exec");
 
-    //  position= -49.95613858 , 0.002538946657 , 0.003555186998 , direction= 0.9999999383 , 0.00019742765 , -0.0002907078214 , radius= 19.15680458 , stdev= 0.03371648532
     DEBUG_CYLINDER(cylinder);
 
     COMPARE_DOUBLE(cylinder->getDirection().getVector().getAt(0), (-0.9999999383), 0.00001);
@@ -1737,11 +1715,6 @@ void FunctionTest::testIntersectLineLine_parallel()
     point->setPoint(pos);
     QPointer<FeatureWrapper> pointFeature = new FeatureWrapper();
     pointFeature->setPoint(point);
-
-
-    //ScalarInputParams scalarInputParams;
-    //scalarInputParams.stringParameter.insert("TODO", "TODO");
-    //function->setScalarInputParams(scalarInputParams);
 
     addInputLine(1., 1., 1., 0.5772, 0.5772, 0.5772, function, 2000, 0);
     addInputLine(2., 2., 2., 0.5772, 0.5772, 0.5772, function, 2001, 1);
@@ -2476,7 +2449,6 @@ void FunctionTest::testCircleInPlaneFromPoints()
     bool res = function->exec(circleFeature);
     QVERIFY2(res, "exec");
 
-    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_PLANE(circle);
 
     COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
@@ -2683,9 +2655,7 @@ void FunctionTest::testBestFitCircleInPlane_residuals()
     bool res = function->exec(wrapper);
     QVERIFY2(res, "exec");
 
-    // position= 499.99915 , 499.9982 , 999.9921 , direction= -1.499801648e-07 , -7.25006333e-06 , 1 , stdev= 0.002300006535
     DEBUG_CIRCLE(feature);
-    // 499.9991	499.9982	999.9921	0.0023	4/5	FastPoint	BestFitCircleInPlane		-0.000000	-0.000007	1.000000	707.1038
 
     COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.0), 0.000001);
     COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (-0.000007), 0.000001);
@@ -2737,14 +2707,10 @@ void FunctionTest::testBestFitCircleInPlane_residuals2()
 ");
 
     addInputObservations(data, function);
-//    addInputObservations("1100.0093 1100.0075 1000.0071", function, 3000, InputElementKey::eDefault, false);
-//    addInputObservations("400. 400. 1000.1", function, 3001, InputElementKey::eDefault, false);
-//    addInputObservations("900. 900. 1000.1", function, 3002, InputElementKey::eDefault, false);
 
     bool res = function->exec(wrapper);
     QVERIFY2(res, "exec");
 
-    // position= -0.001404037774 , 0.001101723963 , 1.000050134 , direction= -0.0002842264613 , -0.0001194733372 , -0.9999999525 , radius= 1.006048006 , stdev= 0.002803002496
     DEBUG_CIRCLE(feature);
 
     COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (-0.0002842264613), 0.000001);
@@ -2832,48 +2798,9 @@ void FunctionTest::testBestFitSphere_residuals()
     bool res = function->exec(wrapper);
     QVERIFY2(res, "exec");
 
-    //  position= 0.0009435528999 , 0.0004326516194 , -0.0002321768279 , direction= 0 , 0 , 0 , radius= 1.006002313 , stdev= 0.001720371939
     DEBUG_SPHERE(feature);
 
-//    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (-0.0002842264613), 0.000001);
-//    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (-0.0001194733372), 0.000001);
-//    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (-0.9999999525), 0.000001);
-
     COMPARE_DOUBLE(feature->getStatistic().getStdev(), 0.0017, 0.001);
-
-
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1000 :  QMap(("v", 0.004422)("vx", -4.32221e-05)("vy", -0.00046997)("vz", -0.00442179))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1001 :  QMap(("v", 3.62772e-05)("vx", -3.0068e-06)("vy", -2.47065e-06)("vz", -3.61524e-05))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1002 :  QMap(("v", 0.0025312)("vx", -0.0002547)("vy", 2.68612e-05)("vz", -0.00251835))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1003 :  QMap(("v", 0.00391404)("vx", 0.000250172)("vy", -0.000312133)("vz", 0.00390604))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1004 :  QMap(("v", 0.00440145)("vx", -5.05573e-05)("vy", -0.000464571)("vz", 0.00440115))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1005 :  QMap(("v", 0.00308691)("vx", -0.000242974)("vy", -0.000197619)("vz", 0.00307733))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1006 :  QMap(("v", 0.00450185)("vx", -0.000465401)("vy", 4.43563e-05)("vz", 0.00447773))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1007 :  QMap(("v", 0.00133364)("vx", 9.25858e-05)("vy", -0.000111149)("vz", -0.00133042))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1008 :  QMap(("v", 0.00156752)("vx", -0.000188453)("vy", -0.00189998)("vz", -0.00155615))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1009 :  QMap(("v", 0.00114584)("vx", -0.00078948)("vy", -0.000645944)("vz", -0.000830463))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1010 :  QMap(("v", 0.00256235)("vx", 0.00197183)("vy", -0.000199176)("vz", 0.00163632))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1011 :  QMap(("v", 0.00192102)("vx", -0.00117401)("vy", 0.00143961)("vz", -0.00152053))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1012 :  QMap(("v", 0.00365304)("vx", 0.000449531)("vy", 0.00442982)("vz", -0.00362527))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1013 :  QMap(("v", 0.00292964)("vx", -0.00201627)("vy", -0.00164743)("vz", 0.00212543))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1014 :  QMap(("v", 0.00350098)("vx", 0.00270703)("vy", -0.000269799)("vz", -0.0022201))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1015 :  QMap(("v", 0.00232597)("vx", -0.00142408)("vy", 0.00173718)("vz", 0.00183906))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1016 :  QMap(("v", 3.95106e-05)("vx", -2.78103e-05)("vy", -0.000279674)("vz", 2.80656e-05))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1017 :  QMap(("v", 0.000899147)("vx", 0.000891648)("vy", 0.000729427)("vz", -0.000115889))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1018 :  QMap(("v", 0.000195485)("vx", -0.000194506)("vy", 1.96174e-05)("vz", 1.95379e-05))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1019 :  QMap(("v", 0.000839322)("vx", -0.000828993)("vy", 0.00101596)("vz", 0.000131268))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1020 :  QMap(("v", 0.000441733)("vx", 0.000313226)("vy", 0.00309424)("vz", 0.000311475))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1021 :  QMap(("v", 6.62449e-05)("vx", 6.57015e-05)("vy", 5.36907e-05)("vz", 8.46712e-06))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1022 :  QMap(("v", 0.00170899)("vx", -0.00170045)("vy", 0.000169724)("vz", -0.000170633))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1023 :  QMap(("v", 0.0025934)("vx", 0.00256175)("vy", -0.00312683)("vz", 0.000403896))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1024 :  QMap(("v", 7.12998e-05)("vx", 5.71588e-06)("vy", 5.77798e-05)("vz", -7.10703e-05))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1025 :  QMap(("v", 0.0018276)("vx", 0.00097228)("vy", 0.000795636)("vz", -0.00154751))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1026 :  QMap(("v", 0.000105669)("vx", -6.68151e-05)("vy", 6.75863e-06)("vz", 8.18632e-05))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1027 :  QMap(("v", 9.6292e-05)("vx", -4.42841e-05)("vy", 5.43343e-05)("vz", 8.55048e-05))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1028 :  QMap(("v", 0.00138667)("vx", -0.000115082)("vy", -0.00113112)("vz", -0.00138189))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1029 :  QMap(("v", 0.00457928)("vx", -0.00245156)("vy", -0.00200277)("vz", -0.00386778))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1030 :  QMap(("v", 0.00181412)("vx", 0.00114354)("vy", -0.000113797)("vz", 0.00140831))
-//QDEBUG : FunctionTest::testBestFitSphere_residuals() 1031 :  QMap(("v", 0.00143198)("vx", 0.000656647)("vy", -0.000800552)("vz", 0.00127254))
 
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1000).corrections.value("vr", -1), (0.00444691), 0.00001);
     COMPARE_DOUBLE(function->getStatistic().getDisplayResidual(1001).corrections.value("vr", -1), (3.63613e-05), 0.00001);
@@ -2932,7 +2859,6 @@ void FunctionTest::testPointFromPoints_point()
     bool res = function->exec(wrapper);
     QVERIFY2(res, "exec");
 
-    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_POINT(feature);
 
     COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (1000.6609), 0.0001);
@@ -2962,7 +2888,6 @@ void FunctionTest::testPointFromPoints_circle()
     bool res = function->exec(wrapper);
     QVERIFY2(res, "exec");
 
-    // QDEBUG : FunctionTest::testBestFitCircleInPlane() position= 0.5 , 0.5 , 0.0025 , direction= -0.0009999975 , -0.001999995 , 0.9999975 , stdev= 1.414211795e-06
     DEBUG_POINT(feature);
 
     COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (1000.6609), 0.0001);
@@ -3002,7 +2927,6 @@ void FunctionTest::testPointFromPoints_Register() {
     feature->recalc();
     QVERIFY2(feature->getIsSolved(), "recalc");
 
-    // QDEBUG : FunctionTest::testFunctions() position= 710.7908481 , 2281.722941 , 153.1470537 , direction= 0 , 0 , 0 , stdev= nan
     DEBUG_POINT(feature);
 
     COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
@@ -3053,7 +2977,6 @@ void FunctionTest::testPointFromPoints_RegisterV2() {
     feature->recalc();
     QVERIFY2(feature->getIsSolved(), "recalc");
 
-    // QDEBUG : FunctionTest::testFunctions() position= 710.7908481 , 2281.722941 , 153.1470537 , direction= 0 , 0 , 0 , stdev= nan
     DEBUG_POINT(feature);
 
     COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
@@ -3075,7 +2998,6 @@ void FunctionTest::testDistance_PointFromPoints_RegisterV2() {
     QVERIFY2(!function.isNull(), "function is null");
 
     addInputPoint(1000.6609, 2000.3247, 3000.3180, function, 2000, 0);
-    // addInputCircle(1000.6609, 2000.3247, 3000.3180, 0.0, 0.0, 1.0, 1.0, function, 2000, 0);
     addInputPlane( 1374.9964, 1624.9982, 1024.7504, 0.100818, -0.097854, 0.990081, function, 2001, 1);
 
 
