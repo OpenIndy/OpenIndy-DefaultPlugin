@@ -22,25 +22,10 @@ void BestFitCylinderFromPoints::init(){
     param1.typeOfElement = eObservationElement;
     this->neededElements.append(param1);
 
-    NeededElement param2;
-    param2.description = "approximation direction.";
-    param2.infinite = true;
-    param2.typeOfElement = eDirectionElement;
-    this->neededElements.append(param2);
-
-    NeededElement param3;
-    param3.description = "Dummy points to indicate cylinder normal.";
-    param3.infinite = true;
-    param3.typeOfElement = eObservationElement;
-    param3.key = InputElementKey::eDummyPoint;
-    this->neededElements.append(param3);
-
     //set spplicable for
     this->applicableFor.append(eCylinderFeature);
 
     this->stringParameters.insert("approximation", "first two points");
-    this->stringParameters.insert("approximation", "first two dummy points");
-    this->stringParameters.insert("approximation", "direction");
     this->stringParameters.insert("approximation", "guess axis");
 
     this->scalarInputParams.isValid = true;
@@ -101,4 +86,75 @@ bool BestFitCylinderFromPoints::setUpResult(Cylinder &cylinder){
     }
 
     return bestFitCylinder(this, cylinder, points, usablePoints);
+}
+
+/*!
+ * \brief BestFitCylinderFromPointsAppxDirection::init
+ */
+void BestFitCylinderFromPointsAppxDirection::init(){
+
+    //set plugin meta data
+    this->metaData.name = "BestFitCylinderFromPointsAppxDirection";
+    this->metaData.pluginName = "OpenIndy Default Plugin";
+    this->metaData.author = "esc";
+    this->metaData.description = QString("%1 %2")
+            .arg("This function calculates an adjusted cylinder.")
+            .arg("You can input as many observations as you want which are then used to find the best fit cylinder.");
+    this->metaData.iid = FitFunction_iidd;
+
+    //set needed elements
+    this->neededElements.clear();
+    NeededElement param1;
+    param1.description = "Select at least five observations to calculate the best fit cylinder.";
+    param1.infinite = true;
+    param1.typeOfElement = eObservationElement;
+    this->neededElements.append(param1);
+
+    NeededElement param2;
+    param2.description = "approximation direction.";
+    param2.infinite = true;
+    param2.typeOfElement = eDirectionElement;
+    this->neededElements.append(param2);
+
+    //set spplicable for
+    this->applicableFor.append(eCylinderFeature);
+
+    this->scalarInputParams.isValid = true;
+    this->scalarInputParams.stringParameter.insert("approximation", "direction"); // default
+}
+
+/*!
+ * \brief BestFitCylinderFromPointsAppxDummyPoint::init
+ */
+void BestFitCylinderFromPointsAppxDummyPoint::init(){
+
+    //set plugin meta data
+    this->metaData.name = "BestFitCylinderFromPointsAppxDummyPoint";
+    this->metaData.pluginName = "OpenIndy Default Plugin";
+    this->metaData.author = "esc";
+    this->metaData.description = QString("%1 %2")
+            .arg("This function calculates an adjusted cylinder.")
+            .arg("You can input as many observations as you want which are then used to find the best fit cylinder.");
+    this->metaData.iid = FitFunction_iidd;
+
+    //set needed elements
+    this->neededElements.clear();
+    NeededElement param1;
+    param1.description = "Select at least five observations to calculate the best fit cylinder.";
+    param1.infinite = true;
+    param1.typeOfElement = eObservationElement;
+    this->neededElements.append(param1);
+
+    NeededElement param3;
+    param3.description = "Dummy points to indicate cylinder normal.";
+    param3.infinite = true;
+    param3.typeOfElement = eObservationElement;
+    param3.key = InputElementKey::eDummyPoint;
+    this->neededElements.append(param3);
+
+    //set spplicable for
+    this->applicableFor.append(eCylinderFeature);
+
+    this->scalarInputParams.isValid = true;
+    this->scalarInputParams.stringParameter.insert("approximation", "first two dummy points"); // default
 }
