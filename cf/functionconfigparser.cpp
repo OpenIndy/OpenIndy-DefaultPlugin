@@ -1,4 +1,5 @@
 #include "functionconfigparser.h"
+#include "cfutil.h"
 
 const char *jsonData =
 #include "cfconfig.res"

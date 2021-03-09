@@ -1,4 +1,7 @@
 #include "configuredfunction.h"
+#include "types.h"
+#include "treeutil.h"
+#include "cfvisitor.h"
 
 ConfiguredFunction::ConfiguredFunction(ConfiguredFunctionConfig config, QList<QPointer<Function> > functions, QObject *parent): SpecialFunction(parent), functions(functions), config(config) {
 }

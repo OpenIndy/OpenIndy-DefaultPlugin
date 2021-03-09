@@ -5,9 +5,9 @@
 #include "featurewrapper.h"
 #include "types.h"
 #include "treeutil.h"
-#include "configuredfunctioncommon.h"
 #include "configuredfunctionconfig.h"
 #include "cfcparameter.h"
+#include "cfcontext.h"
 
 using namespace oi;
 
