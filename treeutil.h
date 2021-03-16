@@ -13,7 +13,7 @@ class Node: public QObject {
 public:
     virtual QString getName() = 0;
     virtual QString prettyPrint() = 0;
-    virtual QList<QPointer<Node> > getSubnodes() = 0;
+    virtual QList<QPointer<Node> > &getSubnodes() = 0;
 
 };
 

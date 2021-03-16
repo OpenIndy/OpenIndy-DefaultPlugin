@@ -1,4 +1,13 @@
+#include <QList>
+#include <stdexcept>
+
 #include "cfvisitor.h"
+#include "configuredfunctionconfig.h"
+#include "configuredfunction.h"
+#include "cfcparameter.h"
+#include "cfutil.h"
+#include "cffunctiondata.h"
+
 
 CFVisitor::CFVisitor(CFContext ctx): ctx(ctx) {
 
@@ -37,7 +46,7 @@ void CFVisitor::pre(QPointer<Node> n, int index, int level) {
                 break;
             }
             default:
-                throw logic_error(QString("no FeatureTypes for \"%1\" found").arg(ctx.global_feature->getFeatureTypeString()).toLocal8Bit().data());
+                throw std::logic_error(QString("no FeatureTypes for \"%1\" found").arg(ctx.global_feature->getFeatureTypeString()).toLocal8Bit().data());
                 break;
             }
             fd.feature = copy;
@@ -91,7 +100,7 @@ void CFVisitor::post(QPointer<Node> n, int index, int level) {
 
         debug(post, QString("exec featureData: %1").arg(fd.prettyPrint()), level);
         if(!fd.function->exec(fd.feature)) {
-            throw logic_error(QString("execution failed for function: '%1'' with feature: '%2'").arg(fd.function->getMetaData().name).arg(fd.feature->getFeature()->getFeatureName()).toLocal8Bit().data());
+            throw std::logic_error(QString("execution failed for function: '%1'' with feature: '%2'").arg(fd.function->getMetaData().name).arg(fd.feature->getFeature()->getFeatureName()).toLocal8Bit().data());
         }
 
     }

@@ -11,7 +11,7 @@ class CFCParameter: public Node {
 public:
     CFCParameter(QString name, QString comment, QString feature, QList<QPointer<Node> > subnodes, QObject *parent = 0);
 
-    QList<QPointer<Node> > getSubnodes() override;
+    QList<QPointer<Node> > &getSubnodes() override;
 
     QString getName() override;
 

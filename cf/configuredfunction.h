@@ -6,11 +6,7 @@
 #include "function.h"
 #include "specialfunction.h"
 #include "featurewrapper.h"
-#include "types.h"
-#include "treeutil.h"
-#include "configuredfunctioncommon.h"
 #include "configuredfunctionconfig.h"
-#include "cfvisitor.h"
 
 using namespace oi;
 

@@ -4,7 +4,7 @@ CFCParameter::CFCParameter(QString name, QString comment, QString feature, QList
 
 }
 
-QList<QPointer<Node> > CFCParameter::getSubnodes() {
+QList<QPointer<Node> > &CFCParameter::getSubnodes() {
     return subnodes;
 }
 
