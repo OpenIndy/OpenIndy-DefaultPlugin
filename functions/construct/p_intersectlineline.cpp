@@ -34,7 +34,7 @@ void IntersectLineLine::init(){
     this->stringParameters.insert("intersection", "midpoint");
 
     this->scalarInputParams.isValid = true;
-    this->scalarInputParams.stringParameter.insert("intersection", "at first line"); // default
+    this->scalarInputParams.stringParameter.insert("intersection", "midpoint"); // default
 }
 
 IntersectionTypes IntersectLineLine::getIntersectionType() {
