@@ -93,7 +93,7 @@ bool PseudoTracker::doSelfDefinedAction(const QString &action){
     qDebug() << "PseudoTracker::doSelfDefinedAction(): " << action;
     if(action == "echo"){
         emit this->sensorMessage(action, eInformationMessage, eMessageBoxMessage);
-    } else if (action == "stopMeasurement") {
+    } else if (action == "stopMeasure") {
         this->isScanning = false;
         emit this->sensorMessage("try to stop / finish measurement", eInformationMessage, eConsoleMessage);
     }
