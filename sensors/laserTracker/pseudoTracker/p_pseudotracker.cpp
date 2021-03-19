@@ -58,7 +58,7 @@ void PseudoTracker::init(){
 
     //set self defined actions
     this->selfDefinedActions.append("echo(Alt+E)");
-    this->selfDefinedActions.append("stopMeasurement"); // e.g. finish scanning
+    this->selfDefinedActions.append("stopMeasure"); // e.g. finish scanning
 
     //set default accuracy
     this->defaultAccuracy.sigmaAzimuth = 0.000001570;
