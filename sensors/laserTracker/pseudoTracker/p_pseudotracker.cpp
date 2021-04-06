@@ -58,7 +58,7 @@ void PseudoTracker::init(){
 
     //set self defined actions
     this->selfDefinedActions.append("echo(Alt+E)");
-    this->selfDefinedActions.append("dummy");
+    this->selfDefinedActions.append("stopMeasure"); // e.g. finish scanning
 
     //set default accuracy
     this->defaultAccuracy.sigmaAzimuth = 0.000001570;
@@ -90,9 +90,12 @@ void PseudoTracker::init(){
  * \return
  */
 bool PseudoTracker::doSelfDefinedAction(const QString &action){
-
+    qDebug() << "PseudoTracker::doSelfDefinedAction(): " << action;
     if(action == "echo"){
         emit this->sensorMessage(action, eInformationMessage, eMessageBoxMessage);
+    } else if (action == "stopMeasure") {
+        this->isScanning = false;
+        emit this->sensorMessage("try to stop / finish measurement", eInformationMessage, eConsoleMessage);
     }
     return true;
 }
@@ -218,29 +221,38 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
     QList<QPointer<Reading> > readings;
 
     const int faceCount = mConfig.getMeasureTwoSides() ? 2 : 1;
-    for(int face=0; face<faceCount; face++) {
 
-        switch (mConfig.getTypeOfReading()) {
-        case ePolarReading:{
-            readings += measurePolar(mConfig);
-            break;
-        }case eDistanceReading:{
-            readings += measureDistance(mConfig);
-            break;
-        }case eDirectionReading:{
-            readings += measureDirection(mConfig);
-            break;
-        }case eCartesianReading:{
-            readings += measureCartesian(mConfig);
-            break;
-        }
-        }
+    int scanPointCount = mConfig.getCount();
+    this->isScanning = mConfig.getDistanceDependent();
 
-        if(mConfig.getMeasureTwoSides() && face<(faceCount -1)) {
-            this->toggleSightOrientation();
-        }
+    do {
+        for(int face=0; face<faceCount; face++) {
 
-    }
+            switch (mConfig.getTypeOfReading()) {
+            case ePolarReading:{
+                readings += measurePolar(mConfig);
+                break;
+            }case eDistanceReading:{
+                readings += measureDistance(mConfig);
+                break;
+            }case eDirectionReading:{
+                readings += measureDirection(mConfig);
+                break;
+            }case eCartesianReading:{
+                readings += measureCartesian(mConfig);
+                break;
+            }
+            }
+
+            if(mConfig.getMeasureTwoSides() && face<(faceCount -1)) {
+                this->toggleSightOrientation();
+            }
+
+        }
+        qDebug()<< "isScanning: " << isScanning;
+
+    } while(mConfig.getDistanceDependent() && scanPointCount-- > 1 && this->isScanning);
+    this->isScanning = false;
 
     if(readings.size() > 0){
 
