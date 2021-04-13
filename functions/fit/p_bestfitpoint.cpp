@@ -54,24 +54,24 @@ bool BestFitPoint::setUpResult(Point &point){
         return false;
     }
 
-    if(this->scalarInputParams.stringParameter.contains(key)){
-        if(this->scalarInputParams.stringParameter.value(key).compare(value_yes) == 0){
+    if(this->scalarInputParams.stringParameter.contains(key)
+        && this->scalarInputParams.stringParameter.value(key).compare(value_yes) == 0){
 
-            for ( int sideInt = SensorFaces::eFrontSide; sideInt != SensorFaces::eUndefinedSide; sideInt++ ) {
-               SensorFaces side = static_cast<SensorFaces>(sideInt);
-               QList<int> obsIds; // observation ids
-               foreach(InputElement e, this->inputElements[0]) {
-                   if(e.observation->getReading()->getFace() == side) {
-                        obsIds.append(e.id);
-                   }
+        for ( int sideInt = SensorFaces::eFrontSide; sideInt <= SensorFaces::eUndefinedSide; sideInt++ ) {
+           SensorFaces side = static_cast<SensorFaces>(sideInt);
+           QList<int> obsIds; // observation ids
+           foreach(InputElement e, this->inputElements[0]) {
+               if(e.observation->getReading()->getFace() == side) {
+                    obsIds.append(e.id);
                }
-               std::sort(obsIds.begin(), obsIds.end()); // sort by id
-               for(int i=0; i< (obsIds.count() -1); ++i ) {
-                   // disable all observations but last one
-                   this->setShouldBeUsed(0, obsIds[i], false);
-               }
-            }
+           }
+           std::sort(obsIds.begin(), obsIds.end()); // sort by id
+           for(int i=0; i< (obsIds.count() -1); ++i ) {
+               // disable all observations but last one
+               this->setShouldBeUsed(0, obsIds[i], false);
+           }
         }
+
     }
 
     QList<QPointer<Observation> > allUsableObservations;
