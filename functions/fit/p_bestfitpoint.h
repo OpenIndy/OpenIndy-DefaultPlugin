@@ -21,6 +21,10 @@ class BestFitPoint : public FitFunction
 
 public:
 
+    BestFitPoint(QObject *parent = 0) : FitFunction(parent),
+        key("disable all observations but last one"), value_no("no"), value_yes("yes") {
+    }
+
     //##############################
     //function initialization method
     //##############################
@@ -42,6 +46,10 @@ private:
     //##############
 
     bool setUpResult(Point &point);
+
+    const QString key; // disable all observations but last one
+    const QString value_no;
+    const QString value_yes;
 
 };
 

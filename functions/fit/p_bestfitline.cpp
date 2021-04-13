@@ -122,10 +122,9 @@ bool BestFitLine::setUpResult(Line &line){
         v_line.setAt(2, observation->getXYZ().getAt(2) - v_line.getAt(2));
 
         //set up display residual
-        addDisplayResidual(observation->getId(), v_line.getAt(0), v_line.getAt(1), v_line.getAt(2),
-                                qSqrt(v_line.getAt(0) * v_line.getAt(0)
-                                    + v_line.getAt(1) * v_line.getAt(1)
-                                    + v_line.getAt(2) * v_line.getAt(2)));
+        double dot;
+        OiVec::dot(dot, v_line, v_line);
+        addDisplayResidual(observation->getId(), v_line.getAt(0), v_line.getAt(1), v_line.getAt(2), qSqrt(dot));
 
     }
 

@@ -1,20 +1,23 @@
-#ifndef P_RECTIFYTOPOINT_H
-#define P_RECTIFYTOPOINT_H
+#ifndef P_BESTFTICIRCLEINPLANEFROMPOINTS_H
+#define P_BESTFTICIRCLEINPLANEFROMPOINTS_H
 
 #include <QObject>
 #include <QPointer>
+#include <QtMath>
 
-#include "objecttransformation.h"
+#include "fitfunction.h"
 #include "oivec.h"
 #include "oimat.h"
 
 using namespace oi;
+using namespace std;
+
 
 /*!
- * \brief The RectifyToPoint class
+ * \brief The BestFitCircleInPlaneFromPoints class
  */
-class RectifyToPoint : public ObjectTransformation
-{
+class BestFitCircleInPlaneFromPoints : public FitFunction, public BestFitCircleUtil
+{ 
     Q_OBJECT
 
 public:
@@ -31,19 +34,16 @@ protected:
     //exec methods
     //############
 
-    bool exec(Plane &plane);
     bool exec(Circle &circle);
-    bool exec(Line &line);
-    bool exec(Cylinder &cylinder);
 
 private:
 
     //##############
     //helper methods
     //##############
-    bool point(OiVec &point);
-    bool setUpResult(Geometry &geometry);
+
+    bool setUpResult(Circle &circle);
 
 };
 
-#endif // P_RECTIFYTOPOINT_H
+#endif // P_BESTFTICIRCLEINPLANEFROMPOINTS_H

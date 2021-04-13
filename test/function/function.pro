@@ -3,7 +3,7 @@
 # Project created by QtCreator 2019-06-12T15:53:07
 #
 #-------------------------------------------------
-
+CONFIG += c++11
 QT       += testlib
 
 QT       += core gui widgets serialport xml
@@ -21,6 +21,8 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 INCLUDEPATH += \
     $$PWD/../.. \
     $$PWD/../../functions/objectTransformation \
+    $$PWD/../../functions/fit \
+    $$PWD/../../functions/construct \
     $$PWD/../../lib/OpenIndy-Core/include/plugin \
     $$PWD/../../lib/OpenIndy-Core/include/util \
     $$PWD/../../lib/OpenIndy-Core/include \
@@ -28,8 +30,16 @@ INCLUDEPATH += \
     $$PWD/../../lib/OpenIndy-Core/include/geometry \
     $$PWD/../../lib/OpenIndy-Core/include/plugin/function \
     $$PWD/../../lib/OpenIndy-Core/include/plugin/simulation \
-    $$PWD/../../lib/OpenIndy-Core/include/plugin/sensor
-
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/sensor \
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/networkAdjustment \
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/tool \
+    $$PWD/../../lib/OpenIndy-Core/include/plugin/exchange \
+    $$PWD/../../functions/systemTransformation \
+    $$PWD/../../sensors/laserTracker/pseudoTracker \
+    $$PWD/../../sensors/tachymeter/LeicaGeoCom \
+    $$PWD/../../simulations/simplePolarMeasurement \
+    $$PWD/../../exchange \
+    $$PWD/../../cf
 
 CONFIG(debug, debug|release) {
     BUILD_DIR=debug

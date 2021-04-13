@@ -1,14 +1,14 @@
-#include "p_bestfitcylinder.h"
+#include "p_bestfitcylinderfrompoints.h"
 
 /*!
- * \brief BestFitCylinder::init
+ * \brief BestFitCylinderFromPoints::init
  */
-void BestFitCylinder::init(){
+void BestFitCylinderFromPoints::init(){
 
     //set plugin meta data
-    this->metaData.name = "BestFitCylinder";
+    this->metaData.name = "BestFitCylinderFromPoints";
     this->metaData.pluginName = "OpenIndy Default Plugin";
-    this->metaData.author = "bra";
+    this->metaData.author = "esc";
     this->metaData.description = QString("%1 %2")
             .arg("This function calculates an adjusted cylinder.")
             .arg("You can input as many observations as you want which are then used to find the best fit cylinder.");
@@ -33,45 +33,54 @@ void BestFitCylinder::init(){
 }
 
 /*!
- * \brief BestFitCylinder::exec
+ * \brief BestFitCylinderFromPoints::exec
  * \param cylinder
  * \return
  */
-bool BestFitCylinder::exec(Cylinder &cylinder){
+bool BestFitCylinderFromPoints::exec(Cylinder &cylinder){
     this->statistic.reset();
-    return BestFitCylinder::setUpResult(cylinder);
+    return BestFitCylinderFromPoints::setUpResult(cylinder);
 }
 
 /*!
- * \brief BestFitCylinder::setUpResult
+ * \brief BestFitCylinderFromPoints::setUpResult
  * \param cylinder
  * \return
  */
-bool BestFitCylinder::setUpResult(Cylinder &cylinder){
+bool BestFitCylinderFromPoints::setUpResult(Cylinder &cylinder){
 
     QList<IdPoint> usablePoints;
     QList<IdPoint> points;
     {
         //get and check input observations
-        QList<QPointer<Observation> > allUsableObservations;
-        QList<QPointer<Observation> > inputObservations;
-        filterObservations(allUsableObservations, inputObservations);
-        if(inputObservations.size() < 5){
-            emit this->sendMessage(QString("Not enough valid observations to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
+        QList<QPointer<Point> > allUsablePoints;
+        QList<QPointer<Point> > inputPoints;
+        foreach(const InputElement &element, this->inputElements[0]){
+            allUsablePoints.append(element.point);
+            if(!element.point.isNull() && element.point->getIsSolved()){
+                inputPoints.append(element.point);
+                this->setIsUsed(0, element.id, true);
+            }  else {
+                this->setIsUsed(0, element.id, false);
+            }
+        }
+
+        if(inputPoints.size() < 5){
+            emit this->sendMessage(QString("Not enough valid points to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
             cylinder.setIsSolved(false);
             return false;
         }
 
-        foreach(const QPointer<Observation> &obs, allUsableObservations) {
+        foreach(const QPointer<Point> &p, allUsablePoints) {
             IdPoint point;
-            point.id = obs->getId();
-            point.xyz = obs->getXYZ();
+            point.id = p->getId();
+            point.xyz = p->getPosition().getVectorH();
             usablePoints.append(point);
         }
-        foreach(const QPointer<Observation> &obs, inputObservations) {
+        foreach(const QPointer<Point> &p, inputPoints) {
             IdPoint point;
-            point.id = obs->getId();
-            point.xyz = obs->getXYZ();
+            point.id = p->getId();
+            point.xyz = p->getPosition().getVectorH();
             points.append(point);
         }
     }
@@ -79,13 +88,13 @@ bool BestFitCylinder::setUpResult(Cylinder &cylinder){
     return bestFitCylinder(this, cylinder, points, usablePoints);
 }
 
-/**
- * @brief BestFitCylinderAppxDirection::init
+/*!
+ * \brief BestFitCylinderFromPointsAppxDirection::init
  */
-void BestFitCylinderAppxDirection::init(){
+void BestFitCylinderFromPointsAppxDirection::init(){
 
     //set plugin meta data
-    this->metaData.name = "BestFitCylinderAppxDirection";
+    this->metaData.name = "BestFitCylinderFromPointsAppxDirection";
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "esc";
     this->metaData.description = QString("%1 %2")
@@ -114,13 +123,13 @@ void BestFitCylinderAppxDirection::init(){
     this->scalarInputParams.stringParameter.insert("approximation", "direction"); // default
 }
 
-/**
- * @brief BestFitCylinderAppxDummyPoint::init
+/*!
+ * \brief BestFitCylinderFromPointsAppxDummyPoint::init
  */
-void BestFitCylinderAppxDummyPoint::init(){
+void BestFitCylinderFromPointsAppxDummyPoint::init(){
 
     //set plugin meta data
-    this->metaData.name = "BestFitCylinderAppxDummyPoint";
+    this->metaData.name = "BestFitCylinderFromPointsAppxDummyPoint";
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "esc";
     this->metaData.description = QString("%1 %2")
@@ -147,5 +156,5 @@ void BestFitCylinderAppxDummyPoint::init(){
     this->applicableFor.append(eCylinderFeature);
 
     this->scalarInputParams.isValid = true;
-    this->scalarInputParams.stringParameter.insert("approximation", "first two dummy points");
+    this->scalarInputParams.stringParameter.insert("approximation", "first two dummy points"); // default
 }

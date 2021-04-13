@@ -43,9 +43,11 @@ INCLUDEPATH += $$PWD/../functions/generateFeature
 INCLUDEPATH += $$PWD/../functions/generateFeature/pointcloud_segmentation
 INCLUDEPATH += $$PWD/../simulations/simplePolarMeasurement
 INCLUDEPATH += $$PWD/../exchange
+INCLUDEPATH += $$PWD/../cf
 
 # source files
 SOURCES += \
+    $$PWD/../functions/construct/p_intersectlineline.cpp \
     $$PWD/../functions/construct/p_intersectlineplane.cpp \
     $$PWD/../functions/construct/p_intersectplaneplane.cpp \
     $$PWD/../functions/construct/p_linefrompoints.cpp \
@@ -71,11 +73,24 @@ SOURCES += \
     $$PWD/../functions/objectTransformation/p_shift.cpp \
     $$PWD/../functions/objectTransformation/p_rectifytovector.cpp \
     $$PWD/../functions/fit/p_bestfitcylinder.cpp \
+    $$PWD/../functions/fit/p_bestfitcylinderfrompoints.cpp \
     $$PWD/../functions/fit/p_bestfitcircleinplane.cpp \
-    $$PWD/../functions/fit/p_bestfitsphere.cpp
+    $$PWD/../functions/fit/p_bestfitsphere.cpp \
+    $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.cpp \
+    $$PWD/../cf/cfutil.cpp \
+    $$PWD/../cf/cffunctiondata.cpp \
+    $$PWD/../cf/configuredfunction.cpp \
+    $$PWD/../cf/functionconfigparser.cpp \
+    $$PWD/../cf/distancebetweentwopoints.cpp \
+    $$PWD/../cf/configuredfunctionconfig.cpp \
+    $$PWD/../cf/cfcontext.cpp \
+    $$PWD/../cf/cfcparameter.cpp \
+    $$PWD/../cf/xyzfilter.cpp \
+    $$PWD/../cf/cfvisitor.cpp
 
 # header files
 HEADERS += \
+    $$PWD/../functions/construct/p_intersectlineline.h \
     $$PWD/../functions/construct/p_intersectlineplane.h \
     $$PWD/../functions/construct/p_intersectplaneplane.h \
     $$PWD/../functions/construct/p_linefrompoints.h \
@@ -100,11 +115,26 @@ HEADERS += \
     $$PWD/../functions/objectTransformation/p_shift.h \
     $$PWD/../functions/objectTransformation/p_rectifytovector.h \
     $$PWD/../functions/fit/p_bestfitcylinder.h \
+    $$PWD/../functions/fit/p_bestfitcylinderfrompoints.h \
     $$PWD/../functions/fit/p_bestfitcircleinplane.h \
-    $$PWD/../functions/fit/p_bestfitsphere.h
+    $$PWD/../functions/fit/p_bestfitsphere.h \
+    $$PWD/../functions/fit/p_bestfitcircleinplanefrompoints.h \
+    $$PWD/../treeutil.h \
+    $$PWD/../cf/cfutil.h \
+    $$PWD/../cf/cffunctiondata.h \
+    $$PWD/../cf/configuredfunction.h \
+    $$PWD/../cf/functionconfigparser.h \
+    $$PWD/../cf/distancebetweentwopoints.h \
+    $$PWD/../cf/configuredfunctionconfig.h \
+    $$PWD/../cf/cfcontext.h \
+    $$PWD/../cf/cfcparameter.h \
+    $$PWD/../cf/xyzfilter.h \
+    $$PWD/../cf/cfvisitor.h
 
 # other files
-OTHER_FILES += $$PWD/../metaInfo.json
+OTHER_FILES += $$PWD/../metaInfo.json \
+    $PWD/../cf/cfconfig.res
+
 
 # ui files
 FORMS += \
