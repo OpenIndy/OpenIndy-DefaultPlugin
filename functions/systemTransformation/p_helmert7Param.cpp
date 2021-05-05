@@ -35,6 +35,10 @@ void Helmert7Param::init(){
     this->doubleParameters.insert("reference", 20.0);
     this->doubleParameters.insert("actual", 20.0);
 
+    //controll reference temeprature
+    this->stringParameters.insert("use reference temperature", "yes");
+    this->stringParameters.insert("use reference temperature", "no");
+
     //materials
     QList<QString> materials = getMaterials();
 
@@ -86,6 +90,9 @@ void Helmert7Param::getScaleType()
                     this->scaleType = pointScale;
                     return;
                 }else{
+                    if(this->scalarInputParams.stringParameter.value("use reference temperature").compare("no") == 0){
+                        this->scalarInputParams.doubleParameter["reference"] = 20.0;
+                    }
                     this->scaleType = tempScale;
                     return;
                 }
