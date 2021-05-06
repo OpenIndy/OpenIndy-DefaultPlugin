@@ -5,13 +5,11 @@ include($$PWD/../lib/OpenIndy-Core/include.pri)
 # openIndyDefaultPlugin
 win32 {
 CONFIG(release, debug|release) {
-    openIndyDefaultPlugin.path = $$PWD/../install/release
-    openIndyDefaultPlugin.files += $$PWD/../bin/release/p_defaultPlugin1.dll
+    dlltarget.path = $$PWD/../install/release
 } else {
-    openIndyDefaultPlugin.path = $$PWD/../install/debug
-    openIndyDefaultPlugin.files += $$PWD/../bin/debug/p_defaultPlugind1.dll
+    dlltarget.path = $$PWD/../install/debug
 }
-INSTALLS += openIndyDefaultPlugin
+INSTALLS += dlltarget
 }
 
 linux {
