@@ -10,10 +10,11 @@ void BestFitCircleInPlaneFromPoints::init(){
     this->metaData.name = "BestFitCircleInPlaneFromPoints";
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "esc";
-    this->metaData.description = QString("%1 %2 %3")
+    this->metaData.description = QString("%1 %2 %3 %4")
             .arg("This function calculates an adjusted circle.")
             .arg("The points are registered into a best fit plane first and afterward a 2D circle is approximated inside the plane.")
-            .arg("You can input as many points as you want which are then used to find the best fit circle.");
+            .arg("You can input as many points as you want which are then used to find the best fit circle.")
+            .arg("There will be no plane feature/calculations vissible, the calculation is performed inside the function");
     this->metaData.iid = FitFunction_iidd;
 
     //set needed elements
