@@ -88,9 +88,10 @@ void BestFitCylinderAppxDirection::init(){
     this->metaData.name = "BestFitCylinderAppxDirection";
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "esc";
-    this->metaData.description = QString("%1 %2")
+    this->metaData.description = QString("%1 %2 %3")
             .arg("This function calculates an adjusted cylinder.")
-            .arg("You can input as many observations as you want which are then used to find the best fit cylinder.");
+            .arg("You can input as many observations as you want which are then used to find the best fit cylinder.")
+            .arg("Additionally you should input a direction for approximation, this can be done by all vector geometries");
     this->metaData.iid = FitFunction_iidd;
 
     //set needed elements
@@ -123,9 +124,10 @@ void BestFitCylinderAppxDummyPoint::init(){
     this->metaData.name = "BestFitCylinderAppxDummyPoint";
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "esc";
-    this->metaData.description = QString("%1 %2")
+    this->metaData.description = QString("%1 %2 %3")
             .arg("This function calculates an adjusted cylinder.")
-            .arg("You can input as many observations as you want which are then used to find the best fit cylinder.");
+            .arg("You can input as many observations as you want which are then used to find the best fit cylinder.")
+            .arg("Additionally you should input dummy points for approximation, this can be done by all point geometries");
     this->metaData.iid = FitFunction_iidd;
 
     //set needed elements
