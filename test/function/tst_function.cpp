@@ -32,6 +32,12 @@
 #define DEBUG_POINT(feature)    qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
 #define DEBUG_LINE(feature)     qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
 #define DEBUG_DISTANCE(feature) qDebug() << qSetRealNumberPrecision(10) << "distance=" << feature->getDistance();
+#define DEBUG_TRAFOPARAM(feature) qDebug() << qSetRealNumberPrecision(10) \
+        << "r(r)=" << _OI_VEC(feature.getRotation()) \
+        << ", r(g)=" << _OI_VEC((feature.getRotation()* RHO_DEGREE)) \
+        << ", t=" << _OI_VEC(feature.getTranslation()) \
+        << ", s=" << _OI_VEC(feature.getScale()) \
+        << ", stdev=" << feature.getStatistic().getStdev();
 
 using namespace oi;
 
@@ -142,6 +148,8 @@ private Q_SLOTS:
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
+    void  getPoint(QString name, Point *p, QString data);
+
     QPointer<Function> createFunction(QString name);
 
     void addInputObservations(QString data, QPointer<Function> function, int id, int inputElementKey, bool shouldBeUsed);
@@ -164,6 +172,27 @@ private:
 
 FunctionTest::FunctionTest()
 {
+}
+
+void  FunctionTest::getPoint(QString name, Point *p, QString data) {
+    QTextStream stream(data.toUtf8());
+    while(!stream.atEnd()) {
+        QStringList list = stream.readLine().split("\t");
+        if(name == list.at(3)) {
+            p->setFeatureName(name);
+            p->setPoint(Position(
+                            list.at(4).toDouble(),
+                            list.at(5).toDouble(),
+                            list.at(6).toDouble()
+                            )
+                        );
+            DEBUG_POINT(p);
+            return;
+        }
+    }
+
+
+    QFAIL(QString("\"%1\" not found").arg(name).toUtf8().data());
 }
 
 void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest) {
