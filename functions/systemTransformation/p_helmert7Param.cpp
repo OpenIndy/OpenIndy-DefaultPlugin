@@ -906,10 +906,8 @@ OiMat Helmert7Param::p6_getScaleMatrix(OiVec s)
  */
 double Helmert7Param::setScaleValue()
 {
-    double scale = 1.0;
-
     if(this->scaleType == noScale){
-        scale = 1.0;
+        return 1.0;
     }else{
         double act = this->scalarInputParams.doubleParameter.value("actual");
         double ref = this->scalarInputParams.doubleParameter.value("reference");
@@ -917,7 +915,6 @@ double Helmert7Param::setScaleValue()
 
         return oi::getTemperatureExpansion(material, act, ref);
     }
-    return scale;
 }
 
 /*!
