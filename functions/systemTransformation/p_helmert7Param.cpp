@@ -97,11 +97,10 @@ void Helmert7Param::getScaleType()
                     return;
                 }
             }
-        }else{
-            this->scaleType = noScale;
-            return;
         }
     }
+
+    this->scaleType = noScale;
 }
 
 /*!
