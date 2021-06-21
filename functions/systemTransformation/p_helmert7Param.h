@@ -21,8 +21,8 @@ using namespace std;
 
 enum ScaleTypes{
     noScale,
-    pointScale,
-    tempScale
+    pointScale,      // calculate scale from points
+    temperatureScale // calculate scale from material & temparture
 };
 
 class Helmert7Param : public SystemTransformation
