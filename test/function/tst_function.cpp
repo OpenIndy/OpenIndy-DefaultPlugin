@@ -21,6 +21,7 @@
 #include "p_pointfrompoints.h"
 #include "p_register.h"
 #include "p_factory.h"
+#include "p_helmert7param.h"
 
 
 #define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY2(std::abs(actual-expected)< threshold, QString("actual: %1, expected: %2").arg(actual).arg(expected).toLatin1().data());
@@ -49,6 +50,8 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void testHelmert7param();
+
     void testPointFromPoints_RegisterV2();
     void testDistanceBetweenTwoPointsV2();
     void testDistance_PointFromPoints_RegisterV2();    
@@ -3176,6 +3179,88 @@ void FunctionTest::testDistanceBetweenTwoPointsV2() {
 
     delete function.data();
 }
+
+void FunctionTest::testHelmert7param() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QString station("\
+point	actual	03_ref	REF_1	1588.695045	-975.971296	-364.151131	0.000000	6/6	FastPoint	BestFitPointInPlane		-/-	-/-	-/-	0.000000			-/-	\n\
+point	actual	03_ref	REF_2	1595.018408	-876.154860	-363.945936	0.000000	6/6	FastPoint	BestFitPointInPlane		-/-	-/-	-/-	0.000000			-/-	\n\
+point	actual	03_ref	REF_3	1601.372597	-776.358830	-363.743397	0.000000	6/6	FastPoint	BestFitPointInPlane		-/-	-/-	-/-	0.000000			-/-	\n\
+point	actual	03_ref	REF_4	1488.823208	-969.504319	-364.350058	0.000000	9/9	FastPoint	BestFitPointInPlane		-/-	-/-	-/-	0.000000			-/-	\n\
+point	actual	03_ref	REF_5	1389.054629	-963.227151	-364.602493	0.000000	6/7	FastPoint	BestFitPointInPlane		-/-	-/-	-/-	0.000000			-/-	\n\
+point	actual	03_ref	REF_6	1401.762094	-763.630182	-364.241889	0.000000	6/6	FastPoint	BestFitPointInPlane		-/-	-/-	-/-	0.000000			-/-	\n\
+plane	actual	03_ref	level					0/0	StdPoint									-/-	-/-\n\
+");
+    QString part("\
+point	nominal PART	03_ref	REF_1	0.000000	0.000000	0.000000						-/-	-/-	-/-	0.000000			-/-	\n\
+point	nominal PART	03_ref	REF_2	0.000000	100.000000	0.000000						-/-	-/-	-/-	0.000000			-/-	\n\
+point	nominal PART	03_ref	REF_3	0.000000	200.000000	0.000000						-/-	-/-	-/-	0.000000			-/-	\n\
+point	nominal PART	03_ref	REF_4	-100.000000	0.000000	0.000000						-/-	-/-	-/-	0.000000			-/-	\n\
+point	nominal PART	03_ref	REF_5	-200.000000	0.000000	0.000000						-/-	-/-	-/-	0.000000			-/-	\n\
+point	nominal PART	03_ref	REF_6	-200.000000	200.000000	0.000000						-/-	-/-	-/-	0.000000			-/-	\n\
+");
+
+    TrafoParam feature;
+    feature.setIsSolved(false);
+
+    Helmert7Param function;
+    feature.addFunction(&function);
+
+    QMap<int, QList<InputElement> > startSystemE;
+    QList<Point> startSystemP;
+    int i=0;
+    for(QString name : { "REF_1", "REF_2", "REF_3", "REF_4", "REF_5", "REF_6" }) {
+        Point *p = new Point(false);
+        getPoint(name, p, station);
+        startSystemP.append(*p);
+
+        InputElement *inputElement = new InputElement();
+        inputElement->point = p;
+        inputElement->typeOfElement = ElementTypes::ePointElement;
+        inputElement->id = i++;
+        function.addInputElement(*inputElement,0);
+        startSystemE[0].append(*inputElement);
+    }
+
+    QMap<int, QList<InputElement> > destinationSystemE;
+    QList<Point> destinationSystemP;
+    for(QString name : { "REF_1", "REF_2", "REF_3", "REF_4", "REF_5", "REF_6" }) {
+        Point *p = new Point(false);
+        getPoint(name, p, part);
+        destinationSystemP.append(*p);
+
+        InputElement *inputElement = new InputElement();
+        inputElement->point = p;
+        inputElement->typeOfElement = ElementTypes::ePointElement;
+        inputElement->id = i++;
+        function.addInputElement(*inputElement,0);
+        destinationSystemE[0].append(*inputElement);
+    }
+
+    //function.setInputElements(startSystem, destinationSystem);
+    function.setInputPoint(startSystemP, destinationSystemP);
+
+    if(false){
+        // steel, 23.1, 20
+        ScalarInputParams scalarInputParams;
+        scalarInputParams.doubleParameter.insert("actual temperature", 23.1);
+        scalarInputParams.doubleParameter.insert("reference temperature", 20.);
+        scalarInputParams.stringParameter.insert("material", "steel");
+
+        scalarInputParams.doubleParameter.insert("shift - distance [mm]", 222.);
+        function.setScalarInputParams(scalarInputParams);
+    }
+
+    feature.recalc();
+
+    QVERIFY2(feature.getIsSolved(), "solved");
+
+    DEBUG_TRAFOPARAM(feature);
+
+
+}
+
 
 QTEST_APPLESS_MAIN(FunctionTest)
 
