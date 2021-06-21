@@ -520,7 +520,6 @@ OiVec Helmert7Param::fillL0Vector(OiVec x0){
 bool Helmert7Param::calc_6p(TrafoParam &tp)
 {
     //adjust trafo param if enough points are given
-    bool result = false;
 
     this->p6_rotation = this->p6_approxRotation();
     this->p6_translation = this->p6_approxTranslation(this->p6_rotation);
@@ -621,9 +620,7 @@ bool Helmert7Param::calc_6p(TrafoParam &tp)
 
     tp.setTransformationParameters(r,t,s);
 
-    result = true;
-
-    return result;
+    return true;
 }
 
 /*!
