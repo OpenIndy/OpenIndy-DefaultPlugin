@@ -8,6 +8,8 @@
 using namespace oi;
 using namespace std;
 
+//not stable, temporary not ready to use
+
 /*!
  * \brief The ExtendedTemperatureCompensation class is a system transformation with temperature compensation.
  * By specifying a minimum of 3 common points between the systems, a reference temperature and the material, this
