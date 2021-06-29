@@ -104,14 +104,17 @@ private Q_SLOTS:
     void testBestFitCylinder1__DummyPoint1();
     void testBestFitCylinder1__DummyPoint2();
 
-    void testBestFitCircleInPlane_DummyPoint1();
-    void testBestFitCircleInPlane_DummyPoint2();
+    void testBestFitCircleInPlane_DummyPoint_positive_up();
+    void testBestFitCircleInPlane_DummyPoint_negative_up();
+    void testBestFitCircleInPlane_DummyPoint_negative_down();
     void testBestFitCircleInPlane_left();
     void testBestFitCircleInPlane_right();
 
     void testBestFitPlane_right();
-    void testBestFitPlane_DummyPoint1();
-    void testBestFitPlane_DummyPoint2();
+    void testBestFitPlane_DummyPoint_positive_up();
+    void testBestFitPlane_DummyPoint_positive_down();
+    void testBestFitPlane_DummyPoint_negative_up();
+    void testBestFitPlane_DummyPoint_negative_down();
 
     void testBestFitCylinderAproximationDirection1();
 
@@ -1384,8 +1387,46 @@ void FunctionTest::testBestFitPlane()
     delete function.data();
 }
 
-// OI-557
-void FunctionTest::testBestFitPlane_DummyPoint1() {
+// OI-557 Test if Dummy Points affect the normal vector accordingly
+
+void FunctionTest::testBestFitPlane_DummyPoint_positive_up() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 10\n", function, 3000, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitPlane_DummyPoint_positive_down() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<Function> function = new BestFitPlane();
@@ -1422,8 +1463,7 @@ void FunctionTest::testBestFitPlane_DummyPoint1() {
     delete function.data();
 }
 
-// OI-557
-void FunctionTest::testBestFitPlane_DummyPoint2() {
+void FunctionTest::testBestFitPlane_DummyPoint_negative_up() {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<Function> function = new BestFitPlane();
@@ -1438,10 +1478,10 @@ void FunctionTest::testBestFitPlane_DummyPoint2() {
     // line ending: "\n"
     // unit:        [mm]
     QString data("\
-0.0 0.0 0.001\n\
-1.0 0.0 0.002\n\
-1.0 1.0 0.004\n\
-0.0 1.0 0.003\n\
+0.0 0.0 -0.004\n\
+1.0 0.0 -0.003\n\
+1.0 1.0 -0.001\n\
+0.0 1.0 -0.002\n\
 ");
 
     addInputObservations(data, function);
@@ -1455,6 +1495,43 @@ void FunctionTest::testBestFitPlane_DummyPoint2() {
     COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
     COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
     COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitPlane_DummyPoint_negative_down() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 -0.004\n\
+1.0 0.0 -0.003\n\
+1.0 1.0 -0.001\n\
+0.0 1.0 -0.002\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 -10\n", function, 3000, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
 
 
     delete function.data();
@@ -1535,7 +1612,7 @@ void FunctionTest::testBestFitCircleInPlane_right()
 
     delete function.data();
 }
-void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
+void FunctionTest::testBestFitCircleInPlane_DummyPoint_positive_up()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -1573,7 +1650,7 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
     delete function.data();
 }
 
-void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
+void FunctionTest::testBestFitCircleInPlane_DummyPoint_negative_up()
 {
     ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
@@ -1589,10 +1666,48 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
     // line ending: "\n"
     // unit:        [mm]
     QString data("\
-0.0 0.0 0.001\n\
-1.0 0.0 0.002\n\
-1.0 1.0 0.004\n\
-0.0 1.0 0.003\n\
+0.0 0.0 -0.004\n\
+1.0 0.0 -0.003\n\
+1.0 1.0 -0.001\n\
+0.0 1.0 -0.002\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 10\n", function, 3000, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(circleFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCircleInPlane_DummyPoint_negative_down()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 -0.004\n\
+1.0 0.0 -0.003\n\
+1.0 1.0 -0.001\n\
+0.0 1.0 -0.002\n\
 ");
 
     addInputObservations(data, function);
