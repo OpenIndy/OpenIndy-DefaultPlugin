@@ -104,9 +104,7 @@ bool BestFitPlane::setUpResult(Plane &plane){
         // computing plane normale by dummy point
         OiVec dummyPoint = inputElements[InputElementKey::eDummyPoint][0].observation->getXYZ();
         dummyPoint.removeLast();
-        double dot;
-        OiVec::dot(dot, dummyPoint - centroid, centroid);
-        direction = - dot * dummyPoint;
+        direction = dummyPoint - centroid;
         direction.normalize();
     } else {
         //check that the normal vector of the plane is defined by the first three points A, B and C (cross product)
@@ -120,7 +118,7 @@ bool BestFitPlane::setUpResult(Plane &plane){
     double angle = 0.0; //angle between n and direction
     OiVec::dot(angle, n, direction);
     angle = qAbs(qAcos(angle));
-    if(angle > (PI/2.0)){
+    if(angle > (PI/2.0)&& angle < PI){
         n = n * -1.0;
     }
 
