@@ -48,10 +48,6 @@
 #include "p_rectifytovector.h"
 #include "p_shift.h"
 
-#include "p_helmert7Param.h"
-#include "p_extendedtemperaturecompensation.h"
-#include "p_helmert6param.h"
-
 #include "p_pseudotracker.h"
 #include "p_leicatachymeter.h"
 
