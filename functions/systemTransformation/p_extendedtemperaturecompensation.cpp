@@ -1,5 +1,7 @@
 #include "p_extendedtemperaturecompensation.h"
 
+//not stable, temporary not ready to use
+
 /*!
  * \brief ExtendedTemperatureCompensation::init
  */
