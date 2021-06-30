@@ -9,10 +9,11 @@ void BestFitCircleInPlane::init(){
     this->metaData.name = "BestFitCircleInPlane";
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "bra";
-    this->metaData.description = QString("%1 %2 %3")
+    this->metaData.description = QString("%1 %2 %3 %4")
             .arg("This function calculates an adjusted circle.")
             .arg("The observations are registered into a best fit plane first and afterward a 2D circle is approximated inside the plane.")
-            .arg("You can input as many observations as you want which are then used to find the best fit circle.");
+            .arg("You can input as many observations as you want which are then used to find the best fit circle.")
+            .arg("There will be no plane feature/calculations vissible, the calculation is performed inside the function");
     this->metaData.iid = FitFunction_iidd;
 
     //set needed elements
@@ -22,6 +23,13 @@ void BestFitCircleInPlane::init(){
     param1.infinite = true;
     param1.typeOfElement = eObservationElement;
     this->neededElements.append(param1);
+
+    NeededElement param2;
+    param2.description = "Dummy point to indicate circle normal.";
+    param2.infinite = true;
+    param2.typeOfElement = eObservationElement;
+    param2.key = InputElementKey::eDummyPoint;
+    this->neededElements.append(param2);
 
     //set spplicable for
     this->applicableFor.append(eCircleFeature);
@@ -50,209 +58,31 @@ bool BestFitCircleInPlane::setUpResult(Circle &circle){
         emit this->sendMessage(QString("Not enough valid observations to fit the circle %1").arg(circle.getFeatureName()), eWarningMessage);
         return false;
     }
-    QList<QPointer<Observation> > allUsableObservations;
-    QList<QPointer<Observation> > inputObservations;
-    filterObservations(allUsableObservations, inputObservations);
-    if(inputObservations.size() < 3){
-        emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(circle.getFeatureName()), eWarningMessage);
-        return false;
-    }
 
-    //calculate centroid
-    OiVec centroid(4);
-    foreach(const QPointer<Observation> &obs, inputObservations){
-        centroid = centroid + obs->getXYZ();
-    }
-    centroid = centroid * (1.0/inputObservations.size());
-    centroid.removeLast();
-
-    //principle component analysis
-    OiMat a(inputObservations.size(), 3);
-    for(int i = 0; i < inputObservations.size(); i++){
-        a.setAt(i, 0, inputObservations.at(i)->getXYZ().getAt(0) - centroid.getAt(0));
-        a.setAt(i, 1, inputObservations.at(i)->getXYZ().getAt(1) - centroid.getAt(1));
-        a.setAt(i, 2, inputObservations.at(i)->getXYZ().getAt(2) - centroid.getAt(2));
-    }
-    OiMat ata = a.t() * a;
-    OiMat u(3,3);
-    OiVec d(3);
-    OiMat v(3,3);
-    ata.svd(u, d, v);
-
-    //get smallest eigenvector which is n vector
-    int eigenIndex = -1;
-    double eVal = 0.0;
-    for(int i = 0; i < d.getSize(); i++){
-        if(d.getAt(i) < eVal || i == 0){
-            eVal = d.getAt(i);
-            eigenIndex = i;
-        }
-    }
-    OiVec n(3);
-    u.getCol(n, eigenIndex);
-    n.normalize();
-
-    //check that the normal vector of the plane is defined by the first three points A, B and C (cross product)
-    OiVec ab = inputObservations.at(1)->getXYZ() - inputObservations.at(0)->getXYZ();
-    ab.removeLast();
-    OiVec ac = inputObservations.at(2)->getXYZ() - inputObservations.at(0)->getXYZ();
-    ac.removeLast();
-    OiVec direction(3);
-    OiVec::cross(direction, ab, ac);
-    direction.normalize();
-    double angle = 0.0; //angle between n and direction
-    OiVec::dot(angle, n, direction);
-    angle = qAbs(qAcos(angle));
-    if(angle > (PI/2.0)){
-        n = n * -1.0;
-    }
-
-    //calculate smallest distance of the plane from the origin
-    double dOrigin = n.getAt(0) * centroid.getAt(0) + n.getAt(1) * centroid.getAt(1) + n.getAt(2) * centroid.getAt(2);
-
-    //calculate the distances of each observation from the plane
-    /*OiVec planeDistances;
-    for(int i = 0; i < inputObservations.size(); i++){
-
-        double distance = qAbs(n.getAt(0) * inputObservations.at(i)->getXYZ().getAt(0)
-                               + n.getAt(1) * inputObservations.at(i)->getXYZ().getAt(1)
-                               + n.getAt(2) * inputObservations.at(i)->getXYZ().getAt(2) - dOrigin);
-
-        planeDistances.add( distance );
-
-    }*/
-
-    //get transformation matrix
-    OiMat t = u.inv();
-
-    //transform centroid into 2D space
-    OiVec centroid2D = t * centroid;
-    centroid2D.removeLast();
-
-    //calculate centroid reduced coordinates in 2D space
-    QList<OiVec> centroidReducedCoordinates;
-    QList<OiVec> allCentroidReducedCoordinates;
-    OiVec xyz(4);
-    foreach(const QPointer<Observation> &observation, allUsableObservations){
-        xyz = observation->getXYZ();
-        xyz.removeLast(); //remove the homogeneous item
-        xyz = t * xyz;
-        xyz.removeLast();
-        OiVec reduced = xyz - centroid2D;
-        allCentroidReducedCoordinates.append(reduced);
-        if(inputObservations.contains(observation)) {
-            centroidReducedCoordinates.append(reduced);
-        }
-        xyz.add(1.0); //add two items so xyz is of size 4 again
-        xyz.add(1.0);
-    }
-
-    //calculate best fit circle in 2D space
-    OiVec A1(inputObservations.size());
-    OiMat A2(inputObservations.size(), 3);
-    for(int i = 0; i < inputObservations.size(); i++){
-        A1.setAt(i, centroidReducedCoordinates.at(i).getAt(0)*centroidReducedCoordinates.at(i).getAt(0)
-                 + centroidReducedCoordinates.at(i).getAt(1)*centroidReducedCoordinates.at(i).getAt(1));
-
-        A2.setAt(i,0,centroidReducedCoordinates.at(i).getAt(0));
-        A2.setAt(i,1,centroidReducedCoordinates.at(i).getAt(1));
-        A2.setAt(i,2,1.0);
-    }
-    OiVec s(3);
-    try{
-        if(!OiMat::solve(s, A2.t() * A2, -1.0 * A2.t() * A1)){
+    QList<IdPoint> usablePoints;
+    QList<IdPoint> points;
+    {
+        QList<QPointer<Observation> > allUsableObservations;
+        QList<QPointer<Observation> > inputObservations;
+        filterObservations(allUsableObservations, inputObservations);
+        if(inputObservations.size() < 3){
+            emit this->sendMessage(QString("Not enough valid observations to fit the plane %1").arg(circle.getFeatureName()), eWarningMessage);
             return false;
         }
-    }catch(const exception &e){
-        emit this->sendMessage(e.what(), eErrorMessage);
-        return false;
-    }
 
-    //calculate center and radius in 2D space
-    OiVec xm(3);
-    xm.setAt(0, (-1.0 * s.getAt(0) / 2.0) + centroid2D.getAt(0));
-    xm.setAt(1, (-1.0 * s.getAt(1) / 2.0) + centroid2D.getAt(1));
-    xm.setAt(2, (t * centroid).getAt(2));
-    double radius = qSqrt(0.25 * (s.getAt(0) * s.getAt(0) + s.getAt(1) * s.getAt(1)) - s.getAt(2));
-
-    //calculate distance of each observation from the 2D circle
-    OiVec circleDistances;
-    OiVec allCircleDistances;
-    int i=0;
-    foreach(const QPointer<Observation> &observation, allUsableObservations){
-        OiVec reduced = allCentroidReducedCoordinates[i++];
-        OiVec diff(2);
-        diff.setAt(0, reduced.getAt(0) + centroid2D.getAt(0) - xm.getAt(0));
-        diff.setAt(1, reduced.getAt(1) + centroid2D.getAt(1) - xm.getAt(1));
-
-        double distance = 0.0;
-        OiVec::dot(distance, diff, diff);
-        distance = qSqrt(distance);
-        distance = qAbs(distance - radius);
-
-        allCircleDistances.add(distance);
-        if(inputObservations.contains(observation)) {
-            circleDistances.add(distance);
+        foreach(const QPointer<Observation> &obs, allUsableObservations) {
+            IdPoint point;
+            point.id = obs->getId();
+            point.xyz = obs->getXYZ();
+            usablePoints.append(point);
+        }
+        foreach(const QPointer<Observation> &obs, inputObservations) {
+            IdPoint point;
+            point.id = obs->getId();
+            point.xyz = obs->getXYZ();
+            points.append(point);
         }
     }
 
-    //transform center into 3D space
-    OiMat t_inv = t.inv();
-    xm = t_inv * xm;
-
-    //calculate 3D residuals for each observation
-    for(int i = 0; i < allUsableObservations.size(); i++){
-        const QPointer<Observation> &observation = allUsableObservations[i];
-        OiVec reduced = allCentroidReducedCoordinates[i];
-
-        OiVec v_circle(3);
-        OiVec v_plane(3);
-        OiVec v_all(3);
-
-        //calculate residual vector of 2D circle fit
-        v_circle.setAt(0, reduced.getAt(0) + centroid2D.getAt(0) - xm.getAt(0));
-        v_circle.setAt(1, reduced.getAt(1) + centroid2D.getAt(1) - xm.getAt(1));
-        v_circle.setAt(2, 0.0);
-        v_circle.normalize();
-        v_circle = allCircleDistances.getAt(i) * v_circle;
-        v_circle = t_inv * v_circle;
-
-        //calculate residual vector of plane fit
-        double distance = n.getAt(0) * observation->getXYZ().getAt(0) + n.getAt(1) * observation->getXYZ().getAt(1)
-                + n.getAt(2) * observation->getXYZ().getAt(2) - dOrigin;
-        v_plane = distance * n;
-
-        //calculate the at all residual vector
-        v_all = v_circle + v_plane;
-
-        //set up display residual
-        addDisplayResidual(observation->getId(), v_all.getAt(0), v_all.getAt(1), v_all.getAt(2),
-                           qSqrt(v_all.getAt(0) * v_all.getAt(0)
-                                + v_all.getAt(1) * v_all.getAt(1)
-                                + v_all.getAt(2) * v_all.getAt(2)));
-
-    }
-
-    //set result
-    Position circlePosition;
-    circlePosition.setVector(xm);
-    Radius circleRadius;
-    circleRadius.setRadius(radius);
-    Direction circleNormal;
-    circleNormal.setVector(n);
-    circle.setCircle(circlePosition, circleNormal, circleRadius);
-
-    //set statistic
-    double stdev = 0.0;
-    for(int i = 0; i < centroidReducedCoordinates.size(); i++){
-        double v_i = circleDistances.getAt(i);
-        stdev += v_i*v_i;
-    }
-    stdev = qSqrt(stdev / (centroidReducedCoordinates.size() - 3.0));
-    this->statistic.setIsValid(true);
-    this->statistic.setStdev(stdev);
-    circle.setStatistic(this->statistic);
-
-    return true;
-
+    return bestFitCircleInPlane(this, circle, points, usablePoints);
 }

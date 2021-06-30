@@ -539,7 +539,7 @@ void OiExchangeAscii::exportOiData(){
 
     try{
         if(!this->device.isNull()){
-            this->device->open(QIODevice::ReadWrite);
+            this->device->open(QIODevice::WriteOnly);
             QTextStream out(this->device);
 
             foreach (QPointer<FeatureWrapper> fw, this->currentJob->getGeometriesList()) {

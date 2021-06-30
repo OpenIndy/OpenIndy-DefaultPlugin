@@ -1,3 +1,4 @@
+CONFIG += c++11
 
 TEMPLATE = subdirs
 
@@ -11,7 +12,7 @@ SUBDIRS = \
 # project locations
 plugin.subdir = $$PWD/build
 core.subdir = $$PWD/lib/OpenIndy-Core
+test.subdir = $$PWD/test
 
 # project dependencies
-plugin.depends = core
-test.depends = core
+plugin.depends = core test

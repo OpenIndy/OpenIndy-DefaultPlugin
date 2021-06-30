@@ -11,6 +11,12 @@
 
 using namespace oi;
 
+enum Axis {
+    eXAxis = 0,
+    eYAxis,
+    eZAxis // ijk
+};
+
 /*!
  * \brief The RectifyToVector class
  */
@@ -43,10 +49,9 @@ private:
     //helper methods
     //##############
 
-    bool setUpResult(Plane &plane);
-    bool setUpResult(Circle &circle);
-    bool setUpResult(Line &line);
-    bool setUpResult(Cylinder &cylinder);
+    bool setUpResult(Geometry &plane);
+    bool direction(OiVec &direction);
+    Axis axis();
 
 };
 

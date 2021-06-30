@@ -1,6 +1,7 @@
 #ifndef P_PSEUDOTRACKER_H
 #define P_PSEUDOTRACKER_H
 
+#include <atomic>
 #include <QtGlobal>
 #include <QDateTime>
 #include <QObject>
@@ -110,6 +111,8 @@ private:
     bool myCompIt;
     int side;
     bool isConnected;
+
+    std::atomic<bool> isScanning;
 
 };
 

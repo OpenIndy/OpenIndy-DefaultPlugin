@@ -15,7 +15,7 @@ using namespace std;
 /*!
  * \brief The BestFitCircleInPlane class
  */
-class BestFitCircleInPlane : public FitFunction
+class BestFitCircleInPlane : public FitFunction, public BestFitCircleUtil
 { 
     Q_OBJECT
 

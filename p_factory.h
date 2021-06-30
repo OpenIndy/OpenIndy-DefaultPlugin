@@ -29,11 +29,14 @@
 //#include "p_bestfitcircle.h"
 #include "p_bestfitsphere.h"
 #include "p_bestfitcircleinplane.h"
+#include "p_bestfitcircleinplanefrompoints.h"
 #include "p_bestfitcylinder.h"
+#include "p_bestfitcylinderfrompoints.h"
 
 #include "p_pointfrompoints.h"
 #include "p_linefrompoints.h"
 #include "p_planefrompoints.h"
+#include "p_intersectlineline.h"
 #include "p_intersectlineplane.h"
 #include "p_intersectplaneplane.h"
 #include "p_spherefrompoints.h"
@@ -45,10 +48,6 @@
 #include "p_rectifytovector.h"
 #include "p_shift.h"
 
-#include "p_helmert7Param.h"
-#include "p_extendedtemperaturecompensation.h"
-#include "p_helmert6param.h"
-
 #include "p_pseudotracker.h"
 #include "p_leicatachymeter.h"
 
@@ -57,6 +56,12 @@
 #include "simplepolarmeasurement.h"
 
 #include "p_oiexchangeascii.h"
+
+#include "configuredfunction.h"
+#include "distancebetweentwopoints.h"
+#include "xyzfilter.h"
+#include "functionconfigparser.h"
+#include "configuredfunctionconfig.h"
 
 using namespace oi;
 
@@ -87,6 +92,7 @@ public:
 
     QPointer<Sensor> createSensor(const QString &name);
     QPointer<Function> createFunction(const QString &name);
+    QPointer<Function> createFunctionFromConfig(const QString &name);
     QPointer<BundleAdjustment> createBundleAdjustment(const QString &name);
     QPointer<SimulationModel> createSimulation(const QString &name);
     QPointer<Tool> createTool(const QString &name);

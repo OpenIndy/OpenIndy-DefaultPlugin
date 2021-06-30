@@ -20,6 +20,12 @@ void RectifyToPoint::init(){
     param1.typeOfElement = ePositionElement;
     this->neededElements.append(param1);
 
+    NeededElement param2;
+    param2.description = "Select a station used for the orientation of the target geometry.";
+    param2.infinite = false;
+    param2.typeOfElement = eStationElement;
+    this->neededElements.append(param2);
+
     //set spplicable for
     this->applicableFor.append(ePlaneFeature);
     this->applicableFor.append(eCircleFeature);
@@ -71,18 +77,41 @@ bool RectifyToPoint::exec(Cylinder &cylinder)
 }
 
 /*!
+ * \brief RectifyToPoint::point
+ * \param point
+ * \return if valid point was found
+ */
+bool RectifyToPoint::point(OiVec &point) {
+
+    // 1. get and check position of rectify geometry if available
+    if(this->inputElements.contains(0) && this->inputElements[0].size() == 1){
+        QPointer<Geometry> rectifyGeometry = this->inputElements[0].at(0).geometry;
+        if(!rectifyGeometry.isNull() && rectifyGeometry->getIsSolved() && rectifyGeometry->hasPosition()){
+            point = rectifyGeometry->getPosition().getVector();
+            return true;
+        }
+    } else {// 2. get and check position of rectify station if available
+        if(this->inputElements.contains(1) && this->inputElements[1].size() == 1) {
+            QPointer<Station> rectifyStation = this->inputElements[1].at(0).station;
+            if(!rectifyStation.isNull() && !rectifyStation->getPosition().isNull() && rectifyStation->getPosition()->hasPosition()) {
+                point = rectifyStation->getPosition()->getPosition().getVector();
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/*!
  * \brief RectifyToPoint::setUpResult
  * \param plane
  * \return
  */
-bool RectifyToPoint::setUpResult(Plane &plane){
+bool RectifyToPoint::setUpResult(Geometry &geometry){
 
-    //get and check position
-    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
-        return false;
-    }
-    QPointer<Geometry> geometry = this->inputElements[0].at(0).geometry;
-    if(geometry.isNull() || !geometry->getIsSolved() || !geometry->hasPosition()){
+    OiVec p;
+    if(!point(p)) {
         return false;
     }
 
@@ -95,22 +124,21 @@ bool RectifyToPoint::setUpResult(Plane &plane){
     }
 
     //get the position of the point and the plane and the normal vector
-    OiVec n_plane = plane.getDirection().getVector();
-    n_plane.normalize();
-    OiVec x_plane = plane.getPosition().getVector();
-    OiVec x_point = geometry->getPosition().getVector();
+    OiVec n = geometry.getDirection().getVector();
+    n.normalize();
+    OiVec x = geometry.getPosition().getVector();
 
     //calculate the distance of the plane from the origin
     double d;
-    OiVec::dot(d, x_plane, n_plane);
+    OiVec::dot(d, x, n);
     if(d < 0.0){
-        n_plane = -1.0 * n_plane;
+        n = -1.0 * n;
         d = -d;
     }
 
     //calculate the distance of the point position from the plane
     double s;
-    OiVec::dot(s, x_point, n_plane);
+    OiVec::dot(s, p, n);
     s = s - d;
 
     //invert the distance if sense is negative
@@ -118,192 +146,14 @@ bool RectifyToPoint::setUpResult(Plane &plane){
 
     //invert the normal vector of the plane if it has the wrong orientation
     if(s < 0.0){
-        n_plane = -1.0 * n_plane;
+        n = -1.0 * n;
     }
 
     //set result
-    Direction direction = plane.getDirection();
-    direction.setVector(n_plane);
-    plane.setPlane(plane.getPosition(), direction);
+    Direction direction = geometry.getDirection();
+    direction.setVector(n);
+    geometry.setDirection(direction);
 
     return true;
 
-}
-
-/*!
- * \brief RectifyToPoint::setUpResult
- * \param circle
- * \return
- */
-bool RectifyToPoint::setUpResult(Circle &circle){
-
-    //get and check position
-    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
-        return false;
-    }
-    QPointer<Geometry> geometry = this->inputElements[0].at(0).geometry;
-    if(geometry.isNull() || !geometry->getIsSolved() || !geometry->hasPosition()){
-        return false;
-    }
-
-    //get the sense (positive or negative)
-    double sense = 1.0;
-    if(this->scalarInputParams.stringParameter.contains("sense")){
-        if(this->scalarInputParams.stringParameter.value("sense").compare("negative") == 0){
-            sense = -1.0;
-        }
-    }
-
-    //get the position of the point and the circle and the normal vector
-    OiVec n_circle = circle.getDirection().getVector();
-    n_circle.normalize();
-    OiVec x_circle = circle.getPosition().getVector();
-    OiVec x_point = geometry->getPosition().getVector();
-
-    //calculate the distance of the circle plane from the origin
-    double d;
-    OiVec::dot(d, x_circle, n_circle);
-    if(d < 0.0){
-        n_circle = -1.0 * n_circle;
-        d = -d;
-    }
-
-    //calculate the distance of the point position from the circle plane
-    double s;
-    OiVec::dot(s, x_point, n_circle);
-    s = s - d;
-
-    //invert the distance if sense is negative
-    s = s * sense;
-
-    //invert the normal vector of the circle if it has the wrong orientation
-    if(s < 0.0){
-        n_circle = -1.0 * n_circle;
-    }
-
-    //set result
-    Direction direction = circle.getDirection();
-    direction.setVector(n_circle);
-    circle.setCircle(circle.getPosition(), direction, circle.getRadius());
-
-    return true;
-
-}
-
-/*!
- * \brief RectifyToPoint::setUpResult
- * \param line
- * \return
- */
-bool RectifyToPoint::setUpResult(Line &line)
-{
-    //get and check position
-    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
-        return false;
-    }
-    QPointer<Geometry> geometry = this->inputElements[0].at(0).geometry;
-    if(geometry.isNull() || !geometry->getIsSolved() || !geometry->hasPosition()){
-        return false;
-    }
-
-    //get the sense (positive or negative)
-    double sense = 1.0;
-    if(this->scalarInputParams.stringParameter.contains("sense")){
-        if(this->scalarInputParams.stringParameter.value("sense").compare("negative") == 0){
-            sense = -1.0;
-        }
-    }
-
-    //get the position of the point and the line and the normal vector
-    OiVec n_line = line.getDirection().getVector();
-    n_line.normalize();
-    OiVec x_line = line.getPosition().getVector();
-    OiVec x_point = geometry->getPosition().getVector();
-
-    //calculate the distance of the line plane from the origin
-    double d;
-    OiVec::dot(d, x_line, n_line);
-    if(d < 0.0){
-        n_line = -1.0 * n_line;
-        d = -d;
-    }
-
-    //calculate the distance of the point position from the line plane
-    double s;
-    OiVec::dot(s, x_point, n_line);
-    s = s - d;
-
-    //invert the distance if sense is negative
-    s = s * sense;
-
-    //invert the normal vector of the line if it has the wrong orientation
-    if(s < 0.0){
-        n_line = -1.0 * n_line;
-    }
-
-    //set result
-    Direction direction = line.getDirection();
-    direction.setVector(n_line);
-    line.setLine(line.getPosition(), direction);
-
-    return true;
-}
-
-/*!
- * \brief RectifyToPoint::setUpResult
- * \param cylinder
- * \return
- */
-bool RectifyToPoint::setUpResult(Cylinder &cylinder)
-{
-    //get and check position
-    if(!this->inputElements.contains(0) || this->inputElements[0].size() != 1){
-        return false;
-    }
-    QPointer<Geometry> geometry = this->inputElements[0].at(0).geometry;
-    if(geometry.isNull() || !geometry->getIsSolved() || !geometry->hasPosition()){
-        return false;
-    }
-
-    //get the sense (positive or negative)
-    double sense = 1.0;
-    if(this->scalarInputParams.stringParameter.contains("sense")){
-        if(this->scalarInputParams.stringParameter.value("sense").compare("negative") == 0){
-            sense = -1.0;
-        }
-    }
-
-    //get the position of the point and the cylinder and the normal vector
-    OiVec n_cylinder = cylinder.getDirection().getVector();
-    n_cylinder.normalize();
-    OiVec x_cylinder = cylinder.getPosition().getVector();
-    OiVec x_point = geometry->getPosition().getVector();
-
-    //calculate the distance of the cylinder plane from the origin
-    double d;
-    OiVec::dot(d, x_cylinder, n_cylinder);
-    if(d < 0.0){
-        n_cylinder = -1.0 * n_cylinder;
-        d = -d;
-    }
-
-    //calculate the distance of the point position from the cylinder plane
-    double s;
-    OiVec::dot(s, x_point, n_cylinder);
-    s = s - d;
-
-    //invert the distance if sense is negative
-    s = s * sense;
-
-    //invert the normal vector of the cylinder if it has the wrong orientation
-    if(s < 0.0){
-        n_cylinder = -1.0 * n_cylinder;
-    }
-
-    //set result
-    Direction direction = cylinder.getDirection();
-    direction.setVector(n_cylinder);
-    cylinder.setCylinder(cylinder.getPosition(), direction, cylinder.getRadius());
-
-    return true;
 }

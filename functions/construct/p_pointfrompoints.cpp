@@ -18,7 +18,7 @@ void PointFromPoints::init(){
     NeededElement param1;
     param1.description = "Select at least one points to calculate the best fit point.";
     param1.infinite = true;
-    param1.typeOfElement = ePointElement;
+    param1.typeOfElement = ePositionElement;
     this->neededElements.append(param1);
 
     //set spplicable for
@@ -46,13 +46,14 @@ bool PointFromPoints::setUpResult(Point &point){
         emit this->sendMessage(QString("Not enough valid points to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
         return false;
     }
-    QList<QPointer<Point> > inputPoints;
+    QList<OiVec> inputPoints;
     foreach(const InputElement &element, this->inputElements[0]){
-        if(!element.point.isNull() && element.point->getIsSolved()){
-            inputPoints.append(element.point);
+        if(!element.geometry.isNull() && element.geometry->getIsSolved()&& element.geometry->hasPosition()){
+            inputPoints.append(element.geometry->getPosition().getVector());
             this->setIsUsed(0, element.id, true);
+        } else {
+            this->setIsUsed(0, element.id, false);
         }
-        this->setIsUsed(0, element.id, false);
     }
     if(inputPoints.size() < 1){
         emit this->sendMessage(QString("Not enough valid points to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
@@ -61,10 +62,10 @@ bool PointFromPoints::setUpResult(Point &point){
 
     //fill l vector
     OiVec l;
-    foreach(const QPointer<Point> &p, inputPoints){
-        l.add( p->getPosition().getVector().getAt(0) );
-        l.add( p->getPosition().getVector().getAt(1) );
-        l.add( p->getPosition().getVector().getAt(2) );
+    foreach(const OiVec p, inputPoints){
+        l.add( p.getAt(0) );
+        l.add( p.getAt(1) );
+        l.add( p.getAt(2) );
     }
 
     //fill A matrix

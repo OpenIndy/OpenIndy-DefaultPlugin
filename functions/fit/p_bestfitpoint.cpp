@@ -25,6 +25,10 @@ void BestFitPoint::init(){
     //set spplicable for
     this->applicableFor.append(ePointFeature);
 
+    this->stringParameters.insert(key, value_no);
+    this->stringParameters.insert(key, value_yes);
+    this->scalarInputParams.isValid = true;
+    this->scalarInputParams.stringParameter.insert(key, value_no); // default
 }
 
 /*!
@@ -48,6 +52,26 @@ bool BestFitPoint::setUpResult(Point &point){
     if(!this->inputElements.contains(0) || this->inputElements[0].size() < 1){
         emit this->sendMessage(QString("Not enough valid observations to fit the point %1").arg(point.getFeatureName()), eWarningMessage);
         return false;
+    }
+
+    if(this->scalarInputParams.stringParameter.contains(key)
+        && this->scalarInputParams.stringParameter.value(key).compare(value_yes) == 0){
+
+        for ( int sideInt = SensorFaces::eFrontSide; sideInt <= SensorFaces::eUndefinedSide; sideInt++ ) {
+           SensorFaces side = static_cast<SensorFaces>(sideInt);
+           QList<int> obsIds; // observation ids
+           foreach(InputElement e, this->inputElements[0]) {
+               if(e.observation->getReading()->getFace() == side) {
+                    obsIds.append(e.id);
+               }
+           }
+           std::sort(obsIds.begin(), obsIds.end()); // sort by id
+           for(int i=0; i< (obsIds.count() -1); ++i ) {
+               // disable all observations but last one
+               this->setShouldBeUsed(0, obsIds[i], false);
+           }
+        }
+
     }
 
     QList<QPointer<Observation> > allUsableObservations;
@@ -112,7 +136,6 @@ bool BestFitPoint::setUpResult(Point &point){
 
         if(inputObservations.contains(observation)) {
             corr.add(_corr);
-            qDebug() << "used observation: " << observation->getId();
         }
 
         addDisplayResidual(observation->getId(), _vx, _vy, _vz, _corr);
