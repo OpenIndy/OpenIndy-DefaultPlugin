@@ -6,7 +6,7 @@ void DistanceBetweenTwoPoints::init() {
     this->applicableFor.append(eScalarEntityDistanceFeature);
 }
 
-bool DistanceBetweenTwoPoints::exec(ScalarEntityDistance &distance)
+bool DistanceBetweenTwoPoints::exec(ScalarEntityDistance &distance, const FunctionContext &ctx)
 {
     if(this->inputElements[0].isEmpty()) {
         emit this->sendMessage("inputElements[0] is empty", MessageTypes::eWarningMessage);

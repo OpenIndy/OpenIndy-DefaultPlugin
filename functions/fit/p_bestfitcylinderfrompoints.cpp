@@ -37,7 +37,7 @@ void BestFitCylinderFromPoints::init(){
  * \param cylinder
  * \return
  */
-bool BestFitCylinderFromPoints::exec(Cylinder &cylinder){
+bool BestFitCylinderFromPoints::exec(Cylinder &cylinder, const FunctionContext &ctx){
     this->statistic.reset();
     return BestFitCylinderFromPoints::setUpResult(cylinder);
 }

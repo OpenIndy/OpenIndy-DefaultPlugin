@@ -22,7 +22,7 @@ class ConfiguredFunction : public SpecialFunction {
 public:
     ConfiguredFunction(ConfiguredFunctionConfig config, QList<QPointer<Function> > functions, QObject *parent = 0);
     void init() override;
-    bool exec(const QPointer<FeatureWrapper> &feature) override;
+    bool exec(const QPointer<FeatureWrapper> &feature, const FunctionContext &ctx = FunctionContext{}) override;
 
     QString prettyPrint();
 

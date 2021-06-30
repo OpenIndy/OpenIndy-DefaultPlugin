@@ -20,7 +20,7 @@ public:
 
     void init() override;
 
-    bool exec(Point &point) override;
+    bool exec(Point &point, const FunctionContext &ctx = FunctionContext{}) override;
 
 private:
 

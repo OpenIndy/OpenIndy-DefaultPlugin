@@ -9,7 +9,7 @@ void XYZFilter::init() {
 }
 
 
-bool XYZFilter::exec(Point &point) {
+bool XYZFilter::exec(Point &point, const FunctionContext &ctx) {
     if(this->inputElements[0].isEmpty()) {
         emit this->sendMessage("inputElements[0] is empty", MessageTypes::eWarningMessage);
         return false;

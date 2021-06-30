@@ -14,7 +14,7 @@ void ConfiguredFunction::init() {
     this->neededElements = config.getNeededElements();
 }
 
-bool ConfiguredFunction::exec(const QPointer<FeatureWrapper> &feature) {
+bool ConfiguredFunction::exec(const QPointer<FeatureWrapper> &feature, const FunctionContext &ctx) {
     try {
         ListVisitor visitors;
 

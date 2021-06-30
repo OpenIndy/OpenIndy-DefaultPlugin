@@ -11,7 +11,7 @@ class DistanceBetweenTwoPoints : public ConstructFunction
 public:
     void init() override;
 
-    bool exec(ScalarEntityDistance &distance) override;
+    bool exec(ScalarEntityDistance &distance, const FunctionContext &ctx = FunctionContext{}) override;
 
 };
 

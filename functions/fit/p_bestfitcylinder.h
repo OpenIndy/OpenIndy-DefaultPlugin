@@ -31,7 +31,7 @@ protected:
     //exec methods
     //############
 
-    bool exec(Cylinder &cylinder) override;
+    bool exec(Cylinder &cylinder, const FunctionContext &ctx = FunctionContext{}) override;
 
 private:
 
