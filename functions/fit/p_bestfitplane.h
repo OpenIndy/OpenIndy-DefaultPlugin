@@ -32,7 +32,7 @@ protected:
     //exec methods
     //############
 
-    bool exec(Plane &plane);
+    bool exec(Plane &plane, const FunctionContext &ctx = FunctionContext{});
 
 private:
 

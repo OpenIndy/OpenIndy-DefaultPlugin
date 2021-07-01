@@ -42,7 +42,7 @@ void BestFitCircleInPlaneFromPoints::init(){
  * \param circle
  * \return
  */
-bool BestFitCircleInPlaneFromPoints::exec(Circle &circle){
+bool BestFitCircleInPlaneFromPoints::exec(Circle &circle, const FunctionContext &ctx){
     this->statistic.reset();
     return this->setUpResult(circle);
 }

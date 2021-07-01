@@ -38,10 +38,10 @@ protected:
     //exec methods
     //############
 
-    bool exec(Plane &plane);
-    bool exec(Circle &circle);
-    bool exec(Line &line);
-    bool exec(Cylinder &cylinder);
+    bool exec(Plane &plane, const FunctionContext &ctx = FunctionContext{});
+    bool exec(Circle &circle, const FunctionContext &ctx = FunctionContext{});
+    bool exec(Line &line, const FunctionContext &ctx = FunctionContext{});
+    bool exec(Cylinder &cylinder, const FunctionContext &ctx = FunctionContext{});
 
 private:
 

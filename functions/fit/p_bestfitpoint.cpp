@@ -36,7 +36,7 @@ void BestFitPoint::init(){
  * \param point
  * \return
  */
-bool BestFitPoint::exec(Point &point){
+bool BestFitPoint::exec(Point &point, const FunctionContext &ctx){
     this->statistic.reset();
     return this->setUpResult(point);
 }

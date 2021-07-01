@@ -31,7 +31,7 @@ void PointFromPoints::init(){
  * \param point
  * \return
  */
-bool PointFromPoints::exec(Point &point){
+bool PointFromPoints::exec(Point &point, const FunctionContext &ctx){
     return this->setUpResult(point);
 }
 

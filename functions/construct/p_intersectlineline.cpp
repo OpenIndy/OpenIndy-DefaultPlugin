@@ -56,7 +56,7 @@ IntersectionTypes IntersectLineLine::getIntersectionType() {
  * \param point
  * \return
  */
-bool IntersectLineLine::exec(Point &point){
+bool IntersectLineLine::exec(Point &point, const FunctionContext &ctx){
     return this->setUpResult(point);
 }
 

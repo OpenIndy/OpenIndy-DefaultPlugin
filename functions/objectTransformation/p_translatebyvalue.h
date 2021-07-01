@@ -28,10 +28,10 @@ protected:
     //exec methods
     //############
 
-    bool exec(Point &point);
-    bool exec(Line &line);
-    bool exec(Plane &plane);
-    bool exec(Sphere &sphere);
+    bool exec(Point &point, const FunctionContext &ctx = FunctionContext{});
+    bool exec(Line &line, const FunctionContext &ctx = FunctionContext{});
+    bool exec(Plane &plane, const FunctionContext &ctx = FunctionContext{});
+    bool exec(Sphere &sphere, const FunctionContext &ctx = FunctionContext{});
 
 private:
 

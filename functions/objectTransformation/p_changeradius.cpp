@@ -28,7 +28,7 @@ void ChangeRadius::init(){
  * \param sphere
  * \return
  */
-bool ChangeRadius::exec(Sphere &sphere){
+bool ChangeRadius::exec(Sphere &sphere, const FunctionContext &ctx){
     return this->setUpResult(sphere);
 }
 
@@ -37,7 +37,7 @@ bool ChangeRadius::exec(Sphere &sphere){
  * \param circle
  * \return
  */
-bool ChangeRadius::exec(Circle &circle){
+bool ChangeRadius::exec(Circle &circle, const FunctionContext &ctx){
     return this->setUpResult(circle);
 }
 
@@ -46,7 +46,7 @@ bool ChangeRadius::exec(Circle &circle){
  * \param cylinder
  * \return
  */
-bool ChangeRadius::exec(Cylinder &cylinder){
+bool ChangeRadius::exec(Cylinder &cylinder, const FunctionContext &ctx){
     return this->setUpResult(cylinder);
 }
 

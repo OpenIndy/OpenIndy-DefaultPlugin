@@ -39,7 +39,7 @@ void BestFitPlane::init(){
  * \param plane
  * \return
  */
-bool BestFitPlane::exec(Plane &plane){
+bool BestFitPlane::exec(Plane &plane, const FunctionContext &ctx){
     this->statistic.reset();
     return this->setUpResult(plane);
 }

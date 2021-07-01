@@ -31,7 +31,7 @@ protected:
     //exec methods
     //############
 
-    bool exec(Point &point);
+    bool exec(Point &point, const FunctionContext &ctx = FunctionContext{});
 
 private:
 

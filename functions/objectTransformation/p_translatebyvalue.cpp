@@ -36,7 +36,7 @@ void TranslateByValue::init(){
  * \param point
  * \return
  */
-bool TranslateByValue::exec(Point &point){
+bool TranslateByValue::exec(Point &point, const FunctionContext &ctx){
     return this->setUpResult(point);
 }
 
@@ -45,7 +45,7 @@ bool TranslateByValue::exec(Point &point){
  * \param line
  * \return
  */
-bool TranslateByValue::exec(Line &line){
+bool TranslateByValue::exec(Line &line, const FunctionContext &ctx){
     return this->setUpResult(line);
 }
 
@@ -54,7 +54,7 @@ bool TranslateByValue::exec(Line &line){
  * \param plane
  * \return
  */
-bool TranslateByValue::exec(Plane &plane){
+bool TranslateByValue::exec(Plane &plane, const FunctionContext &ctx){
     return this->setUpResult(plane);
 }
 
@@ -63,7 +63,7 @@ bool TranslateByValue::exec(Plane &plane){
  * \param sphere
  * \return
  */
-bool TranslateByValue::exec(Sphere &sphere){
+bool TranslateByValue::exec(Sphere &sphere, const FunctionContext &ctx){
     return this->setUpResult(sphere);
 }
 

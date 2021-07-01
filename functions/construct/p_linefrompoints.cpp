@@ -31,7 +31,7 @@ void LineFromPoints::init(){
  * \param line
  * \return
  */
-bool LineFromPoints::exec(Line &line){
+bool LineFromPoints::exec(Line &line, const FunctionContext &ctx){
     return this->setUpResult(line);
 }
 

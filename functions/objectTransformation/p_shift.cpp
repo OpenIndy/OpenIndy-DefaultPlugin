@@ -27,7 +27,7 @@ void Shift::init(){
  * \param plane
  * \return
  */
-bool Shift::exec(Plane &plane){
+bool Shift::exec(Plane &plane, const FunctionContext &ctx){
     return this->setUpResult(plane);
 }
 
@@ -36,7 +36,7 @@ bool Shift::exec(Plane &plane){
  * \param circle
  * \return
  */
-bool Shift::exec(Circle &circle){
+bool Shift::exec(Circle &circle, const FunctionContext &ctx){
     return this->setUpResult(circle);
 }
 

@@ -51,7 +51,7 @@ void RectifyToVector::init(){
  * \param plane
  * \return
  */
-bool RectifyToVector::exec(Plane &plane){
+bool RectifyToVector::exec(Plane &plane, const FunctionContext &ctx){
     return this->setUpResult(plane);
 }
 
@@ -60,7 +60,7 @@ bool RectifyToVector::exec(Plane &plane){
  * \param circle
  * \return
  */
-bool RectifyToVector::exec(Circle &circle){
+bool RectifyToVector::exec(Circle &circle, const FunctionContext &ctx){
     return this->setUpResult(circle);
 }
 
@@ -69,7 +69,7 @@ bool RectifyToVector::exec(Circle &circle){
  * \param line
  * \return
  */
-bool RectifyToVector::exec(Line &line)
+bool RectifyToVector::exec(Line &line, const FunctionContext &ctx)
 {
     return this->setUpResult(line);
 }
@@ -79,7 +79,7 @@ bool RectifyToVector::exec(Line &line)
  * \param cylinder
  * \return
  */
-bool RectifyToVector::exec(Cylinder &cylinder)
+bool RectifyToVector::exec(Cylinder &cylinder, const FunctionContext &ctx)
 {
     return this->setUpResult(cylinder);
 }

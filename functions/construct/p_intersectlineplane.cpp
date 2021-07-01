@@ -35,7 +35,7 @@ void IntersectLinePlane::init(){
  * \param point
  * \return
  */
-bool IntersectLinePlane::exec(Point &point){
+bool IntersectLinePlane::exec(Point &point, const FunctionContext &ctx){
     return this->setUpResult(point);
 }
 

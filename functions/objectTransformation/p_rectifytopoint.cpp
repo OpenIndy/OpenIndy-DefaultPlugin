@@ -43,7 +43,7 @@ void RectifyToPoint::init(){
  * \param plane
  * \return
  */
-bool RectifyToPoint::exec(Plane &plane){
+bool RectifyToPoint::exec(Plane &plane, const FunctionContext &ctx){
     return this->setUpResult(plane);
 }
 
@@ -52,7 +52,7 @@ bool RectifyToPoint::exec(Plane &plane){
  * \param circle
  * \return
  */
-bool RectifyToPoint::exec(Circle &circle){
+bool RectifyToPoint::exec(Circle &circle, const FunctionContext &ctx){
     return this->setUpResult(circle);
 }
 
@@ -61,7 +61,7 @@ bool RectifyToPoint::exec(Circle &circle){
  * \param line
  * \return
  */
-bool RectifyToPoint::exec(Line &line)
+bool RectifyToPoint::exec(Line &line, const FunctionContext &ctx)
 {
     return this->setUpResult(line);
 }
@@ -71,7 +71,7 @@ bool RectifyToPoint::exec(Line &line)
  * \param Cylinder
  * \return
  */
-bool RectifyToPoint::exec(Cylinder &cylinder)
+bool RectifyToPoint::exec(Cylinder &cylinder, const FunctionContext &ctx)
 {
     return this->setUpResult(cylinder);
 }

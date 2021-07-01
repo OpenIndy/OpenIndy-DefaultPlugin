@@ -33,7 +33,7 @@ protected:
     //exec methods
     //############
 
-    bool exec(Line &line);
+    bool exec(Line &line, const FunctionContext &ctx = FunctionContext{});
 
 private:
 

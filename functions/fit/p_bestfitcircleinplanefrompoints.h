@@ -34,7 +34,7 @@ protected:
     //exec methods
     //############
 
-    bool exec(Circle &circle);
+    bool exec(Circle &circle, const FunctionContext &ctx = FunctionContext{});
 
 private:
 

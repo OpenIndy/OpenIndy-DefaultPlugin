@@ -31,7 +31,7 @@ void SphereFromPoints::init(){
  * \param sphere
  * \return
  */
-bool SphereFromPoints::exec(Sphere &sphere){
+bool SphereFromPoints::exec(Sphere &sphere, const FunctionContext &ctx){
     return this->setUpResult(sphere);
 }
 

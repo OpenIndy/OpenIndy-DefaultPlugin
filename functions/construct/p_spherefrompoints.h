@@ -32,7 +32,7 @@ protected:
     //exec methods
     //############
 
-    bool exec(Sphere &sphere);
+    bool exec(Sphere &sphere, const FunctionContext &ctx = FunctionContext{});
 
 private:
 

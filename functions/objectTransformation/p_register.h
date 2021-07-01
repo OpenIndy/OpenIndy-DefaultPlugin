@@ -31,9 +31,9 @@ protected:
     //exec methods
     //############
 
-    bool exec(Point &point);
-    bool exec(Sphere &sphere);
-    bool exec(Circle &circle);
+    bool exec(Point &point, const FunctionContext &ctx = FunctionContext{});
+    bool exec(Sphere &sphere, const FunctionContext &ctx = FunctionContext{});
+    bool exec(Circle &circle, const FunctionContext &ctx = FunctionContext{});
 
 private:
 

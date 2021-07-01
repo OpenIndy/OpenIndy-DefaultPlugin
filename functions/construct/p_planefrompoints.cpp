@@ -31,7 +31,7 @@ void PlaneFromPoints::init(){
  * \param plane
  * \return
  */
-bool PlaneFromPoints::exec(Plane &plane){
+bool PlaneFromPoints::exec(Plane &plane, const FunctionContext &ctx){
     return this->setUpResult(plane);
 }
 

@@ -32,7 +32,7 @@ void Register::init(){
  * \param point
  * \return
  */
-bool Register::exec(Point &point){
+bool Register::exec(Point &point, const FunctionContext &ctx){
     return this->setUpResult(point);
 }
 
@@ -41,7 +41,7 @@ bool Register::exec(Point &point){
  * \param sphere
  * \return
  */
-bool Register::exec(Sphere &sphere){
+bool Register::exec(Sphere &sphere, const FunctionContext &ctx){
     return this->setUpResult(sphere);
 }
 
@@ -50,7 +50,7 @@ bool Register::exec(Sphere &sphere){
  * \param circle
  * \return
  */
-bool Register::exec(Circle &circle){
+bool Register::exec(Circle &circle, const FunctionContext &ctx){
     return this->setUpResult(circle);
 }
 

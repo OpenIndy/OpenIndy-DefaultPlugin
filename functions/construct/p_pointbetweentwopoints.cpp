@@ -35,7 +35,7 @@ void PointBetweenTwoPoints::init(){
  * \param point
  * \return
  */
-bool PointBetweenTwoPoints::exec(Point &point){
+bool PointBetweenTwoPoints::exec(Point &point, const FunctionContext &ctx){
     return this->setUpResult(point);
 }
 

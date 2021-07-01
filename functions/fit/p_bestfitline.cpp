@@ -29,7 +29,7 @@ void BestFitLine::init(){
  * \param line
  * \return
  */
-bool BestFitLine::exec(Line &line){
+bool BestFitLine::exec(Line &line, const FunctionContext &ctx){
     this->statistic.reset();
     return this->setUpResult(line);
 }

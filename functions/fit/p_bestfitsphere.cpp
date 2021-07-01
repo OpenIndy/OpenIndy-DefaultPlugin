@@ -32,7 +32,7 @@ void BestFitSphere::init(){
  * \param sphere
  * \return
  */
-bool BestFitSphere::exec(Sphere &sphere){
+bool BestFitSphere::exec(Sphere &sphere, const FunctionContext &ctx){
 
     this->statistic.reset();
 
