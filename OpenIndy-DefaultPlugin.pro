@@ -14,4 +14,5 @@ test.subdir = $$PWD/test
 
 # project dependencies
 plugin.depends = core
-test.depends plugin
+test.depends = plugin
+
