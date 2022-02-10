@@ -28,6 +28,7 @@ void PseudoTracker::init(){
     this->supportedSensorActions.append(eToggleSight);
     this->supportedSensorActions.append(eCompensation);
     this->supportedSensorActions.append(eMotorState);
+    this->supportedSensorActions.append(eSearch);
 
     //set supported connection types
     this->supportedConnectionTypes.append(eNetworkConnection);
