@@ -757,7 +757,7 @@ void PseudoTracker::noisyPolarReading(ReadingPolar &r){
 }
 
 bool PseudoTracker::search() {
-    emit this->sensorMessage("search SMR", eInformationMessage, eConsoleMessage);
+    emit this->sensorMessage("search", eInformationMessage, eConsoleMessage);
     QThread::msleep(1000);
     return true;
 }
