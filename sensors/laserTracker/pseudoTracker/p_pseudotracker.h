@@ -63,6 +63,8 @@ public:
     //!checks if sensor is busy
     bool getIsBusy();
 
+    bool search();
+
 protected:
 
     //! starts initialization

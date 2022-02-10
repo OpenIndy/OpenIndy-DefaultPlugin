@@ -755,3 +755,9 @@ void PseudoTracker::noisyPolarReading(ReadingPolar &r){
     r.zenith = acos(p.getAt(2)/r.distance);
 
 }
+
+bool PseudoTracker::search() {
+    emit this->sensorMessage("search SMR", eInformationMessage, eConsoleMessage);
+    QThread::msleep(1000);
+    return true;
+}
