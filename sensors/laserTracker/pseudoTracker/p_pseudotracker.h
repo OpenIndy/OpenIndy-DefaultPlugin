@@ -116,6 +116,8 @@ private:
 
     std::atomic<bool> isScanning;
 
+    std::atomic<bool> returnReading;
+
 };
 
 #endif // P_PSEUDOTRACKER_H
