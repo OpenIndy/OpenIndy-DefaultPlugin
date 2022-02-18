@@ -28,6 +28,7 @@ void PseudoTracker::init(){
     this->supportedSensorActions.append(eToggleSight);
     this->supportedSensorActions.append(eCompensation);
     this->supportedSensorActions.append(eMotorState);
+    this->supportedSensorActions.append(eSearch);
 
     //set supported connection types
     this->supportedConnectionTypes.append(eNetworkConnection);
@@ -59,6 +60,7 @@ void PseudoTracker::init(){
     //set self defined actions
     this->selfDefinedActions.append("echo(Alt+E)");
     this->selfDefinedActions.append("stopMeasure"); // e.g. finish scanning
+    this->selfDefinedActions.append("toggle return readings"); // for tests, if set to false then OpenIndy responds with an incorrect measurement
 
     //set default accuracy
     this->defaultAccuracy.sigmaAzimuth = 0.000001570;
@@ -82,6 +84,8 @@ void PseudoTracker::init(){
     this->isConnected = false;
     this->side = 1;
 
+    this->returnReading = true;
+
 }
 
 /*!
@@ -96,6 +100,9 @@ bool PseudoTracker::doSelfDefinedAction(const QString &action){
     } else if (action == "stopMeasure") {
         this->isScanning = false;
         emit this->sensorMessage("try to stop / finish measurement", eInformationMessage, eConsoleMessage);
+    } else if(action == "toggle return readings") {
+        this->returnReading = !this->returnReading; // toggle
+        emit this->sensorMessage(QString("return readings: %1").arg(this->returnReading), eInformationMessage, eConsoleMessage);
     }
     return true;
 }
@@ -219,6 +226,10 @@ bool PseudoTracker::compensation() {
 QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfig){
 
     QList<QPointer<Reading> > readings;
+
+    if(!this->returnReading) {
+        return readings;
+    }
 
     const int faceCount = mConfig.getMeasureTwoSides() ? 2 : 1;
 
@@ -753,4 +764,10 @@ void PseudoTracker::noisyPolarReading(ReadingPolar &r){
     r.distance = qSqrt(p.getAt(0)*p.getAt(0)+p.getAt(1)*p.getAt(1)+p.getAt(2)*p.getAt(2));
     r.zenith = acos(p.getAt(2)/r.distance);
 
+}
+
+bool PseudoTracker::search() {
+    emit this->sensorMessage("search", eInformationMessage, eConsoleMessage);
+    QThread::msleep(1000);
+    return true;
 }

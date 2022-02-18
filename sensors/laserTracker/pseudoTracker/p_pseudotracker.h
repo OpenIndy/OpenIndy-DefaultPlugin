@@ -63,6 +63,8 @@ public:
     //!checks if sensor is busy
     bool getIsBusy();
 
+    bool search();
+
 protected:
 
     //! starts initialization
@@ -113,6 +115,8 @@ private:
     bool isConnected;
 
     std::atomic<bool> isScanning;
+
+    std::atomic<bool> returnReading;
 
 };
 
