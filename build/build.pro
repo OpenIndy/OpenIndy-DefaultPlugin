@@ -66,7 +66,6 @@ SOURCES += \
     $$PWD/../functions/objectTransformation/p_register.cpp \
     $$PWD/../functions/objectTransformation/p_translatebyvalue.cpp \
     $$PWD/../p_factory.cpp \
-    $$PWD/../main.cpp \
     $$PWD/../functions/objectTransformation/p_rectifytopoint.cpp \
     $$PWD/../functions/objectTransformation/p_shift.cpp \
     $$PWD/../functions/objectTransformation/p_rectifytovector.cpp \
