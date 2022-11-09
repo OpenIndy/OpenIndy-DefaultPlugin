@@ -43,7 +43,7 @@ void LoadPluginTest::testLoadPlugin(){
 #ifdef QT_DEBUG
     QString pluginPath = dir.absoluteFilePath("../../bin/debug/p_defaultPlugind1.dll");
 #else
-    QString pluginPath = dir.absoluteFilePath("../../bin/debug/p_defaultPlugin1.dll");
+    QString pluginPath = dir.absoluteFilePath("../../bin/release/p_defaultPlugin1.dll");
 #endif
 
     QVERIFY2(QFile::exists(pluginPath), pluginPath.toLatin1().data());
