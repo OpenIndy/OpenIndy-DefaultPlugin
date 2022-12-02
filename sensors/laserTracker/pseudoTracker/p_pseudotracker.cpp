@@ -19,6 +19,7 @@ void PseudoTracker::init(){
     this->supportedReadingTypes.append(eDistanceReading);
     this->supportedReadingTypes.append(eLevelReading);
     this->supportedReadingTypes.append(eTemperatureReading);
+    this->supportedReadingTypes.append(eLevelReading);
 
     //set supported sensor actions
     this->supportedSensorActions.append(eHome);
@@ -251,6 +252,11 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
                 break;
             }case eCartesianReading:{
                 readings += measureCartesian(mConfig);
+                break;
+            }case eLevelReading: {
+                readings += measureLevel(mConfig);
+                Reading* r = readings.at(0).data();
+                qDebug();
                 break;
             }
             }
@@ -770,4 +776,28 @@ bool PseudoTracker::search() {
     emit this->sensorMessage("search", eInformationMessage, eConsoleMessage);
     QThread::msleep(1000);
     return true;
+}
+
+QList<QPointer<Reading> > PseudoTracker::measureLevel(const MeasurementConfig &mConfig){
+
+    QList<QPointer<Reading> > readings;
+
+    ReadingLevel rLevel;
+    rLevel.i = ((double) rand()/RAND_MAX) / 1000.;
+    rLevel.j = ((double) rand()/RAND_MAX) / 1000.;
+    rLevel.k = sqrt(1. - pow(rLevel.i, 2) - pow(rLevel.j, 2));
+
+    rLevel.sigmaI = defaultAccuracy.sigmaI;
+    rLevel.sigmaJ = defaultAccuracy.sigmaJ;
+    rLevel.sigmaK = defaultAccuracy.sigmaK;
+    rLevel.isValid = true;
+
+    QPointer<Reading> p = new Reading(rLevel);
+
+    QThread::msleep(1000);
+
+    readings.append(p);
+
+    return readings;
+
 }

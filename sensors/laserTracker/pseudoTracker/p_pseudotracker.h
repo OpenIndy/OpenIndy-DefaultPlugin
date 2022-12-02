@@ -92,6 +92,7 @@ private:
     QList<QPointer<Reading> > measureDistance(const MeasurementConfig &mConfig);
     QList<QPointer<Reading> > measureDirection(const MeasurementConfig &mConfig);
     QList<QPointer<Reading> > measureCartesian(const MeasurementConfig &mConfig);
+    QList<QPointer<Reading> > measureLevel(const MeasurementConfig &mConfig);
 
     //methodes to generate random value
     double randomX(int d, double m, double s);
