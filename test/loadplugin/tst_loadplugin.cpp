@@ -14,6 +14,7 @@ public:
     LoadPluginTest();
 
 private Q_SLOTS:
+    void testPseudoTracker_eCartesianReading();
     void testLoadPlugin();
 
 private:
@@ -57,6 +58,35 @@ void LoadPluginTest::testLoadPlugin(){
 
     QList<QPointer<Function> > functions = oiPlugin->createFunctions();
     QVERIFY2(functions.size() > 0, "no functions found");
+
+}
+void LoadPluginTest::testPseudoTracker_eCartesianReading(){
+
+    QDir dir;
+
+#ifdef QT_DEBUG
+    QString pluginPath = dir.absoluteFilePath("../../bin/debug/p_defaultPlugind1.dll");
+#else
+    QString pluginPath = dir.absoluteFilePath("../../bin/release/p_defaultPlugin1.dll");
+#endif
+
+    QVERIFY2(QFile::exists(pluginPath), pluginPath.toLatin1().data());
+    QPluginLoader pluginLoader(pluginPath);
+
+    QObject *plugin = pluginLoader.instance();
+    QVERIFY2(plugin, pluginLoader.errorString().toLatin1().data());
+
+    Plugin *oiPlugin = qobject_cast<Plugin *>(plugin);
+    QVERIFY2(oiPlugin, "qobject_cast");
+
+    QPointer<Sensor> sensor = oiPlugin->createSensor("PseudoTracker");
+
+    sensor->init();
+
+    MeasurementConfig config;
+    config.setTypeOfReading(ReadingTypes::eCartesianReading);
+    QList<QPointer<Reading> > readings = sensor->measure(config);
+    QVERIFY2(readings.size() > 0, "no readings");
 
 }
 
