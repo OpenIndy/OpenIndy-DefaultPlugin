@@ -40,6 +40,8 @@ void LeicaTachymeter::init(){
     this->stringParameters.insert("measure mode", "precise");
     this->stringParameters.insert("laser beam after aim", "no");
     this->stringParameters.insert("laser beam after aim", "yes");
+    this->stringParameters.insert("reading type", "polar");
+    this->stringParameters.insert("reading type", "cartesian");
 
     //set self defined actions
     this->selfDefinedActions.append("lock to prism"); //start tracking
@@ -491,7 +493,7 @@ QList<QPointer<Reading> > LeicaTachymeter::measure(const MeasurementConfig &mCon
     //measurements work with standard mode for precise measurements
     if(this->setTargetTypeMeasure()){
 
-        switch (mConfig.getTypeOfReading()){
+        switch (getReadingType(mConfig)){
         case ePolarReading:
             readings = this->measurePolar(mConfig);
             break;
@@ -519,7 +521,7 @@ QList<QPointer<Reading> > LeicaTachymeter::measure(const MeasurementConfig &mCon
             delete this->lastReading.second;
         }
 
-        this->lastReading.first = mConfig.getTypeOfReading();
+        this->lastReading.first = getReadingType(mConfig);
         Reading *r = new Reading(*readings.last().data());
         this->lastReading.second = r;
 

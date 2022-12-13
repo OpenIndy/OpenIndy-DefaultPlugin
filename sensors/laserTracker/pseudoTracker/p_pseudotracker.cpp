@@ -56,6 +56,8 @@ void PseudoTracker::init(){
     this->stringParameters.insert("active probe", "0.5''");
     this->stringParameters.insert("active probe", "1.0''");
     this->stringParameters.insert("active probe", "1.5''");
+    this->stringParameters.insert("reading type", "polar");
+    this->stringParameters.insert("reading type", "cartesian");
 
     //set self defined actions
     this->selfDefinedActions.append("echo(Alt+E)");
@@ -239,7 +241,7 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
     do {
         for(int face=0; face<faceCount; face++) {
 
-            switch (mConfig.getTypeOfReading()) {
+            switch (getReadingType(mConfig)) {
             case ePolarReading:{
                 readings += measurePolar(mConfig);
                 break;
