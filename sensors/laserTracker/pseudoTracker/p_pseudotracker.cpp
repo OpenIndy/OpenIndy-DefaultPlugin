@@ -233,8 +233,8 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
 
     const int faceCount = mConfig.getMeasureTwoSides() ? 2 : 1;
 
-    int scanPointCount = mConfig.getCount();
-    this->isScanning = mConfig.getDistanceDependent();
+    int scanPointCount = mConfig.getMaxObservations();
+    this->isScanning = mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent;
 
     do {
         for(int face=0; face<faceCount; face++) {
@@ -262,7 +262,7 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
         }
         qDebug()<< "isScanning: " << isScanning;
 
-    } while(mConfig.getDistanceDependent() && scanPointCount-- > 1 && this->isScanning);
+    } while(mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent && scanPointCount-- > 1 && this->isScanning);
     this->isScanning = false;
 
     if(readings.size() > 0){
