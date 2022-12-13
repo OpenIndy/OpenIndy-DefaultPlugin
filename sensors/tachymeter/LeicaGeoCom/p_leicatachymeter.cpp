@@ -651,42 +651,40 @@ QList<QPointer<Reading> > LeicaTachymeter::measurePolar(const MeasurementConfig 
 
     if( this->serial->isOpen()){
 
-        for(int i=0;i<mConfig.getIterations();i++){
-            for(int k = 0; k<faceCount;k++){
-                if (this->executeEDM()){
+        for(int k = 0; k<faceCount;k++){
+            if (this->executeEDM()){
 
-                    Reading *r;
-                    QString command = "%R1Q,2108:5000,1\r\n";
+                Reading *r;
+                QString command = "%R1Q,2108:5000,1\r\n";
 
-                    if(executeCommand(command)){
+                if(executeCommand(command)){
 
-                        QString measureData = this->receive();
+                    QString measureData = this->receive();
 
-                        QStringList polarElements = measureData.split(",");
+                    QStringList polarElements = measureData.split(",");
 
-                        ReadingPolar rPolar;
+                    ReadingPolar rPolar;
 
-                        rPolar.azimuth = polarElements.at(polarElements.size()-3).toDouble();
-                        rPolar.zenith = polarElements.at(polarElements.size()-2).toDouble();
-                        rPolar.distance = polarElements.at(polarElements.size()-1).toDouble();
+                    rPolar.azimuth = polarElements.at(polarElements.size()-3).toDouble();
+                    rPolar.zenith = polarElements.at(polarElements.size()-2).toDouble();
+                    rPolar.distance = polarElements.at(polarElements.size()-1).toDouble();
 
-                        //correct the values depending on specified sense of rotation
-                        if(this->sensorConfiguration.getStringParameter().contains("sense of rotation")){
-                            QString sense =  this->sensorConfiguration.getStringParameter().value("sense of rotation");
-                            if(sense.compare("mathematical") == 0){
-                                rPolar.azimuth = 2 * PI - rPolar.azimuth;
-                            }
+                    //correct the values depending on specified sense of rotation
+                    if(this->sensorConfiguration.getStringParameter().contains("sense of rotation")){
+                        QString sense =  this->sensorConfiguration.getStringParameter().value("sense of rotation");
+                        if(sense.compare("mathematical") == 0){
+                            rPolar.azimuth = 2 * PI - rPolar.azimuth;
                         }
-                        rPolar.isValid = true;
+                    }
+                    rPolar.isValid = true;
 
-                        r = new Reading(rPolar);
-                        r->setSensorFace(this->getCurrentFace(rPolar.zenith));
-                        r->setMeasuredAt(QDateTime::currentDateTime());
-                        readings.append(r);
+                    r = new Reading(rPolar);
+                    r->setSensorFace(this->getCurrentFace(rPolar.zenith));
+                    r->setMeasuredAt(QDateTime::currentDateTime());
+                    readings.append(r);
 
-                        if(faceCount == 2){
-                            this->toggleSightOrientation();
-                        }
+                    if(faceCount == 2){
+                        this->toggleSightOrientation();
                     }
                 }
             }
@@ -716,32 +714,30 @@ QList<QPointer<Reading> > LeicaTachymeter::measureDistance(const MeasurementConf
 
     if( this->serial->isOpen()){
 
-        for(int i=0;i<mConfig.getIterations();i++){
-            for(int k = 0; k<faceCount;k++){
-                if (this->executeEDM()){
+        for(int k = 0; k<faceCount;k++){
+            if (this->executeEDM()){
 
-                    QString command = "%R1Q,2108:5000,1\r\n";
+                QString command = "%R1Q,2108:5000,1\r\n";
 
-                    if(executeCommand(command)){
+                if(executeCommand(command)){
 
-                        QString measureData = this->receive();
+                    QString measureData = this->receive();
 
-                        QStringList polarElements = measureData.split(",");
+                    QStringList polarElements = measureData.split(",");
 
-                        double zenith = polarElements.at(polarElements.size()-2).toDouble();
+                    double zenith = polarElements.at(polarElements.size()-2).toDouble();
 
-                        ReadingDistance rDistance;
-                        rDistance.distance = polarElements.at(polarElements.size()-1).toDouble();
-                        rDistance.isValid = true;
+                    ReadingDistance rDistance;
+                    rDistance.distance = polarElements.at(polarElements.size()-1).toDouble();
+                    rDistance.isValid = true;
 
-                        QPointer<Reading> reading = new Reading(rDistance);
-                        reading->setSensorFace(this->getCurrentFace(zenith));
-                        reading->setMeasuredAt(QDateTime::currentDateTime());
-                        readings.append(reading);
+                    QPointer<Reading> reading = new Reading(rDistance);
+                    reading->setSensorFace(this->getCurrentFace(zenith));
+                    reading->setMeasuredAt(QDateTime::currentDateTime());
+                    readings.append(reading);
 
-                        if(faceCount == 2){
-                            this->toggleSightOrientation();
-                        }
+                    if(faceCount == 2){
+                        this->toggleSightOrientation();
                     }
                 }
             }
@@ -771,39 +767,37 @@ QList<QPointer<Reading> > LeicaTachymeter::measureDirection(const MeasurementCon
 
     if( this->serial->isOpen()){
 
-        for(int i=0;i<mConfig.getIterations();i++){
-            for(int k = 0; k<faceCount;k++){
+        for(int k = 0; k<faceCount;k++){
 
-                QString command = "%R1Q,2107:1\r\n";
+            QString command = "%R1Q,2107:1\r\n";
 
-                if(executeCommand(command)){
+            if(executeCommand(command)){
 
-                    QString measureData = this->receive();
+                QString measureData = this->receive();
 
-                    QStringList polarElements = measureData.split(",");
+                QStringList polarElements = measureData.split(",");
 
-                    ReadingDirection rDirection;
+                ReadingDirection rDirection;
 
-                    rDirection.azimuth = polarElements.at(polarElements.size()-2).toDouble();
-                    rDirection.zenith = polarElements.at(polarElements.size()-1).toDouble();
+                rDirection.azimuth = polarElements.at(polarElements.size()-2).toDouble();
+                rDirection.zenith = polarElements.at(polarElements.size()-1).toDouble();
 
-                    //correct the values depending on specified sense of rotation
-                    if(this->sensorConfiguration.getStringParameter().contains("sense of rotation")){
-                        QString sense =  this->sensorConfiguration.getStringParameter().value("sense of rotation");
-                        if(sense.compare("mathematical") == 0){
-                            rDirection.azimuth = 2 * PI - rDirection.azimuth;
-                        }
+                //correct the values depending on specified sense of rotation
+                if(this->sensorConfiguration.getStringParameter().contains("sense of rotation")){
+                    QString sense =  this->sensorConfiguration.getStringParameter().value("sense of rotation");
+                    if(sense.compare("mathematical") == 0){
+                        rDirection.azimuth = 2 * PI - rDirection.azimuth;
                     }
-                    rDirection.isValid = true;
+                }
+                rDirection.isValid = true;
 
-                    QPointer<Reading> r = new Reading(rDirection);
-                    r->setSensorFace(this->getCurrentFace(rDirection.zenith));
-                    r->setMeasuredAt(QDateTime::currentDateTime());
-                    readings.append(r);
+                QPointer<Reading> r = new Reading(rDirection);
+                r->setSensorFace(this->getCurrentFace(rDirection.zenith));
+                r->setMeasuredAt(QDateTime::currentDateTime());
+                readings.append(r);
 
-                    if(faceCount == 2){
-                        this->toggleSightOrientation();
-                    }
+                if(faceCount == 2){
+                    this->toggleSightOrientation();
                 }
             }
         }
