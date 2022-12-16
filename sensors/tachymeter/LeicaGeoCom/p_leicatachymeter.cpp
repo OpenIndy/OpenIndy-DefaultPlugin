@@ -36,8 +36,6 @@ void LeicaTachymeter::init(){
     this->stringParameters.insert("ATR accuracy", "point tolerance");
     this->stringParameters.insert("sense of rotation", "geodetic");
     this->stringParameters.insert("sense of rotation", "mathematical");
-    this->stringParameters.insert("measure mode", "fast");
-    this->stringParameters.insert("measure mode", "precise");
     this->stringParameters.insert("laser beam after aim", "no");
     this->stringParameters.insert("laser beam after aim", "yes");
     this->stringParameters.insert("reading type", "polar");
