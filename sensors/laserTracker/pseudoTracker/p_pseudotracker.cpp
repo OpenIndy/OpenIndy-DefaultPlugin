@@ -254,6 +254,9 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
             }case eCartesianReading:{
                 readings += measureCartesian(mConfig);
                 break;
+            }case eLevelReading:{
+                readings += measureLevel(mConfig);
+                break;
             }
             }
 
@@ -772,4 +775,34 @@ bool PseudoTracker::search() {
     emit this->sensorMessage("search", eInformationMessage, eConsoleMessage);
     QThread::msleep(1000);
     return true;
+}
+
+QList<QPointer<Reading> > PseudoTracker::measureLevel(const MeasurementConfig &mConfig){
+
+    QList<QPointer<Reading> > readings;
+
+    ReadingLevel rLevel;
+    double i = ((double) rand()/RAND_MAX) / 100.;
+    double j = ((double) rand()/RAND_MAX) / 100.;
+
+    //set level reading
+    rLevel.i = i;
+    rLevel.j = j;
+    rLevel.k = std::sqrt(1. - std::pow(i, 2) - std::pow(j, 2));
+    rLevel.sigmaI = this->sensorConfiguration.getAccuracy().sigmaI;
+    rLevel.sigmaJ = this->sensorConfiguration.getAccuracy().sigmaJ;
+    rLevel.sigmaK = this->sensorConfiguration.getAccuracy().sigmaK;
+    rLevel.isValid = true;
+
+    QPointer<Reading> p = new Reading(rLevel);
+
+    p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
+    p->setMeasuredAt(QDateTime::currentDateTime());
+
+    QThread::msleep(1000);
+
+    readings.append(p);
+
+    return readings;
+
 }
