@@ -19,6 +19,7 @@ void PseudoTracker::init(){
     this->supportedReadingTypes.append(eDistanceReading);
     this->supportedReadingTypes.append(eLevelReading);
     this->supportedReadingTypes.append(eTemperatureReading);
+    this->supportedReadingTypes.append(eLevelReading);
 
     //set supported sensor actions
     this->supportedSensorActions.append(eHome);
@@ -782,16 +783,13 @@ QList<QPointer<Reading> > PseudoTracker::measureLevel(const MeasurementConfig &m
     QList<QPointer<Reading> > readings;
 
     ReadingLevel rLevel;
-    double i = ((double) rand()/RAND_MAX) / 100.;
-    double j = ((double) rand()/RAND_MAX) / 100.;
+    rLevel.i = ((double) rand()/RAND_MAX) / 1000.;
+    rLevel.j = ((double) rand()/RAND_MAX) / 1000.;
+    rLevel.k = sqrt(1. - pow(rLevel.i, 2) - pow(rLevel.j, 2));
 
-    //set level reading
-    rLevel.i = i;
-    rLevel.j = j;
-    rLevel.k = std::sqrt(1. - std::pow(i, 2) - std::pow(j, 2));
-    rLevel.sigmaI = this->sensorConfiguration.getAccuracy().sigmaI;
-    rLevel.sigmaJ = this->sensorConfiguration.getAccuracy().sigmaJ;
-    rLevel.sigmaK = this->sensorConfiguration.getAccuracy().sigmaK;
+    rLevel.sigmaI = defaultAccuracy.sigmaI;
+    rLevel.sigmaJ = defaultAccuracy.sigmaJ;
+    rLevel.sigmaK = defaultAccuracy.sigmaK;
     rLevel.isValid = true;
 
     QPointer<Reading> p = new Reading(rLevel);
