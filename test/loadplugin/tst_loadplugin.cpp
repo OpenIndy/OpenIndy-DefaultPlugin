@@ -84,7 +84,12 @@ void LoadPluginTest::testPseudoTracker_eCartesianReading(){
     sensor->init();
 
     MeasurementConfig config;
-    config.setTypeOfReading(ReadingTypes::eCartesianReading);
+    config.setMeasurementType(eSinglePoint_MeasurementType);
+    SensorConfiguration sc = sensor->getSensorConfiguration();
+    QMap sp = sc.getStringParameter();
+    sp.insert("reading type", "cartesian");
+    sc.setStringParameter(sp);
+    sensor->setSensorConfiguration(sc);
     QList<QPointer<Reading> > readings = sensor->measure(config);
     QVERIFY2(readings.size() > 0, "no readings");
 
