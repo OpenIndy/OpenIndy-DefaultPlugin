@@ -57,6 +57,8 @@ void PseudoTracker::init(){
     this->stringParameters.insert("active probe", "0.5''");
     this->stringParameters.insert("active probe", "1.0''");
     this->stringParameters.insert("active probe", "1.5''");
+    this->stringParameters.insert("reading type", "polar");
+    this->stringParameters.insert("reading type", "cartesian");
 
     //set self defined actions
     this->selfDefinedActions.append("echo(Alt+E)");
@@ -234,13 +236,13 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
 
     const int faceCount = mConfig.getMeasureTwoSides() ? 2 : 1;
 
-    int scanPointCount = mConfig.getCount();
-    this->isScanning = mConfig.getDistanceDependent();
+    int scanPointCount = mConfig.getMaxObservations();
+    this->isScanning = mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent_MeasurementType;
 
     do {
         for(int face=0; face<faceCount; face++) {
 
-            switch (mConfig.getTypeOfReading()) {
+            switch (getReadingType(mConfig)) {
             case ePolarReading:{
                 readings += measurePolar(mConfig);
                 break;
@@ -268,7 +270,7 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
         }
         qDebug()<< "isScanning: " << isScanning;
 
-    } while(mConfig.getDistanceDependent() && scanPointCount-- > 1 && this->isScanning);
+    } while(mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent_MeasurementType && scanPointCount-- > 1 && this->isScanning);
     this->isScanning = false;
 
     if(readings.size() > 0){
