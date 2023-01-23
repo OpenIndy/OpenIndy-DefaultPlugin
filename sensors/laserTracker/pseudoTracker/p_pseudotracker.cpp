@@ -255,10 +255,8 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
             }case eCartesianReading:{
                 readings += measureCartesian(mConfig);
                 break;
-            }case eLevelReading: {
+            }case eLevelReading:{
                 readings += measureLevel(mConfig);
-                Reading* r = readings.at(0).data();
-                qDebug();
                 break;
             }
             }
@@ -795,6 +793,9 @@ QList<QPointer<Reading> > PseudoTracker::measureLevel(const MeasurementConfig &m
     rLevel.isValid = true;
 
     QPointer<Reading> p = new Reading(rLevel);
+
+    p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
+    p->setMeasuredAt(QDateTime::currentDateTime());
 
     QThread::msleep(1000);
 
