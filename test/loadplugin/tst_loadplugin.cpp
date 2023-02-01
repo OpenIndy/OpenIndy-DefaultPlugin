@@ -86,7 +86,7 @@ void LoadPluginTest::testPseudoTracker_eCartesianReading(){
     MeasurementConfig config;
     config.setMeasurementType(eSinglePoint_MeasurementType);
     SensorConfiguration sc = sensor->getSensorConfiguration();
-    QMap sp = sc.getStringParameter();
+    QMap<QString, QString> sp = sc.getStringParameter();
     sp.insert("reading type", "cartesian");
     sc.setStringParameter(sp);
     sensor->setSensorConfiguration(sc);
