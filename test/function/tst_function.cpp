@@ -142,6 +142,8 @@ private Q_SLOTS:
 
     void testBestFitPlane();
 
+    void testCircleInPlaneFromPoints_with_DummyPoint(); // OI-805
+
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
@@ -3259,6 +3261,46 @@ void FunctionTest::testDistanceBetweenTwoPointsV2() {
     QVERIFY2(res, "exec");
 
     COMPARE_DOUBLE(feature->getDistance(), (5.000), 0.0001);
+
+    delete function.data();
+}
+
+// OI-805
+void FunctionTest::testCircleInPlaneFromPoints_with_DummyPoint()
+{
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
+    QPointer<Function> function = new BestFitCircleInPlaneFromPoints();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputPoints(data, function);
+
+    addInputPoints("0.0 0.0 -1.0", function, 2000, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(circleFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
+
 
     delete function.data();
 }
