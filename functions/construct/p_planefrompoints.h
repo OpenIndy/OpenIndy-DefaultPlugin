@@ -14,7 +14,7 @@ using namespace oi;
 /*!
  * \brief The PlaneFromPoints class
  */
-class PlaneFromPoints : public ConstructFunction
+class PlaneFromPoints : public ConstructFunction, public FunctionUtil
 {
     Q_OBJECT
 

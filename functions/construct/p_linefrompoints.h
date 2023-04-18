@@ -15,7 +15,7 @@ using namespace std;
 /*!
  * \brief The LineFromPoints class
  */
-class LineFromPoints : public ConstructFunction
+class LineFromPoints : public ConstructFunction, public FunctionUtil
 {
     Q_OBJECT
 

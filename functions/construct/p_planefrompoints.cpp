@@ -99,12 +99,7 @@ bool PlaneFromPoints::setUpResult(Plane &plane){
     OiVec direction(3);
     direction.normalize();
     OiVec::cross(direction, ab, ac);
-    double angle = 0.0; //angle between n and direction
-    OiVec::dot(angle, n, direction);
-    angle = qAbs(qAcos(angle));
-    if(angle > (PI/2.0)){
-        n = n * -1.0;
-    }
+    rectifyNormalToDirection(n, direction);
 
     //set result
     Position planePosition;

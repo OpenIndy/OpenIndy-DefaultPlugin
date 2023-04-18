@@ -100,10 +100,11 @@ bool BestFitPlane::setUpResult(Plane &plane){
     n.normalize();
 
     OiVec direction(3);
-    if(this->inputElements.contains(InputElementKey::eDummyPoint) && this->inputElements[InputElementKey::eDummyPoint].size() > 0) {
+
+    if(hasDummyPoint(this)) {
         // computing plane normale by dummy point
-        OiVec dummyPoint = inputElements[InputElementKey::eDummyPoint][0].observation->getXYZ();
-        dummyPoint.removeLast();
+        OiVec dummyPoint;
+        getDummyPoint(dummyPoint, this);
         direction = dummyPoint - centroid;
         direction.normalize();
     } else {
@@ -115,12 +116,8 @@ bool BestFitPlane::setUpResult(Plane &plane){
         OiVec::cross(direction, ab, ac);
         direction.normalize();
     }
-    double angle = 0.0; //angle between n and direction
-    OiVec::dot(angle, n, direction);
-    angle = qAbs(qAcos(angle));
-    if(angle > (PI/2.0)&& angle < PI){
-        n = n * -1.0;
-    }
+
+    rectifyNormalToDirection(n, direction);
 
     //calculate smallest distance of the plane from the origin
     double dOrigin = n.getAt(0) * centroid.getAt(0) + n.getAt(1) * centroid.getAt(1) + n.getAt(2) * centroid.getAt(2);
