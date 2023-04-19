@@ -61,37 +61,21 @@ bool PlaneFromPoints::setUpResult(Plane &plane){
     }
 
     //centroid
+    QList<IdPoint> points;
+    foreach(const QPointer<Point> &p, inputPoints) {
+        IdPoint point;
+        point.id = p->getId();
+        point.xyz = p->getPosition().getVector();
+        points.append(point);
+    }
     OiVec centroid(3);
-    foreach(const QPointer<Point> &point, inputPoints){
-        centroid = centroid + point->getPosition().getVector();
-    }
-    centroid = centroid * (1.0/inputPoints.size());
-
-    //principle component analysis
-    OiMat a(inputPoints.size(), 3);
-    for(int i = 0; i < inputPoints.size(); i++){
-        a.setAt(i, 0, inputPoints.at(i)->getPosition().getVector().getAt(0) - centroid.getAt(0));
-        a.setAt(i, 1, inputPoints.at(i)->getPosition().getVector().getAt(1) - centroid.getAt(1));
-        a.setAt(i, 2, inputPoints.at(i)->getPosition().getVector().getAt(2) - centroid.getAt(2));
-    }
-    OiMat ata = a.t() * a;
-    OiMat u(3,3);
-    OiVec d(3);
-    OiMat v(3,3);
-    ata.svd(u, d, v);
-
-    //get smallest eigenvector which is n vector
-    int eigenIndex = -1;
-    double eVal = 0.0;
-    for(int i = 0; i < d.getSize(); i++){
-        if(d.getAt(i) < eVal || i == 0){
-            eVal = d.getAt(i);
-            eigenIndex = i;
-        }
-    }
     OiVec n(3);
-    u.getCol(n, eigenIndex);
-    n.normalize();
+    double eVal = 0.0;
+    if(!bestFitPlane(centroid, n, eVal,points)) {
+        emit this->sendMessage(QString("Cannot fit plane %1").arg(plane.getFeatureName()), eWarningMessage);
+        return false;
+    }
+
 
     //check that the normal vector of the plane is defined by the first three points A, B and C (cross product)
     OiVec ab = inputPoints.at(1)->getPosition().getVector() - inputPoints.at(0)->getPosition().getVector();

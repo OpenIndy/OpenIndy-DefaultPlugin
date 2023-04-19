@@ -14,7 +14,7 @@ using namespace oi;
 /*!
  * \brief The BestFitPlane class
  */
-class BestFitPlane : public FitFunction, public BestFitUtil
+class BestFitPlane : public FitFunction, public BestFitPlaneUtil
 {  
     Q_OBJECT
 

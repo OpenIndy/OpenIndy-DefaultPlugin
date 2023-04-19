@@ -65,39 +65,20 @@ bool BestFitPlane::setUpResult(Plane &plane){
         return false;
     }
 
-    //centroid
-    OiVec centroid(4);
-    foreach(const QPointer<Observation> &obs, inputObservations){
-        centroid = centroid + obs->getXYZ();
+    QList<IdPoint> points;
+    foreach(const QPointer<Observation> &obs, inputObservations) {
+        IdPoint point;
+        point.id = obs->getId();
+        point.xyz = obs->getXYZ();
+        points.append(point);
     }
-    centroid = centroid * (1.0/inputObservations.size());
-    centroid.removeLast();
-
-    //principle component analysis
-    OiMat a(inputObservations.size(), 3);
-    for(int i = 0; i < inputObservations.size(); i++){
-        a.setAt(i, 0, inputObservations.at(i)->getXYZ().getAt(0) - centroid.getAt(0));
-        a.setAt(i, 1, inputObservations.at(i)->getXYZ().getAt(1) - centroid.getAt(1));
-        a.setAt(i, 2, inputObservations.at(i)->getXYZ().getAt(2) - centroid.getAt(2));
-    }
-    OiMat ata = a.t() * a;
-    OiMat u(3,3);
-    OiVec d(3);
-    OiMat v(3,3);
-    ata.svd(u, d, v);
-
-    //get smallest eigenvector which is n vector
-    int eigenIndex = -1;
-    double eVal = 0.0;
-    for(int i = 0; i < d.getSize(); i++){
-        if(d.getAt(i) < eVal || i == 0){
-            eVal = d.getAt(i);
-            eigenIndex = i;
-        }
-    }
+    OiVec centroid(3);
     OiVec n(3);
-    u.getCol(n, eigenIndex);
-    n.normalize();
+    double eVal = 0.0;
+    if(!bestFitPlane(centroid, n, eVal, points)) {
+        emit this->sendMessage(QString("Cannot fit plane %1").arg(plane.getFeatureName()), eWarningMessage);
+        return false;
+    }
 
     OiVec direction(3);
 
