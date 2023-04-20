@@ -36,6 +36,7 @@ public:
 private Q_SLOTS:
     void initTestCase();
 
+    void testLineFromPoints();
     void testPointFromPoints_RegisterV2();
     void testDistanceBetweenTwoPointsV2();
     void testDistance_PointFromPoints_RegisterV2();    
@@ -3298,6 +3299,44 @@ void FunctionTest::testCircleInPlaneFromPoints_with_DummyPoint()
     COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
     COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
 
+
+    delete function.data();
+}
+
+void FunctionTest::testLineFromPoints()
+{
+
+
+    QPointer<Function> function = new LineFromPoints();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Line> feature = new Line(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setLine(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+999.9916 999.9958 999.9917\n\
+2000.0015 2000.0008 999.9970\n\
+3000.0270 3000.0247 1000.0083\n\
+4999.9732 4999.9797 1000.0041\n\
+");
+
+    addInputPoints(data, function);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_LINE(feature);
+
+    DEBUG_RESIDULAS(function);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.707106), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (0.707107), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (0.000002), 0.000001);
 
     delete function.data();
 }
