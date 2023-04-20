@@ -113,7 +113,7 @@ bool BestFitPlane::setUpResult(Plane &plane){
         OiVec v_plane = distance * n;
 
         //set up display residual
-        addDisplayResidual(observation->getId(), v_plane.getAt(0), v_plane.getAt(1), v_plane.getAt(2), distance);
+        Function::addDisplayResidual(observation->getId(), v_plane.getAt(0), v_plane.getAt(1), v_plane.getAt(2), distance);
 
     }
 
