@@ -19,6 +19,7 @@ DEFINES += SRCDIR=$$shell_quote($$PWD)
 
 # test dependencies
 INCLUDEPATH += \
+    ../include \
     ../.. \
     ../../functions/objectTransformation \
     ../../functions/fit \
