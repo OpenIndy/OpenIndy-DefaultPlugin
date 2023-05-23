@@ -470,6 +470,13 @@ QList<QPointer<Reading> > PseudoTracker::measurePolar(const MeasurementConfig &m
     p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
     p->setMeasuredAt(QDateTime::currentDateTime());
 
+    QVariant td =  mConfig.getTransientData("isDummyPoint");
+    if(td.isValid()) {
+        p->setProperty("isDummyPoint", td);
+    } else {
+        p->setProperty("isDummyPoint", false);
+    }
+
     QThread::msleep(1000);
 
     readings.append(p);
@@ -562,6 +569,13 @@ QList<QPointer<Reading> > PseudoTracker::measureCartesian(const MeasurementConfi
 
     p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
     p->setMeasuredAt(QDateTime::currentDateTime());
+
+    QVariant td =  mConfig.getTransientData("isDummyPoint");
+    if(td.isValid()) {
+        p->setProperty("isDummyPoint", td);
+    } else {
+        p->setProperty("isDummyPoint", false);
+    }
 
     QThread::msleep(1000);
 
