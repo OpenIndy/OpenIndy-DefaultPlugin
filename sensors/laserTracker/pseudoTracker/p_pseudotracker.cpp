@@ -237,7 +237,10 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
     const int faceCount = mConfig.getMeasureTwoSides() ? 2 : 1;
 
     int scanPointCount = mConfig.getMaxObservations();
-    this->isScanning = mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent_MeasurementType;
+    const bool meaurementTypeScan = mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent_MeasurementType
+            || mConfig.getMeasurementType() == MeasurementTypes::eScanTimeDependent_MeasurementType;
+    this->measureTime =  mConfig.getMeasurementType() == MeasurementTypes::eScanTimeDependent_MeasurementType ? mConfig.getTimeInterval() * 1000 : 1000;
+    this->isScanning = meaurementTypeScan;
 
     do {
         for(int face=0; face<faceCount; face++) {
@@ -268,7 +271,7 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
         }
         qDebug()<< "isScanning: " << isScanning;
 
-    } while(mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent_MeasurementType && scanPointCount-- > 1 && this->isScanning);
+    } while(meaurementTypeScan && scanPointCount-- > 1 && this->isScanning);
     this->isScanning = false;
 
     if(readings.size() > 0){
@@ -477,7 +480,7 @@ QList<QPointer<Reading> > PseudoTracker::measurePolar(const MeasurementConfig &m
         p->setProperty("isDummyPoint", false);
     }
 
-    QThread::msleep(1000);
+    QThread::msleep(this->measureTime);
 
     readings.append(p);
 
@@ -577,7 +580,7 @@ QList<QPointer<Reading> > PseudoTracker::measureCartesian(const MeasurementConfi
         p->setProperty("isDummyPoint", false);
     }
 
-    QThread::msleep(1000);
+    QThread::msleep(this->measureTime);
 
     readings.append(p);
 

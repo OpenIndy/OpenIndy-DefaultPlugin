@@ -119,6 +119,8 @@ private:
 
     std::atomic<bool> returnReading;
 
+    int measureTime; // [ms]
+
 };
 
 #endif // P_PSEUDOTRACKER_H
