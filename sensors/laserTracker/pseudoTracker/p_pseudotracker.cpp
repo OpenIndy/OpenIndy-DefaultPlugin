@@ -173,7 +173,7 @@ bool PseudoTracker::move(const double &azimuth, const double &zenith, const doub
 bool PseudoTracker::move(const double &x, const double &y, const double &z){
     this->myAzimuth = qAtan2(y,x);
     this->myDistance = qSqrt(x*x+y*y+z*z);
-    this->myZenith = acos(z/myDistance);
+    this->myZenith = this->myDistance == 0. ? M_PI / 2. : acos(z/myDistance);
     QThread::msleep(1000);
     return true;
 }
