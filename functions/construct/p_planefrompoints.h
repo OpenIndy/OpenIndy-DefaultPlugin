@@ -6,6 +6,7 @@
 #include <QtMath>
 
 #include "constructfunction.h"
+#include "fitfunction.h"
 #include "oivec.h"
 #include "oimat.h"
 
@@ -14,7 +15,7 @@ using namespace oi;
 /*!
  * \brief The PlaneFromPoints class
  */
-class PlaneFromPoints : public ConstructFunction
+class PlaneFromPoints : public ConstructFunction, public BestFitPlaneUtil
 {
     Q_OBJECT
 

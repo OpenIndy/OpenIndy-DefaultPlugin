@@ -173,7 +173,7 @@ bool PseudoTracker::move(const double &azimuth, const double &zenith, const doub
 bool PseudoTracker::move(const double &x, const double &y, const double &z){
     this->myAzimuth = qAtan2(y,x);
     this->myDistance = qSqrt(x*x+y*y+z*z);
-    this->myZenith = acos(z/myDistance);
+    this->myZenith = this->myDistance == 0. ? M_PI / 2. : acos(z/myDistance);
     QThread::msleep(1000);
     return true;
 }
@@ -237,7 +237,10 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
     const int faceCount = mConfig.getMeasureTwoSides() ? 2 : 1;
 
     int scanPointCount = mConfig.getMaxObservations();
-    this->isScanning = mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent_MeasurementType;
+    const bool meaurementTypeScan = mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent_MeasurementType
+            || mConfig.getMeasurementType() == MeasurementTypes::eScanTimeDependent_MeasurementType;
+    this->measureTime =  mConfig.getMeasurementType() == MeasurementTypes::eScanTimeDependent_MeasurementType ? mConfig.getTimeInterval() * 1000 : 1000;
+    this->isScanning = meaurementTypeScan;
 
     do {
         for(int face=0; face<faceCount; face++) {
@@ -268,7 +271,7 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
         }
         qDebug()<< "isScanning: " << isScanning;
 
-    } while(mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent_MeasurementType && scanPointCount-- > 1 && this->isScanning);
+    } while(meaurementTypeScan && scanPointCount-- > 1 && this->isScanning);
     this->isScanning = false;
 
     if(readings.size() > 0){
@@ -470,7 +473,14 @@ QList<QPointer<Reading> > PseudoTracker::measurePolar(const MeasurementConfig &m
     p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
     p->setMeasuredAt(QDateTime::currentDateTime());
 
-    QThread::msleep(1000);
+    QVariant td =  mConfig.getTransientData("isDummyPoint");
+    if(td.isValid()) {
+        p->setProperty("isDummyPoint", td);
+    } else {
+        p->setProperty("isDummyPoint", false);
+    }
+
+    QThread::msleep(this->measureTime);
 
     readings.append(p);
 
@@ -563,7 +573,14 @@ QList<QPointer<Reading> > PseudoTracker::measureCartesian(const MeasurementConfi
     p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
     p->setMeasuredAt(QDateTime::currentDateTime());
 
-    QThread::msleep(1000);
+    QVariant td =  mConfig.getTransientData("isDummyPoint");
+    if(td.isValid()) {
+        p->setProperty("isDummyPoint", td);
+    } else {
+        p->setProperty("isDummyPoint", false);
+    }
+
+    QThread::msleep(this->measureTime);
 
     readings.append(p);
 
