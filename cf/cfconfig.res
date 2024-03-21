@@ -5,7 +5,7 @@ R"(
     "functions" : [
         {
             "name": "RegisterPositionToPlane",
-            "description": "OI-523",
+            "description": "Project a point onto a plane along the normal vector of the plane.",
             "applicableFor" : [ "Point" ],
 
             "neededElements": [
@@ -43,7 +43,7 @@ R"(
         
         {
             "name": "DistanceFromPlane",
-            "description": "OI-520",
+            "description": "Calculate distance between point and plan.",
             "applicableFor" : [ "ScalarEntityDistance" ],
 
             "neededElements": [
@@ -83,7 +83,7 @@ R"(
 
         {
             "name": "XDistance",
-            "description": "OI-520",
+            "description": "Project a point onto a plane along the x axis.",
             "applicableFor" : [ "ScalarEntityDistance" ],
 
             "neededElements": [
@@ -137,7 +137,7 @@ R"(
         },
         {
             "name": "YDistance",
-            "description": "OI-520",
+            "description": "Project a point onto a plane along the y axis.",
             "applicableFor" : [ "ScalarEntityDistance" ],
 
             "neededElements": [
@@ -191,7 +191,7 @@ R"(
         },
         {
             "name": "ZDistance",
-            "description": "OI-520",
+            "description": "Project a point onto a plane along the z axis.",
             "applicableFor" : [ "ScalarEntityDistance" ],
 
             "neededElements": [
