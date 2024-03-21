@@ -11,7 +11,7 @@ R"(
             "neededElements": [
                 {
                     "name": "Position",
-                    "description" : "Select one points to register to the plane.",
+                    "description" : "Select one point to register to the plane.",
                     "infinite": true,
                     "typeOfElement": "Position"
                 },
@@ -49,7 +49,7 @@ R"(
             "neededElements": [
                 {
                     "name": "Position",
-                    "description" : "Select one points to register to the plane.",
+                    "description" : "Select one point to register to the plane.",
                     "infinite": true,
                     "typeOfElement": "Position"
                 },
@@ -89,7 +89,7 @@ R"(
             "neededElements": [
                 {
                     "name": "Position",
-                    "description" : "Select one points to register to the plane.",
+                    "description" : "Select one point to register to the plane.",
                     "infinite": true,
                     "typeOfElement": "Position"
                 },
@@ -143,7 +143,7 @@ R"(
             "neededElements": [
                 {
                     "name": "Position",
-                    "description" : "Select one points to register to the plane.",
+                    "description" : "Select one point to register to the plane.",
                     "infinite": true,
                     "typeOfElement": "Position"
                 },
@@ -197,7 +197,7 @@ R"(
             "neededElements": [
                 {
                     "name": "Position",
-                    "description" : "Select one points to register to the plane.",
+                    "description" : "Select one point to register to the plane.",
                     "infinite": true,
                     "typeOfElement": "Position"
                 },
