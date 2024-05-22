@@ -11,7 +11,7 @@ void ConfiguredFunction::init() {
     this->metaData.iid = SpecialFunction_iidd; // or differentiate?
     this->metaData.pluginName = "OpenIndy Default Plugin";
     this->metaData.author = "";
-    this->metaData.description = "";
+    this->metaData.description = this->config.description;
 
     this->applicableFor = this->config.applicableFor;
     this->neededElements = config.getNeededElements();
