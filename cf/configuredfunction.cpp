@@ -24,11 +24,15 @@ bool ConfiguredFunction::exec(const QPointer<FeatureWrapper> &feature) {
         QPointer<NodeVisitor> debug = new PrintVisitor();
         visitors.list.append(debug);
 
-        CFContext ctx;
+        CFContext ctx; // contains references not copies !
         ctx.config = this->config;
         ctx.baseFunction = this;
         ctx.baseFeature = feature;
         ctx.functions = this->functions; // all necessary funktions
+
+        for(auto function : ctx.functions) {
+            function->clear(); // remove inner data e.g. inputElements
+        }
 
         ctx.global_inputElements = this->global_inputElements.isEmpty() ? this->getInputElements() :  this->global_inputElements;
         ctx.global_feature = this->global_feature.isNull() ? feature : this->global_feature;
