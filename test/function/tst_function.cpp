@@ -3039,7 +3039,16 @@ void FunctionTest::testPointFromPoints_Register() {
     addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function2);
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_POINT(feature);
 
@@ -3089,7 +3098,16 @@ void FunctionTest::testPointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("RegisterPositionToPlane")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_POINT(feature);
 
@@ -3122,7 +3140,12 @@ void FunctionTest::testDistance_PointFromPoints_RegisterV2() {
     qDebug() << qobject_cast<ConfiguredFunction *>(function)->prettyPrint();
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    COMPARE_DOUBLE(feature->getDistance(), 1881.5050, 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     COMPARE_DOUBLE(feature->getDistance(), 1881.5050, 0.0001);
 
@@ -3151,7 +3174,13 @@ void FunctionTest::testXDistance_PointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("XDistance")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_DISTANCE(feature)
+    COMPARE_DOUBLE(feature->getDistance(),  1.7008, 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_DISTANCE(feature)
     COMPARE_DOUBLE(feature->getDistance(),  1.7008, 0.0001);
@@ -3180,7 +3209,13 @@ void FunctionTest::testYDistance_PointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("YDistance")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_DISTANCE(feature)
+    COMPARE_DOUBLE(feature->getDistance(), 1.7008, 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_DISTANCE(feature)
     COMPARE_DOUBLE(feature->getDistance(), 1.7008, 0.0001);
@@ -3210,7 +3245,13 @@ void FunctionTest::testZDistance_PointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("ZDistance")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_DISTANCE(feature)
+    COMPARE_DOUBLE(feature->getDistance(), (1699.0957), 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_DISTANCE(feature)
     COMPARE_DOUBLE(feature->getDistance(), (1699.0957), 0.0001);
