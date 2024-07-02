@@ -37,6 +37,7 @@ public:
 public:
     int version;
     QString name;
+    QString description;
     QList<QPair<QString, NeededElement> > neededElements;
     QList<FeatureTypes> applicableFor;
 

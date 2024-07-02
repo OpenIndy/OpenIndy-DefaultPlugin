@@ -36,6 +36,9 @@ public:
 private Q_SLOTS:
     void initTestCase();
 
+    void testNotSolved_guessAxis();
+    void testNotSolved_firstTwoPoints();
+
     void testLineFromPoints();
     void testPointFromPoints_RegisterV2();
     void testDistanceBetweenTwoPointsV2();
@@ -3039,7 +3042,16 @@ void FunctionTest::testPointFromPoints_Register() {
     addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function2);
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_POINT(feature);
 
@@ -3089,7 +3101,16 @@ void FunctionTest::testPointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("RegisterPositionToPlane")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_POINT(feature);
 
@@ -3122,7 +3143,12 @@ void FunctionTest::testDistance_PointFromPoints_RegisterV2() {
     qDebug() << qobject_cast<ConfiguredFunction *>(function)->prettyPrint();
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    COMPARE_DOUBLE(feature->getDistance(), 1881.5050, 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     COMPARE_DOUBLE(feature->getDistance(), 1881.5050, 0.0001);
 
@@ -3151,7 +3177,13 @@ void FunctionTest::testXDistance_PointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("XDistance")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_DISTANCE(feature)
+    COMPARE_DOUBLE(feature->getDistance(),  1.7008, 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_DISTANCE(feature)
     COMPARE_DOUBLE(feature->getDistance(),  1.7008, 0.0001);
@@ -3180,7 +3212,13 @@ void FunctionTest::testYDistance_PointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("YDistance")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_DISTANCE(feature)
+    COMPARE_DOUBLE(feature->getDistance(), 1.7008, 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_DISTANCE(feature)
     COMPARE_DOUBLE(feature->getDistance(), 1.7008, 0.0001);
@@ -3210,7 +3248,13 @@ void FunctionTest::testZDistance_PointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("ZDistance")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_DISTANCE(feature)
+    COMPARE_DOUBLE(feature->getDistance(), (1699.0957), 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_DISTANCE(feature)
     COMPARE_DOUBLE(feature->getDistance(), (1699.0957), 0.0001);
@@ -3337,6 +3381,82 @@ void FunctionTest::testLineFromPoints()
     COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.707106), 0.000001);
     COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (0.707107), 0.000001);
     COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (0.000002), 0.000001);
+
+    delete function.data();
+}
+
+// OI-1003
+void FunctionTest::testNotSolved_guessAxis()
+{
+
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    cylinder->setIsSolved(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-3283.654 -79.927 194.917\n\
+-3271.578 -84.991 203.643\n\
+-3292.599 -64.647 196.517\n\
+");
+
+    addInputObservations(data, function);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "guess axis");
+    function->setScalarInputParams(scalarInputParams);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(!res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    delete function.data();
+}
+
+
+// OI-1003
+void FunctionTest::testNotSolved_firstTwoPoints()
+{
+
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    cylinder->setIsSolved(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-3283.654 -79.927 194.917\n\
+-3271.578 -84.991 203.643\n\
+-3292.599 -64.647 196.517\n\
+");
+
+
+    addInputObservations(data, function);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "first two points");
+    function->setScalarInputParams(scalarInputParams);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(!res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
 
     delete function.data();
 }

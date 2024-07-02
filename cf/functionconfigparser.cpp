@@ -47,6 +47,7 @@ QList<ConfiguredFunctionConfig> FunctionConfigParser::readConfigFromJson(QJsonOb
             config.version = 2;
             QJsonObject object = function.toObject();
             config.name = object["name"].toString();
+            config.description = object["description"].toString();
             config.applicableFor = applicableFor(object["applicableFor"]);
 
             config.neededElements = neededElements(object["neededElements"]);
