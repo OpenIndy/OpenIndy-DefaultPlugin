@@ -2,17 +2,20 @@ CONFIG += c++11
 
 TEMPLATE = subdirs
 
-CONFIG += ordered
-
 SUBDIRS = \
     core \
     plugin \
     test
 
 # project locations
-plugin.subdir = $$PWD/build
-core.subdir = $$PWD/lib/OpenIndy-Core
-test.subdir = $$PWD/test
+plugin.subdir = build
+core.subdir = lib/OpenIndy-Core
+test.subdir = test
 
 # project dependencies
-plugin.depends = core test
+plugin.depends = core
+test.depends = plugin
+
+QMAKE_EXTRA_TARGETS += run-test
+run-test.commands = \
+    cd test && $(MAKE) run-test

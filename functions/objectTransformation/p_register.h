@@ -13,7 +13,7 @@ using namespace oi;
 /*!
  * \brief The Register class
  */
-class Register : public ObjectTransformation
+class Register : public ObjectTransformation, public FunctionUtil
 {
     Q_OBJECT
 

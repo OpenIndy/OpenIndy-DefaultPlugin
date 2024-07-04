@@ -22,16 +22,7 @@
 #include "p_register.h"
 #include "p_factory.h"
 
-
-#define COMPARE_DOUBLE(actual, expected, threshold) QVERIFY2(std::abs(actual-expected)< threshold, QString("actual: %1, expected: %2").arg(actual).arg(expected).toLatin1().data());
-#define _OI_VEC(v) v.getAt(0) << "," << v.getAt(1) << "," << v.getAt(2)
-#define DEBUG_CYLINDER(feature) qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", radius=" << feature->getRadius().getRadius() << ", stdev=" << feature->getStatistic().getStdev();
-#define DEBUG_CIRCLE(feature)   qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", radius=" << feature->getRadius().getRadius() << ", stdev=" << feature->getStatistic().getStdev();
-#define DEBUG_SPHERE(feature)   qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", radius=" << feature->getRadius().getRadius() << ", stdev=" << feature->getStatistic().getStdev();
-#define DEBUG_PLANE(feature)    qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
-#define DEBUG_POINT(feature)    qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
-#define DEBUG_LINE(feature)     qDebug() << qSetRealNumberPrecision(10) << "position=" << _OI_VEC(feature->getPosition().getVector()) << ", direction=" << _OI_VEC(feature->getDirection().getVector()) << ", stdev=" << feature->getStatistic().getStdev();
-#define DEBUG_DISTANCE(feature) qDebug() << qSetRealNumberPrecision(10) << "distance=" << feature->getDistance();
+#include "test_defines.h"
 
 using namespace oi;
 
@@ -43,6 +34,12 @@ public:
     FunctionTest();
 
 private Q_SLOTS:
+    void initTestCase();
+
+    void testNotSolved_guessAxis();
+    void testNotSolved_firstTwoPoints();
+
+    void testLineFromPoints();
     void testPointFromPoints_RegisterV2();
     void testDistanceBetweenTwoPointsV2();
     void testDistance_PointFromPoints_RegisterV2();    
@@ -104,14 +101,17 @@ private Q_SLOTS:
     void testBestFitCylinder1__DummyPoint1();
     void testBestFitCylinder1__DummyPoint2();
 
-    void testBestFitCircleInPlane_DummyPoint1();
-    void testBestFitCircleInPlane_DummyPoint2();
+    void testBestFitCircleInPlane_DummyPoint_positive_up();
+    void testBestFitCircleInPlane_DummyPoint_negative_up();
+    void testBestFitCircleInPlane_DummyPoint_negative_down();
     void testBestFitCircleInPlane_left();
     void testBestFitCircleInPlane_right();
 
     void testBestFitPlane_right();
-    void testBestFitPlane_DummyPoint1();
-    void testBestFitPlane_DummyPoint2();
+    void testBestFitPlane_DummyPoint_positive_up();
+    void testBestFitPlane_DummyPoint_positive_down();
+    void testBestFitPlane_DummyPoint_negative_up();
+    void testBestFitPlane_DummyPoint_negative_down();
 
     void testBestFitCylinderAproximationDirection1();
 
@@ -139,6 +139,8 @@ private Q_SLOTS:
 
     void testBestFitPlane();
 
+    void testCircleInPlaneFromPoints_with_DummyPoint(); // OI-805
+
     void printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest = eConsoleMessage);
 
 private:
@@ -164,6 +166,10 @@ private:
 
 FunctionTest::FunctionTest()
 {
+}
+
+void FunctionTest::initTestCase() {
+    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 }
 
 void FunctionTest::printMessage(const QString &msg, const MessageTypes &msgType, const MessageDestinations &msgDest) {
@@ -475,7 +481,7 @@ QPointer<Line> FunctionTest::createLine(double x, double y, double z, double i, 
 
 void FunctionTest::testRegisterPoint()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new Register();
     function->init();
@@ -505,7 +511,7 @@ void FunctionTest::testRegisterPoint()
 
 void FunctionTest::testRegisterSphere()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new Register();
     function->init();
@@ -536,7 +542,7 @@ void FunctionTest::testRegisterSphere()
 
 void FunctionTest::testRegisterCircle()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new Register();
     function->init();
@@ -564,7 +570,7 @@ void FunctionTest::testRegisterCircle()
 // OI-494
 void FunctionTest::testVRadial()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -620,7 +626,7 @@ void FunctionTest::testVRadial()
 // OI-637
 void FunctionTest::testVRadial2()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinderFromPoints();
     function->init();
@@ -673,7 +679,7 @@ void FunctionTest::testVRadial2()
     delete function.data();
 }
 void FunctionTest::testVRadial3() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -732,7 +738,7 @@ void FunctionTest::testVRadial3() {
 // OI-566
 void FunctionTest::testBestFitCylinder1()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
 
     QPointer<Function> function = new BestFitCylinder();
@@ -779,7 +785,7 @@ void FunctionTest::testBestFitCylinder1()
 // OI-566
 void FunctionTest::testBestFitCylinder1_modifyX()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -824,7 +830,7 @@ void FunctionTest::testBestFitCylinder1_modifyX()
 // OI-566
 void FunctionTest::testBestFitCylinder1_modifyZ()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -869,7 +875,7 @@ void FunctionTest::testBestFitCylinder1_modifyZ()
 // OI-566
 void FunctionTest::testBestFitCylinder1_modifyY()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -914,7 +920,7 @@ void FunctionTest::testBestFitCylinder1_modifyY()
 // OI-298
 void FunctionTest::testBestFitCylinder2_trafo_guess_axis_3()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -958,7 +964,7 @@ void FunctionTest::testBestFitCylinder2_trafo_guess_axis_3()
 // OI-298
 void FunctionTest::testBestFitCylinder2_trafo_1st_2_pts()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -999,7 +1005,7 @@ void FunctionTest::testBestFitCylinder2_trafo_1st_2_pts()
 // OI-298
 void FunctionTest::testBestFitCylinder2_trafo_guess_axis_2()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -1045,7 +1051,7 @@ void FunctionTest::testBestFitCylinder2_trafo_guess_axis_2()
 // OI-298
 void FunctionTest::testBestFitCylinder2_trafo_guess_axis_1()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -1091,7 +1097,7 @@ void FunctionTest::testBestFitCylinder2_trafo_guess_axis_1()
 // OI-298
 void FunctionTest::testBestFitCylinder2_guess_axis()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -1136,7 +1142,7 @@ void FunctionTest::testBestFitCylinder2_guess_axis()
 // OI-298 direction
 void FunctionTest::testBestFitCylinder2_1st_2_pts()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinder();
     function->init();
@@ -1177,7 +1183,7 @@ void FunctionTest::testBestFitCylinder2_1st_2_pts()
 // OI-627
 void FunctionTest::testBestFitCylinderAproximationDirection1()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCylinderAppxDirection();
     function->init();
@@ -1224,7 +1230,7 @@ void FunctionTest::testBestFitCylinderAproximationDirection1()
 // OI-573
 void FunctionTest::testDisableAllObservationsButLastOne_no()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitPoint();
     function->init();
@@ -1265,7 +1271,7 @@ void FunctionTest::testDisableAllObservationsButLastOne_no()
 // OI-573
 void FunctionTest::testDisableAllObservationsButLastOne_yes()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitPoint();
     function->init();
@@ -1306,7 +1312,7 @@ void FunctionTest::testDisableAllObservationsButLastOne_yes()
 // OI-573
 void FunctionTest::testDisableAllObservationsButLastOne_2side_yes()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitPoint();
     function->init();
@@ -1349,7 +1355,7 @@ void FunctionTest::testDisableAllObservationsButLastOne_2side_yes()
 // OI-577: old behavior
 void FunctionTest::testBestFitPlane()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitPlane();
     function->init();
@@ -1384,47 +1390,10 @@ void FunctionTest::testBestFitPlane()
     delete function.data();
 }
 
-// OI-557
-void FunctionTest::testBestFitPlane_DummyPoint1() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+// OI-557 Test if Dummy Points affect the normal vector accordingly
 
-    QPointer<Function> function = new BestFitPlane();
-    function->init();
-    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+void FunctionTest::testBestFitPlane_DummyPoint_positive_up() {
 
-    QPointer<Plane> plane = new Plane(false);
-    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
-    planeFeature->setPlane(plane);
-
-    // colum delim: " "
-    // line ending: "\n"
-    // unit:        [mm]
-    QString data("\
-0.0 0.0 0.001\n\
-1.0 0.0 0.002\n\
-1.0 1.0 0.004\n\
-0.0 1.0 0.003\n\
-");
-
-    addInputObservations(data, function);
-    addInputObservations("0.0 0.0 -10\n", function, 3000, InputElementKey::eDummyPoint);
-
-    bool res = function->exec(planeFeature);
-    QVERIFY2(res, "exec");
-
-    DEBUG_PLANE(plane);
-
-    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
-    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
-    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
-
-
-    delete function.data();
-}
-
-// OI-557
-void FunctionTest::testBestFitPlane_DummyPoint2() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
 
     QPointer<Function> function = new BestFitPlane();
     function->init();
@@ -1460,11 +1429,122 @@ void FunctionTest::testBestFitPlane_DummyPoint2() {
     delete function.data();
 }
 
+void FunctionTest::testBestFitPlane_DummyPoint_positive_down() {
+
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 -10\n", function, 3000, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitPlane_DummyPoint_negative_up() {
+
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 -0.004\n\
+1.0 0.0 -0.003\n\
+1.0 1.0 -0.001\n\
+0.0 1.0 -0.002\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 10\n", function, 3000, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitPlane_DummyPoint_negative_down() {
+
+
+    QPointer<Function> function = new BestFitPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Plane> plane = new Plane(false);
+    QPointer<FeatureWrapper> planeFeature = new FeatureWrapper();
+    planeFeature->setPlane(plane);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 -0.004\n\
+1.0 0.0 -0.003\n\
+1.0 1.0 -0.001\n\
+0.0 1.0 -0.002\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 -10\n", function, 3000, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(planeFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(plane);
+
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
+    COMPARE_DOUBLE(plane->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
 
 // OI-577: old behavior
 void FunctionTest::testBestFitCircleInPlane_left()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCircleInPlane();
     function->init();
@@ -1501,7 +1581,7 @@ void FunctionTest::testBestFitCircleInPlane_left()
 
 void FunctionTest::testBestFitCircleInPlane_right()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCircleInPlane();
     function->init();
@@ -1535,9 +1615,9 @@ void FunctionTest::testBestFitCircleInPlane_right()
 
     delete function.data();
 }
-void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
+void FunctionTest::testBestFitCircleInPlane_DummyPoint_positive_up()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCircleInPlane();
     function->init();
@@ -1573,9 +1653,9 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint1()
     delete function.data();
 }
 
-void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
+void FunctionTest::testBestFitCircleInPlane_DummyPoint_negative_up()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCircleInPlane();
     function->init();
@@ -1589,10 +1669,48 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
     // line ending: "\n"
     // unit:        [mm]
     QString data("\
-0.0 0.0 0.001\n\
-1.0 0.0 0.002\n\
-1.0 1.0 0.004\n\
-0.0 1.0 0.003\n\
+0.0 0.0 -0.004\n\
+1.0 0.0 -0.003\n\
+1.0 1.0 -0.001\n\
+0.0 1.0 -0.002\n\
+");
+
+    addInputObservations(data, function);
+    addInputObservations("0.0 0.0 10\n", function, 3000, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(circleFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (-0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (-0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testBestFitCircleInPlane_DummyPoint_negative_down()
+{
+
+
+    QPointer<Function> function = new BestFitCircleInPlane();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 -0.004\n\
+1.0 0.0 -0.003\n\
+1.0 1.0 -0.001\n\
+0.0 1.0 -0.002\n\
 ");
 
     addInputObservations(data, function);
@@ -1613,7 +1731,7 @@ void FunctionTest::testBestFitCircleInPlane_DummyPoint2()
 
 void FunctionTest::testBestFitCylinder1__DummyPoint1()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
 
     QPointer<Function> function = new BestFitCylinderAppxDummyPoint();
@@ -1657,7 +1775,7 @@ void FunctionTest::testBestFitCylinder1__DummyPoint1()
 }
 void FunctionTest::testBestFitCylinder1__DummyPoint2()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
 
     QPointer<Function> function = new BestFitCylinderAppxDummyPoint();
@@ -1702,7 +1820,7 @@ void FunctionTest::testBestFitCylinder1__DummyPoint2()
 
 void FunctionTest::testIntersectLineLine_parallel()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new IntersectLineLine();
     function->init();
@@ -1725,7 +1843,7 @@ void FunctionTest::testIntersectLineLine_parallel()
 }
 void FunctionTest::testIntersectLineLine_intersect1_atfirstline()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new IntersectLineLine();
     function->init();
@@ -1761,7 +1879,7 @@ void FunctionTest::testIntersectLineLine_intersect1_atfirstline()
 
 void FunctionTest::testIntersectLineLine_intersect1_atsecondline()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new IntersectLineLine();
     function->init();
@@ -1797,7 +1915,7 @@ void FunctionTest::testIntersectLineLine_intersect1_atsecondline()
 
 void FunctionTest::testIntersectLineLine_intersect1_midpoint()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new IntersectLineLine();
     function->init();
@@ -1833,7 +1951,7 @@ void FunctionTest::testIntersectLineLine_intersect1_midpoint()
 
 void FunctionTest::testIntersectLineLine_intersect2_atfirstline()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new IntersectLineLine();
     function->init();
@@ -1869,7 +1987,7 @@ void FunctionTest::testIntersectLineLine_intersect2_atfirstline()
 
 void FunctionTest::testIntersectLineLine_intersect2_atsecondline()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new IntersectLineLine();
     function->init();
@@ -1906,7 +2024,7 @@ void FunctionTest::testIntersectLineLine_intersect2_atsecondline()
 
 void FunctionTest::testIntersectLineLine_intersect2_midpoint()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new IntersectLineLine();
     function->init();
@@ -1942,7 +2060,7 @@ void FunctionTest::testIntersectLineLine_intersect2_midpoint()
 
 // OI-42
 void FunctionTest::testRectifyToPoint_Plane_negative() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToPoint();
     function->init();
@@ -1973,7 +2091,7 @@ void FunctionTest::testRectifyToPoint_Plane_negative() {
 }
 
 void FunctionTest::testRectifyToPoint_Plane_positive() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToPoint();
     function->init();
@@ -2004,7 +2122,7 @@ void FunctionTest::testRectifyToPoint_Plane_positive() {
 }
 
 void FunctionTest::testRectifyToPoint_Plane_Station() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToPoint();
     function->init();
@@ -2036,7 +2154,7 @@ void FunctionTest::testRectifyToPoint_Plane_Station() {
 
 // OI-42
 void FunctionTest::testRectifyToPoint_Circle_negative() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToPoint();
     function->init();
@@ -2068,7 +2186,7 @@ void FunctionTest::testRectifyToPoint_Circle_negative() {
 
 // OI-42
 void FunctionTest::testRectifyToPoint_Line_negative() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToPoint();
     function->init();
@@ -2100,7 +2218,7 @@ void FunctionTest::testRectifyToPoint_Line_negative() {
 
 // OI-42
 void FunctionTest::testRectifyToPoint_Cylinder_negative() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToPoint();
     function->init();
@@ -2132,7 +2250,7 @@ void FunctionTest::testRectifyToPoint_Cylinder_negative() {
 
 // OI-42
 void FunctionTest::testRectifyToVector_PlaneToPlane_negative() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToVector();
     function->init();
@@ -2162,7 +2280,7 @@ void FunctionTest::testRectifyToVector_PlaneToPlane_negative() {
     delete function.data();
 }
 void FunctionTest::testRectifyToVector_PlaneToStation() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToVector();
     function->init();
@@ -2194,7 +2312,7 @@ void FunctionTest::testRectifyToVector_PlaneToStation() {
 
 
 void FunctionTest::testRectifyToVector_CircleToStation() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToVector();
     function->init();
@@ -2225,7 +2343,7 @@ void FunctionTest::testRectifyToVector_CircleToStation() {
 }
 
 void FunctionTest::testRectifyToVector_LineToStation() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToVector();
     function->init();
@@ -2256,7 +2374,7 @@ void FunctionTest::testRectifyToVector_LineToStation() {
 }
 
 void FunctionTest::testRectifyToVector_CylinderToStation() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToVector();
     function->init();
@@ -2288,7 +2406,7 @@ void FunctionTest::testRectifyToVector_CylinderToStation() {
 
 // OI-527
 void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem_zAxis() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToVector();
     function->init();
@@ -2320,7 +2438,7 @@ void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem_zAxis() {
 
 // OI-527
 void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem_xAxis() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToVector();
     function->init();
@@ -2371,7 +2489,7 @@ void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem_xAxis() {
 
 // OI-527
 void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem_yAxis() {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new RectifyToVector();
     function->init();
@@ -2423,7 +2541,7 @@ void FunctionTest::testRectifyToVector_PlaneToCoodinateSystem_yAxis() {
 // OI-636
 void FunctionTest::testCircleInPlaneFromPoints()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCircleInPlaneFromPoints();
     function->init();
@@ -2461,7 +2579,7 @@ void FunctionTest::testCircleInPlaneFromPoints()
 // OI-508
 void FunctionTest::testBestFitPoint_residuals()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
 
     QPointer<Function> function = new BestFitPoint();
@@ -2502,7 +2620,7 @@ void FunctionTest::testBestFitPoint_residuals()
 // clock wise
 void FunctionTest::testBestFitPlane_right()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitPlane();
     function->init();
@@ -2536,7 +2654,7 @@ void FunctionTest::testBestFitPlane_right()
 
 void FunctionTest::testBestFitPlane_residuals()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitPlane();
     function->init();
@@ -2581,7 +2699,7 @@ void FunctionTest::testBestFitPlane_residuals()
 
 void FunctionTest::testBestFitLine_residuals()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitLine();
     function->init();
@@ -2626,7 +2744,7 @@ void FunctionTest::testBestFitLine_residuals()
 
 void FunctionTest::testBestFitCircleInPlane_residuals()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCircleInPlane();
     function->init();
@@ -2679,7 +2797,7 @@ void FunctionTest::testBestFitCircleInPlane_residuals()
 void FunctionTest::testBestFitCircleInPlane_residuals2()
 {
     QSKIP("");
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitCircleInPlane();
     function->init();
@@ -2742,7 +2860,7 @@ void FunctionTest::testBestFitCircleInPlane_residuals2()
 
 void FunctionTest::testBestFitSphere_residuals()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new BestFitSphere();
     function->init();
@@ -2843,7 +2961,7 @@ void FunctionTest::testBestFitSphere_residuals()
 
 void FunctionTest::testPointFromPoints_point()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new PointFromPoints();
     function->init();
@@ -2869,7 +2987,7 @@ void FunctionTest::testPointFromPoints_point()
 
 void FunctionTest::testPointFromPoints_circle()
 {
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Function> function = new PointFromPoints();
     function->init();
@@ -2898,7 +3016,7 @@ void FunctionTest::testPointFromPoints_circle()
 
 void FunctionTest::testPointFromPoints_Register() {
 
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Point> feature = new Point(false);
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
@@ -2924,7 +3042,16 @@ void FunctionTest::testPointFromPoints_Register() {
     addInputPlane(0., 0., 0., 0.10080018, -0.09785417,  0.99008277, function2);
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_POINT(feature);
 
@@ -2954,7 +3081,7 @@ QPointer<Function> FunctionTest::createFunction(QString functionName) {
 
 void FunctionTest::testPointFromPoints_RegisterV2() {
 
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<Point> feature = new Point(false);
     QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
@@ -2974,7 +3101,16 @@ void FunctionTest::testPointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("RegisterPositionToPlane")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_POINT(feature);
+
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(0), (  710.79084819), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(1), ( 2281.722941), 0.0001);
+    COMPARE_DOUBLE(feature->getPosition().getVector().getAt(2), (  153.1470537), 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_POINT(feature);
 
@@ -2986,7 +3122,7 @@ void FunctionTest::testPointFromPoints_RegisterV2() {
 
 void FunctionTest::testDistance_PointFromPoints_RegisterV2() {
 
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
     feature->setFeatureName("ScalarEntityDistance");
@@ -3007,7 +3143,12 @@ void FunctionTest::testDistance_PointFromPoints_RegisterV2() {
     qDebug() << qobject_cast<ConfiguredFunction *>(function)->prettyPrint();
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    COMPARE_DOUBLE(feature->getDistance(), 1881.5050, 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     COMPARE_DOUBLE(feature->getDistance(), 1881.5050, 0.0001);
 
@@ -3015,7 +3156,7 @@ void FunctionTest::testDistance_PointFromPoints_RegisterV2() {
 
 void FunctionTest::testXDistance_PointFromPoints_RegisterV2() {
 
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
     feature->setFeatureName("ScalarEntityDistance");
@@ -3036,7 +3177,13 @@ void FunctionTest::testXDistance_PointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("XDistance")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_DISTANCE(feature)
+    COMPARE_DOUBLE(feature->getDistance(),  1.7008, 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_DISTANCE(feature)
     COMPARE_DOUBLE(feature->getDistance(),  1.7008, 0.0001);
@@ -3044,7 +3191,7 @@ void FunctionTest::testXDistance_PointFromPoints_RegisterV2() {
 }
 void FunctionTest::testYDistance_PointFromPoints_RegisterV2() {
 
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
     feature->setFeatureName("ScalarEntityDistance");
@@ -3065,7 +3212,13 @@ void FunctionTest::testYDistance_PointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("YDistance")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_DISTANCE(feature)
+    COMPARE_DOUBLE(feature->getDistance(), 1.7008, 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_DISTANCE(feature)
     COMPARE_DOUBLE(feature->getDistance(), 1.7008, 0.0001);
@@ -3073,7 +3226,7 @@ void FunctionTest::testYDistance_PointFromPoints_RegisterV2() {
 }
 void FunctionTest::testZDistance_PointFromPoints_RegisterV2() {
 
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
     feature->setFeatureName("ScalarEntityDistance");
@@ -3095,7 +3248,13 @@ void FunctionTest::testZDistance_PointFromPoints_RegisterV2() {
     QVERIFY2(feature->getDisplayFunctions().compare("ZDistance")==0, "getDisplayFunctions");
 
     feature->recalc();
-    QVERIFY2(feature->getIsSolved(), "recalc");
+    QVERIFY2(feature->getIsSolved(), "first recalc");
+
+    DEBUG_DISTANCE(feature)
+    COMPARE_DOUBLE(feature->getDistance(), (1699.0957), 0.0001);
+
+    feature->recalc();
+    QVERIFY2(feature->getIsSolved(), "second recalc");
 
     DEBUG_DISTANCE(feature)
     COMPARE_DOUBLE(feature->getDistance(), (1699.0957), 0.0001);
@@ -3127,7 +3286,7 @@ void FunctionTest::testTODO5() {
 
 void FunctionTest::testDistanceBetweenTwoPointsV2() {
 
-    ChooseLALib::setLinearAlgebra(ChooseLALib::Armadillo);
+
 
     QPointer<ScalarEntityDistance> feature = new ScalarEntityDistance(false);
     feature->setFeatureName("ScalarEntityDistance");
@@ -3144,6 +3303,160 @@ void FunctionTest::testDistanceBetweenTwoPointsV2() {
     QVERIFY2(res, "exec");
 
     COMPARE_DOUBLE(feature->getDistance(), (5.000), 0.0001);
+
+    delete function.data();
+}
+
+// OI-805
+void FunctionTest::testCircleInPlaneFromPoints_with_DummyPoint()
+{
+
+
+    QPointer<Function> function = new BestFitCircleInPlaneFromPoints();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Circle> circle = new Circle(false);
+    QPointer<FeatureWrapper> circleFeature = new FeatureWrapper();
+    circleFeature->setCircle(circle);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+0.0 0.0 0.001\n\
+1.0 0.0 0.002\n\
+1.0 1.0 0.004\n\
+0.0 1.0 0.003\n\
+");
+
+    addInputPoints(data, function);
+
+    addInputPoints("0.0 0.0 -1.0", function, 2000, InputElementKey::eDummyPoint);
+
+    bool res = function->exec(circleFeature);
+    QVERIFY2(res, "exec");
+
+    DEBUG_PLANE(circle);
+
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(0), (0.0009999975), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(1), (0.001999995), 0.000001);
+    COMPARE_DOUBLE(circle->getDirection().getVector().getAt(2), (-0.9999975), 0.000001);
+
+
+    delete function.data();
+}
+
+void FunctionTest::testLineFromPoints()
+{
+
+
+    QPointer<Function> function = new LineFromPoints();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Line> feature = new Line(false);
+    QPointer<FeatureWrapper> wrapper = new FeatureWrapper();
+    wrapper->setLine(feature);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+999.9916 999.9958 999.9917\n\
+2000.0015 2000.0008 999.9970\n\
+3000.0270 3000.0247 1000.0083\n\
+4999.9732 4999.9797 1000.0041\n\
+");
+
+    addInputPoints(data, function);
+
+    bool res = function->exec(wrapper);
+    QVERIFY2(res, "exec");
+
+    DEBUG_LINE(feature);
+
+    DEBUG_RESIDULAS(function);
+
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(0), (0.707106), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(1), (0.707107), 0.000001);
+    COMPARE_DOUBLE(feature->getDirection().getVector().getAt(2), (0.000002), 0.000001);
+
+    delete function.data();
+}
+
+// OI-1003
+void FunctionTest::testNotSolved_guessAxis()
+{
+
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    cylinder->setIsSolved(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-3283.654 -79.927 194.917\n\
+-3271.578 -84.991 203.643\n\
+-3292.599 -64.647 196.517\n\
+");
+
+    addInputObservations(data, function);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "guess axis");
+    function->setScalarInputParams(scalarInputParams);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(!res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
+
+    delete function.data();
+}
+
+
+// OI-1003
+void FunctionTest::testNotSolved_firstTwoPoints()
+{
+
+
+    QPointer<Function> function = new BestFitCylinder();
+    function->init();
+    QObject::connect(function.data(), &Function::sendMessage, this, &FunctionTest::printMessage, Qt::AutoConnection);
+
+    QPointer<Cylinder> cylinder = new Cylinder(false);
+    cylinder->setIsSolved(false);
+    QPointer<FeatureWrapper> cylinderFeature = new FeatureWrapper();
+    cylinderFeature->setCylinder(cylinder);
+
+    // colum delim: " "
+    // line ending: "\n"
+    // unit:        [mm]
+    QString data("\
+-3283.654 -79.927 194.917\n\
+-3271.578 -84.991 203.643\n\
+-3292.599 -64.647 196.517\n\
+");
+
+
+    addInputObservations(data, function);
+
+    ScalarInputParams scalarInputParams;
+    scalarInputParams.stringParameter.insert("approximation", "first two points");
+    function->setScalarInputParams(scalarInputParams);
+
+    bool res = function->exec(cylinderFeature);
+    QVERIFY2(!res, "exec");
+
+    DEBUG_CYLINDER(cylinder);
 
     delete function.data();
 }

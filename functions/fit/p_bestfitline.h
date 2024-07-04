@@ -15,7 +15,7 @@ using namespace std;
 /*!
  * \brief The BestFitLine class
  */
-class BestFitLine : public FitFunction
+class BestFitLine : public FitFunction, public FunctionUtil
 { 
     Q_OBJECT
 

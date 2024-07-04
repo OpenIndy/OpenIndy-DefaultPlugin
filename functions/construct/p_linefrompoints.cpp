@@ -101,12 +101,8 @@ bool LineFromPoints::setUpResult(Line &line){
     OiVec pos2 = inputPoints.at(1)->getPosition().getVector();
     OiVec direction = pos2 - pos1;
     direction.normalize();
-    double angle = 0.0; //angle between r and direction
-    OiVec::dot(angle, r, direction);
-    angle = qAbs(qAcos(angle));
-    if(angle > (PI/2.0)){
-        r = r * -1.0;
-    }
+
+    rectifyNormalToDirection(r, direction);
 
     //set result
     Position linePosition;

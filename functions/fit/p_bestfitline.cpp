@@ -98,12 +98,7 @@ bool BestFitLine::setUpResult(Line &line){
     pos2.removeLast();
     OiVec direction = pos2 - pos1;
     direction.normalize();
-    double angle = 0.0; //angle between r and direction
-    OiVec::dot(angle, r, direction);
-    angle = qAbs(qAcos(angle));
-    if(angle > (PI/2.0)){
-        r = r * -1.0;
-    }
+    rectifyNormalToDirection(r, direction);
 
     //calculate display residuals for each observation
     foreach(const QPointer<Observation> &observation, allUsableObservations){

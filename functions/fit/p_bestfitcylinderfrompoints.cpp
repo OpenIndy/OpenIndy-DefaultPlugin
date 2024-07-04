@@ -67,7 +67,6 @@ bool BestFitCylinderFromPoints::setUpResult(Cylinder &cylinder){
 
         if(inputPoints.size() < 5){
             emit this->sendMessage(QString("Not enough valid points to fit the cylinder %1").arg(cylinder.getFeatureName()), eWarningMessage);
-            cylinder.setIsSolved(false);
             return false;
         }
 

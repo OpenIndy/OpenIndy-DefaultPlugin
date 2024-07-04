@@ -19,6 +19,7 @@ void PseudoTracker::init(){
     this->supportedReadingTypes.append(eDistanceReading);
     this->supportedReadingTypes.append(eLevelReading);
     this->supportedReadingTypes.append(eTemperatureReading);
+    this->supportedReadingTypes.append(eLevelReading);
 
     //set supported sensor actions
     this->supportedSensorActions.append(eHome);
@@ -28,6 +29,7 @@ void PseudoTracker::init(){
     this->supportedSensorActions.append(eToggleSight);
     this->supportedSensorActions.append(eCompensation);
     this->supportedSensorActions.append(eMotorState);
+    this->supportedSensorActions.append(eSearch);
 
     //set supported connection types
     this->supportedConnectionTypes.append(eNetworkConnection);
@@ -55,10 +57,13 @@ void PseudoTracker::init(){
     this->stringParameters.insert("active probe", "0.5''");
     this->stringParameters.insert("active probe", "1.0''");
     this->stringParameters.insert("active probe", "1.5''");
+    this->stringParameters.insert("reading type", "polar");
+    this->stringParameters.insert("reading type", "cartesian");
 
     //set self defined actions
     this->selfDefinedActions.append("echo(Alt+E)");
     this->selfDefinedActions.append("stopMeasure"); // e.g. finish scanning
+    this->selfDefinedActions.append("toggle return readings"); // for tests, if set to false then OpenIndy responds with an incorrect measurement
 
     //set default accuracy
     this->defaultAccuracy.sigmaAzimuth = 0.000001570;
@@ -82,6 +87,8 @@ void PseudoTracker::init(){
     this->isConnected = false;
     this->side = 1;
 
+    this->returnReading = true;
+
 }
 
 /*!
@@ -96,6 +103,9 @@ bool PseudoTracker::doSelfDefinedAction(const QString &action){
     } else if (action == "stopMeasure") {
         this->isScanning = false;
         emit this->sensorMessage("try to stop / finish measurement", eInformationMessage, eConsoleMessage);
+    } else if(action == "toggle return readings") {
+        this->returnReading = !this->returnReading; // toggle
+        emit this->sensorMessage(QString("return readings: %1").arg(this->returnReading), eInformationMessage, eConsoleMessage);
     }
     return true;
 }
@@ -163,7 +173,7 @@ bool PseudoTracker::move(const double &azimuth, const double &zenith, const doub
 bool PseudoTracker::move(const double &x, const double &y, const double &z){
     this->myAzimuth = qAtan2(y,x);
     this->myDistance = qSqrt(x*x+y*y+z*z);
-    this->myZenith = acos(z/myDistance);
+    this->myZenith = this->myDistance == 0. ? M_PI / 2. : acos(z/myDistance);
     QThread::msleep(1000);
     return true;
 }
@@ -220,15 +230,22 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
 
     QList<QPointer<Reading> > readings;
 
+    if(!this->returnReading) {
+        return readings;
+    }
+
     const int faceCount = mConfig.getMeasureTwoSides() ? 2 : 1;
 
-    int scanPointCount = mConfig.getCount();
-    this->isScanning = mConfig.getDistanceDependent();
+    int scanPointCount = mConfig.getMaxObservations();
+    const bool meaurementTypeScan = mConfig.getMeasurementType() == MeasurementTypes::eScanDistanceDependent_MeasurementType
+            || mConfig.getMeasurementType() == MeasurementTypes::eScanTimeDependent_MeasurementType;
+    this->measureTime =  mConfig.getMeasurementType() == MeasurementTypes::eScanTimeDependent_MeasurementType ? mConfig.getTimeInterval() * 1000 : 1000;
+    this->isScanning = meaurementTypeScan;
 
     do {
         for(int face=0; face<faceCount; face++) {
 
-            switch (mConfig.getTypeOfReading()) {
+            switch (getReadingType(mConfig)) {
             case ePolarReading:{
                 readings += measurePolar(mConfig);
                 break;
@@ -241,6 +258,9 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
             }case eCartesianReading:{
                 readings += measureCartesian(mConfig);
                 break;
+            }case eLevelReading:{
+                readings += measureLevel(mConfig);
+                break;
             }
             }
 
@@ -251,7 +271,7 @@ QList<QPointer<Reading> > PseudoTracker::measure(const MeasurementConfig &mConfi
         }
         qDebug()<< "isScanning: " << isScanning;
 
-    } while(mConfig.getDistanceDependent() && scanPointCount-- > 1 && this->isScanning);
+    } while(meaurementTypeScan && scanPointCount-- > 1 && this->isScanning);
     this->isScanning = false;
 
     if(readings.size() > 0){
@@ -453,7 +473,14 @@ QList<QPointer<Reading> > PseudoTracker::measurePolar(const MeasurementConfig &m
     p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
     p->setMeasuredAt(QDateTime::currentDateTime());
 
-    QThread::msleep(1000);
+    QVariant td =  mConfig.getTransientData("isDummyPoint");
+    if(td.isValid()) {
+        p->setProperty("isDummyPoint", td);
+    } else {
+        p->setProperty("isDummyPoint", false);
+    }
+
+    QThread::msleep(this->measureTime);
 
     readings.append(p);
 
@@ -546,7 +573,14 @@ QList<QPointer<Reading> > PseudoTracker::measureCartesian(const MeasurementConfi
     p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
     p->setMeasuredAt(QDateTime::currentDateTime());
 
-    QThread::msleep(1000);
+    QVariant td =  mConfig.getTransientData("isDummyPoint");
+    if(td.isValid()) {
+        p->setProperty("isDummyPoint", td);
+    } else {
+        p->setProperty("isDummyPoint", false);
+    }
+
+    QThread::msleep(this->measureTime);
 
     readings.append(p);
 
@@ -752,5 +786,38 @@ void PseudoTracker::noisyPolarReading(ReadingPolar &r){
     r.azimuth = qAtan2(p.getAt(1),p.getAt(0));
     r.distance = qSqrt(p.getAt(0)*p.getAt(0)+p.getAt(1)*p.getAt(1)+p.getAt(2)*p.getAt(2));
     r.zenith = acos(p.getAt(2)/r.distance);
+
+}
+
+bool PseudoTracker::search() {
+    emit this->sensorMessage("search", eInformationMessage, eConsoleMessage);
+    QThread::msleep(1000);
+    return true;
+}
+
+QList<QPointer<Reading> > PseudoTracker::measureLevel(const MeasurementConfig &mConfig){
+
+    QList<QPointer<Reading> > readings;
+
+    ReadingLevel rLevel;
+    rLevel.i = ((double) rand()/RAND_MAX) / 1000.;
+    rLevel.j = ((double) rand()/RAND_MAX) / 1000.;
+    rLevel.k = sqrt(1. - pow(rLevel.i, 2) - pow(rLevel.j, 2));
+
+    rLevel.sigmaI = defaultAccuracy.sigmaI;
+    rLevel.sigmaJ = defaultAccuracy.sigmaJ;
+    rLevel.sigmaK = defaultAccuracy.sigmaK;
+    rLevel.isValid = true;
+
+    QPointer<Reading> p = new Reading(rLevel);
+
+    p->setSensorFace((SensorFaces)(side -1)); // SensorFaces defined side between 0 and 1 but this class between 1 and 2
+    p->setMeasuredAt(QDateTime::currentDateTime());
+
+    QThread::msleep(1000);
+
+    readings.append(p);
+
+    return readings;
 
 }

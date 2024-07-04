@@ -9,6 +9,9 @@ ConfiguredFunction::ConfiguredFunction(ConfiguredFunctionConfig config, QList<QP
 void ConfiguredFunction::init() {
     this->metaData.name = this->config.name;
     this->metaData.iid = SpecialFunction_iidd; // or differentiate?
+    this->metaData.pluginName = "OpenIndy Default Plugin";
+    this->metaData.author = "";
+    this->metaData.description = this->config.description;
 
     this->applicableFor = this->config.applicableFor;
     this->neededElements = config.getNeededElements();
@@ -21,11 +24,15 @@ bool ConfiguredFunction::exec(const QPointer<FeatureWrapper> &feature, const Fun
         QPointer<NodeVisitor> debug = new PrintVisitor();
         visitors.list.append(debug);
 
-        CFContext ctx;
+        CFContext ctx; // contains references not copies !
         ctx.config = this->config;
         ctx.baseFunction = this;
         ctx.baseFeature = feature;
         ctx.functions = this->functions; // all necessary funktions
+
+        for(auto function : ctx.functions) {
+            function->clear(); // remove inner data e.g. inputElements
+        }
 
         ctx.global_inputElements = this->global_inputElements.isEmpty() ? this->getInputElements() :  this->global_inputElements;
         ctx.global_feature = this->global_feature.isNull() ? feature : this->global_feature;

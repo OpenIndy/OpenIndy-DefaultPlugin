@@ -76,21 +76,7 @@ bool Register::setUpResult(Point &point){
     OiVec x_plane = plane->getPosition().getVector();
     OiVec x_point = point.getPosition().getVector();
 
-    //calculate the distance of the plane from the origin
-    double d;
-    OiVec::dot(d, x_plane, n_plane);
-    if(d < 0.0){
-        n_plane = -1.0 * n_plane;
-        d = -d;
-    }
-
-    //calculate the distance of the point position from the plane
-    double s;
-    OiVec::dot(s, x_point, n_plane);
-    s = s - d;
-
-    //project the point position into the plane
-    x_point = x_point - s * n_plane;
+    registerPointToPlane(x_point, x_plane, n_plane);
 
     //set result
     Position position = point.getPosition();
